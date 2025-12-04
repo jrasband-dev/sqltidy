@@ -1,2 +1,0 @@
-[console_scripts]
-sqltidy = sqltidy.cli:main
