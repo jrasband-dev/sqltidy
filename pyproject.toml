@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sqltidy"
+version = "0.1.0"
+description = "SQL Formatting Made Easy"
+authors = [{name = "Your Name"}]
+dependencies = []
+
+
+[project.scripts]
+sqltidy = "sqltidy.cli:main"

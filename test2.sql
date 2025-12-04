@@ -1,0 +1,1 @@
+SELECT * FROM rad WHERE dfsadfs = 'sdf' ;

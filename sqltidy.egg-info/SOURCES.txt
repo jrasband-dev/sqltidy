@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+sqltidy/__init__.py
+sqltidy/api.py
+sqltidy/cli.py
+sqltidy/config.py
+sqltidy/core.py
+sqltidy/registry.py
+sqltidy/rules.py
+sqltidy/tokenizer.py
+sqltidy.egg-info/PKG-INFO
+sqltidy.egg-info/SOURCES.txt
+sqltidy.egg-info/dependency_links.txt
+sqltidy.egg-info/entry_points.txt
+sqltidy.egg-info/top_level.txt

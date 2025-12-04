@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: sqltidy
+Version: 0.1.0
+Summary: A SQL Server–focused SQL formatter with plugin support
+Author: Your Name
