@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sqltidy"
-version = "0.1.0"
+version = "0.1.0a1"
 description = "SQL Formatting Made Easy"
 authors = [{name = "Your Name"}]
 dependencies = []
