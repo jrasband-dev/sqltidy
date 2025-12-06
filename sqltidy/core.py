@@ -1,30 +1,47 @@
 # sqltidy/core.py
+import re
 from typing import List
-from .config import FormatterConfig
+from .config import TidyConfig
+from .tokenizer import TOKEN_RE
 
 class SQLFormatter:
     """Main SQL formatting engine."""
 
-    def __init__(self, config: FormatterConfig = None):
-        from .rules.rules import load_rules  # local import avoids circular import
+    def __init__(self, config: TidyConfig = None):
+        from .rules.rules import load_rules
         from .rules.base import FormatterContext
-        self.ctx = FormatterContext(config or FormatterConfig())
+        self.ctx = FormatterContext(config or TidyConfig())
         self.rules = load_rules()
 
+    def tokenize(self, sql: str) -> List[str]:
+        """Convert raw SQL into proper tokens without external dependencies."""
+        tokens = []
+        for groups in TOKEN_RE.findall(sql):
+            # Find the first non-empty capturing group
+            for t in groups:
+                if t == "":
+                    continue
+                # normalize whitespace
+                if t.isspace():
+                    if "\n" in t:
+                        tokens.append("\n")
+                    else:
+                        tokens.append(" ")
+                else:
+                    tokens.append(t)
+                break
+
+        return tokens
+
     def format(self, sql: str) -> str:
-        tokens = list(sql)
+        tokens = self.tokenize(sql)
+
+        # Apply your custom rules
         for rule in sorted(self.rules, key=lambda r: getattr(r, "order", 100)):
             tokens = rule.apply(tokens, self.ctx)
+
         return self.join_tokens(tokens)
 
     def join_tokens(self, tokens: List[str]) -> str:
-        output = []
-        for t in tokens:
-            if t == "\n":
-                output.append("\n")
-            else:
-                if output and not output[-1].endswith("\n") and not output[-1].endswith(" "):
-                    output.append(" " + t)
-                else:
-                    output.append(t)
-        return "".join(output).strip()
+        """Reassemble tokens into formatted SQL text."""
+        return "".join(tokens).strip()

@@ -1,4 +1,4 @@
-from .config import FormatterConfig
+from .config import TidyConfig
 from .rules.base import BaseRule
 from .core import SQLFormatter
 
@@ -22,13 +22,13 @@ def clear_plugins():
     """
     _extra_plugins.clear()
 
-def format_sql(sql: str, config: FormatterConfig = None) -> str:
+def format_sql(sql: str, config: TidyConfig = None) -> str:
     """
     Format a SQL string using all registered rules, including runtime plugins.
 
     Args:
         sql (str): The SQL string to format.
-        config (FormatterConfig, optional): Formatter configuration.
+        config (TidyConfig, optional): Formatter configuration.
 
     Returns:
         str: Formatted SQL string.
