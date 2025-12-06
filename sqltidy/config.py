@@ -8,6 +8,7 @@ class TidyConfig:
     newline_after_select = True
     compact = True
     leading_commas = False
+    enable_subquery_to_cte = False
 
 
 

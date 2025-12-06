@@ -38,7 +38,13 @@ def main():
         help="Rewrite SQL queries",
         description="Rewrite SQL queries according to specified rules"
     )
-    # You can add config-specific arguments here if needed
+    
+    rewrite_input_group = rewrite_parser.add_argument_group(title='Input')
+    rewrite_input_group.add_argument("input", nargs="?", help="SQL file to rewrite")
+    
+    rewrite_parameter_group = rewrite_parser.add_argument_group('Parameters')
+    rewrite_parameter_group.add_argument("-o", "--output", help="Output file")
+    rewrite_parameter_group.add_argument("--enable-subquery-to-cte", action="store_true", help="Convert subqueries to CTEs")
 
 
     # -------------------
@@ -75,6 +81,30 @@ def main():
             sql = sys.stdin.read()
 
         config = TidyConfig()
+
+        formatted_sql = format_sql(sql, config=config)
+
+        if args.output:
+            with open(args.output, "w", encoding="utf-8") as f:
+                f.write(formatted_sql)
+        elif args.input:
+            # overwrite input file if no output specified
+            with open(args.input, "w", encoding="utf-8") as f:
+                f.write(formatted_sql)
+        else:
+            print(formatted_sql)
+
+    # rewrite command
+    if args.command == "rewrite":
+        if args.input:
+            with open(args.input, "r", encoding="utf-8") as f:
+                sql = f.read()
+        else:
+            sql = sys.stdin.read()
+
+        config = TidyConfig()
+        if args.enable_subquery_to_cte:
+            config.enable_subquery_to_cte = True
 
         formatted_sql = format_sql(sql, config=config)
 
