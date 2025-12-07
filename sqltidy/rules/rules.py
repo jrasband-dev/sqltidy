@@ -108,10 +108,9 @@ class LeadingCommasRule(BaseRule):
                     
                     # Now we're at the next token, insert: newline + "  " + comma + space
                     out_tokens.append("\n")
-                    out_tokens.append("  ")  # 2-space indent for leading comma
+                    out_tokens.append("    ")  # tab indent for leading comma
                     out_tokens.append(",")
-                    out_tokens.append(" ")
-                    
+
                     # Continue without advancing i (we're now at the next real token)
                     continue
             
