@@ -1,7 +1,7 @@
 import argparse
 import sys
 from .api import format_sql
-from .config import TidyConfig
+from .config import TidyConfig, RewriteConfig
 
 def main():
     parser = argparse.ArgumentParser(
@@ -44,7 +44,8 @@ def main():
     
     rewrite_parameter_group = rewrite_parser.add_argument_group('Parameters')
     rewrite_parameter_group.add_argument("-o", "--output", help="Output file")
-    rewrite_parameter_group.add_argument("--enable-subquery-to-cte", action="store_true", help="Convert subqueries to CTEs")
+    # Use config.py defaults for rewrite behavior. No CLI enable/disable flags are provided.
+    rewrite_parameter_group.add_argument("--tidy", action="store_true", help="Apply tidy rules after rewriting")
 
 
     # -------------------
@@ -102,11 +103,15 @@ def main():
         else:
             sql = sys.stdin.read()
 
-        config = TidyConfig()
-        if args.enable_subquery_to_cte:
-            config.enable_subquery_to_cte = True
+        config = RewriteConfig()
+        # Use the defaults from RewriteConfig; no CLI override flags are supported
 
         formatted_sql = format_sql(sql, config=config)
+
+        # Apply tidy rules if requested
+        if args.tidy:
+            tidy_config = TidyConfig()
+            formatted_sql = format_sql(formatted_sql, config=tidy_config)
 
         if args.output:
             with open(args.output, "w", encoding="utf-8") as f:

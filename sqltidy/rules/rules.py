@@ -20,7 +20,7 @@ class UppercaseKeywordsRule(BaseRule):
     rule_type = "tidy"
     order = 10
     def apply(self, tokens, ctx):
-        if not ctx.config.uppercase_keywords:
+        if not getattr(ctx.config, "uppercase_keywords", False):
             return tokens
         return [t.upper() if t.lower() in SQL_KEYWORDS else t for t in tokens]
 
@@ -47,25 +47,25 @@ class NewlineAfterSelectRule(BaseRule):
     rule_type = "rewrite"
     order = 15
     def apply(self, tokens, ctx):
-        if not ctx.config.newline_after_select:
+        if not getattr(ctx.config, "newline_after_select", False):
             return tokens
 
         sql = "".join(tokens)
-        pattern = r"SELECT\s+(.*?)\s+FROM"
-        matches = re.findall(pattern, sql, flags=re.IGNORECASE | re.DOTALL)
 
-        if not matches:
-            return tokens
+        # Replace each SELECT ... FROM block independently to avoid cross-replacement
+        pattern = re.compile(r"SELECT\s+(.*?)\s+FROM", flags=re.IGNORECASE | re.DOTALL)
 
-        for cols in matches:
+        def _format_match(m):
+            cols = m.group(1)
             col_list = [c.strip() for c in cols.split(",")]
             formatted_cols = "\n    " + ",\n    ".join(col_list) + "\n"
-            new_block = "SELECT" + formatted_cols + "FROM"
-            sql = re.sub(pattern, new_block, sql, flags=re.IGNORECASE | re.DOTALL)
+            return "SELECT" + formatted_cols + "FROM"
+
+        new_sql = pattern.sub(_format_match, sql)
 
         # Re-tokenize the modified SQL
         from ..tokenizer import tokenize
-        return tokenize(sql)
+        return tokenize(new_sql)
 
 class LeadingCommasRule(BaseRule):
     """
@@ -132,7 +132,7 @@ class SubqueryToCTERule(BaseRule):
     order = 5
 
     def apply(self, tokens, ctx):
-        if not ctx.config.enable_subquery_to_cte:
+        if not getattr(ctx.config, "enable_subquery_to_cte", False):
             return tokens
 
         # Convert tokens back to SQL string

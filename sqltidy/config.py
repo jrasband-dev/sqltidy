@@ -8,10 +8,9 @@ class TidyConfig:
     newline_after_select = True
     compact = True
     leading_commas = False
-    enable_subquery_to_cte = False
 
 
 
 @dataclass
 class RewriteConfig:
-    enable_subquery_to_cte: bool = True
+    enable_subquery_to_cte = True
