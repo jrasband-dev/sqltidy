@@ -38,13 +38,9 @@ class CompactWhitespaceRule(BaseRule):
         return out
 
 
-# ========================
-# REWRITE RULES
-# ========================
-# Rules that restructure/reformat SQL
 
 class NewlineAfterSelectRule(BaseRule):
-    rule_type = "rewrite"
+    rule_type = "tidy"
     order = 15
     def apply(self, tokens, ctx):
         if not getattr(ctx.config, "newline_after_select", False):
@@ -80,7 +76,7 @@ class LeadingCommasRule(BaseRule):
             b,
             c
     """
-    rule_type = "rewrite"
+    rule_type = "tidy"
     order = 45
 
     def apply(self, tokens, ctx):
@@ -125,6 +121,10 @@ class LeadingCommasRule(BaseRule):
         return out_tokens
 
 
+# ========================
+# REWRITE RULES
+# ========================
+# Rules that restructure/reformat SQL
 
 
 class SubqueryToCTERule(BaseRule):
@@ -159,7 +159,15 @@ class SubqueryToCTERule(BaseRule):
             )
             i += 1
 
-        cte_block = "WITH " + ",\n".join(ctes) + "\n"
+            # Build CTE block with leading commas for subsequent CTEs:
+            # WITH cte_1 AS (...)
+            # ,cte_2 AS (...)
+            if not ctes:
+                return tokens
+            cte_block = "WITH " + ctes[0] + "\n"
+            if len(ctes) > 1:
+                cte_block += "".join(["\n," + c for c in ctes[1:]]) + "\n"
+
         result_sql = cte_block + sql
         
         # Re-tokenize the modified SQL
