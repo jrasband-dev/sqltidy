@@ -54,7 +54,7 @@ class NewlineAfterSelectRule(BaseRule):
         def _format_match(m):
             cols = m.group(1)
             col_list = [c.strip() for c in cols.split(",")]
-            formatted_cols = "\n    " + ",\n    ".join(col_list) + "\n"
+            formatted_cols = "\n" + ",\n".join(col_list) + "\n"
             return "SELECT" + formatted_cols + "FROM"
 
         new_sql = pattern.sub(_format_match, sql)
@@ -108,7 +108,6 @@ class LeadingCommasRule(BaseRule):
                     
                     # Now we're at the next token, insert: newline + "  " + comma + space
                     out_tokens.append("\n")
-                    out_tokens.append("    ")  # tab indent for leading comma
                     out_tokens.append(",")
 
                     # Continue without advancing i (we're now at the next real token)
