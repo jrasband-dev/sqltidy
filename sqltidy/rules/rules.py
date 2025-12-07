@@ -149,6 +149,9 @@ class IndentSelectColumnsRule(BaseRule):
             # Detect FROM keyword - end of column list
             if t.upper() == "FROM" and in_select:
                 in_select = False
+                # Remove trailing spaces before FROM
+                while out_tokens and out_tokens[-1] == "    ":
+                    out_tokens.pop()
                 out_tokens.append(t)
                 i += 1
                 continue
