@@ -68,8 +68,8 @@ class LeadingCommasRule(BaseRule):
     If ctx.config.leading_commas is True → leading commas:
         SELECT
             a
-          , b
-          , c
+            ,b
+            ,c
     If False → trailing commas (default):
         SELECT
             a,

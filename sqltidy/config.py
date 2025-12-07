@@ -7,7 +7,7 @@ class TidyConfig:
     uppercase_keywords = True
     newline_after_select = True
     compact = True
-    leading_commas = False
+    leading_commas = True
 
 
 
