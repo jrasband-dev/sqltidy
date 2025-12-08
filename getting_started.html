@@ -42,10 +42,10 @@
 </pre></div>
 </div>
 </section>
-<section id="using-sqltidy-as-a-library">
-<h2>Using SQLTidy as a Library<a class="headerlink" href="#using-sqltidy-as-a-library" title="Link to this heading">¶</a></h2>
-<section id="basic-formatting">
-<h3>Basic Formatting<a class="headerlink" href="#basic-formatting" title="Link to this heading">¶</a></h3>
+<section id="tidy">
+<h2>Tidy<a class="headerlink" href="#tidy" title="Link to this heading">¶</a></h2>
+<section id="api-usage">
+<h3>API Usage<a class="headerlink" href="#api-usage" title="Link to this heading">¶</a></h3>
 <p>The simplest way to use SQLTidy is to import the <code class="docutils literal notranslate"><span class="pre">format_sql</span></code> function:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_sql</span>
 
@@ -54,9 +54,6 @@
 <span class="nb">print</span><span class="p">(</span><span class="n">formatted</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="with-configuration">
-<h3>With Configuration<a class="headerlink" href="#with-configuration" title="Link to this heading">¶</a></h3>
 <p>You can customize formatting behavior using a <code class="docutils literal notranslate"><span class="pre">TidyConfig</span></code> object:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_sql</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TidyConfig</span>
@@ -68,16 +65,23 @@
 </div>
 </section>
 </section>
-<section id="using-the-command-line-interface">
-<h2>Using the Command-Line Interface<a class="headerlink" href="#using-the-command-line-interface" title="Link to this heading">¶</a></h2>
+<section id="command-line-interface">
+<h2>Command-Line Interface<a class="headerlink" href="#command-line-interface" title="Link to this heading">¶</a></h2>
 <p>SQLTidy provides a command-line tool for formatting SQL files:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>input.sql<span class="w"> </span>-o<span class="w"> </span>output.sql
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>tidy<span class="w"> </span>input.sql<span class="w"> </span>-o<span class="w"> </span>output.sql
 </pre></div>
 </div>
 <p>To see all available options:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>--help
 </pre></div>
 </div>
+<section id="rewrite">
+<h3>Rewrite<a class="headerlink" href="#rewrite" title="Link to this heading">¶</a></h3>
+<p>You can also use SQLTidy to rewrite SQL files in place:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>rewrite<span class="w"> </span>input.sql<span class="w"> </span>-o<span class="w"> </span>output.sql
+</pre></div>
+</div>
+</section>
 </section>
 <section id="extending-with-plugins">
 <h2>Extending with Plugins<a class="headerlink" href="#extending-with-plugins" title="Link to this heading">¶</a></h2>
@@ -142,8 +146,8 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#using-sqltidy-as-a-library">Using SQLTidy as a Library</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#using-the-command-line-interface">Using the Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tidy">Tidy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-interface">Command-Line Interface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#extending-with-plugins">Extending with Plugins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
 </ul>
