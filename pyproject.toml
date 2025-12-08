@@ -4,11 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sqltidy"
-version = "0.1.0"
+version = "0.1.1"
 description = "SQL Formatting Made Easy"
-authors = [{name = "Your Name"}]
+readme = "README.md"
+authors = [{name = "Jayden Rasband"}]
 dependencies = []
 
+[project.urls]
+"Source" = "https://github.com/jrasband-dev/sltidy"
+"Documentation" = "https://jrasband-dev.github.io/polars-extensions/"
 
 [project.scripts]
 sqltidy = "sqltidy.cli:main"
