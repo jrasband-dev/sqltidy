@@ -39,7 +39,7 @@ You can customize formatting behavior using a ``TidyConfig`` object:
    formatted = format_sql(sql, config=config)
 
 Command-Line Interface
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 SQLTidy provides a command-line tool for formatting SQL files:
 
@@ -55,7 +55,10 @@ To see all available options:
 
 
 Rewrite
-~~~~~~~
+-------
+
+Command-Line Interface
+~~~~~~~~~~~~~~~~~~~~~~~
 
 You can also use SQLTidy to rewrite SQL files in place:
 
@@ -63,8 +66,7 @@ You can also use SQLTidy to rewrite SQL files in place:
 
    sqltidy rewrite input.sql -o output.sql
 
-
-
+   
 
 Extending with Plugins
 ----------------------
