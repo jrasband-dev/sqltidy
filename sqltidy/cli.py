@@ -1,7 +1,50 @@
 import argparse
 import sys
+import json
 from .api import format_sql
 from .config import TidyConfig, RewriteConfig
+from .generator import run_generator, load_config_file
+
+
+def create_tidy_config_from_file(config_file: str) -> TidyConfig:
+    """
+    Load TidyConfig from a JSON configuration file.
+    
+    Args:
+        config_file: Path to the configuration JSON file
+    
+    Returns:
+        TidyConfig: Configuration object with loaded values
+    """
+    try:
+        config_data = load_config_file(config_file)
+        
+        # Create TidyConfig with loaded values (no nesting needed)
+        return TidyConfig(**config_data)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error loading config file: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+def create_rewrite_config_from_file(config_file: str) -> RewriteConfig:
+    """
+    Load RewriteConfig from a JSON configuration file.
+    
+    Args:
+        config_file: Path to the configuration JSON file
+    
+    Returns:
+        RewriteConfig: Configuration object with loaded values
+    """
+    try:
+        config_data = load_config_file(config_file)
+        
+        # Create RewriteConfig with loaded values (no nesting needed)
+        return RewriteConfig(**config_data)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error loading config file: {e}", file=sys.stderr)
+        sys.exit(1)
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -44,6 +87,7 @@ def main():
     
     rewrite_parameter_group = rewrite_parser.add_argument_group('Parameters')
     rewrite_parameter_group.add_argument("-o", "--output", help="Output file")
+    rewrite_parameter_group.add_argument("-cfg", "--rules", help="Path to custom rules json file")
     # Use config.py defaults for rewrite behavior. No CLI enable/disable flags are provided.
     rewrite_parameter_group.add_argument("--tidy", action="store_true", help="Apply tidy rules after rewriting")
 
@@ -70,7 +114,7 @@ def main():
     args = parser.parse_args()
 
     if args.command == "config":
-        print("Launching config generator...")
+        run_generator()
         return
 
     # tidy command
@@ -81,7 +125,11 @@ def main():
         else:
             sql = sys.stdin.read()
 
-        config = TidyConfig()
+        # Load config from file if provided, otherwise use defaults
+        if args.rules:
+            config = create_tidy_config_from_file(args.rules)
+        else:
+            config = TidyConfig()
 
         formatted_sql = format_sql(sql, config=config)
 
@@ -103,8 +151,11 @@ def main():
         else:
             sql = sys.stdin.read()
 
-        config = RewriteConfig()
-        # Use the defaults from RewriteConfig; no CLI override flags are supported
+        # Load config from file if provided, otherwise use defaults
+        if args.rules:
+            config = create_rewrite_config_from_file(args.rules)
+        else:
+            config = RewriteConfig()
 
         formatted_sql = format_sql(sql, config=config)
 

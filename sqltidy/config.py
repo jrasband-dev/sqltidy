@@ -1,17 +1,17 @@
 # Default Rules
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 @dataclass
 class TidyConfig:
-    uppercase_keywords = True
-    newline_after_select = True
-    compact = True
-    leading_commas = True
-    indent_select_columns = True
+    uppercase_keywords: bool = True
+    newline_after_select: bool = True
+    compact: bool = True
+    leading_commas: bool = True
+    indent_select_columns: bool = True
 
 
 
 @dataclass
 class RewriteConfig:
-    enable_subquery_to_cte = True
+    enable_subquery_to_cte: bool = True
