@@ -1,4 +1,0 @@
-# Documentation Build Output
-# Generated when running `make html` or `sphinx-build`
-build/
-*.doctrees/

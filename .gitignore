@@ -1,5 +1,0 @@
-__pycache__
-.venv
-sqltidy.egg-info
-
-*.sql
