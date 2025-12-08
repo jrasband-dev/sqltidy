@@ -1,2 +1,1 @@
-sphinx
-sphinx-alabaster-theme
+sphinx>=7.0
