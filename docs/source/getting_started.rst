@@ -10,11 +10,11 @@ Install SQLTidy using pip:
 
    pip install sqltidy
 
-Using SQLTidy as a Library
----------------------------
+Tidy
+----
 
-Basic Formatting
-~~~~~~~~~~~~~~~~
+API Usage
+~~~~~~~~~
 
 The simplest way to use SQLTidy is to import the ``format_sql`` function:
 
@@ -26,8 +26,6 @@ The simplest way to use SQLTidy is to import the ``format_sql`` function:
    formatted = format_sql(sql)
    print(formatted)
 
-With Configuration
-~~~~~~~~~~~~~~~~~~~
 
 You can customize formatting behavior using a ``TidyConfig`` object:
 
@@ -40,20 +38,33 @@ You can customize formatting behavior using a ``TidyConfig`` object:
    sql = "SELECT * FROM users"
    formatted = format_sql(sql, config=config)
 
-Using the Command-Line Interface
----------------------------------
+Command-Line Interface
+----------------------
 
 SQLTidy provides a command-line tool for formatting SQL files:
 
 .. code-block:: bash
 
-   sqltidy input.sql -o output.sql
+   sqltidy tidy input.sql -o output.sql
 
 To see all available options:
 
 .. code-block:: bash
 
    sqltidy --help
+
+
+Rewrite
+~~~~~~~
+
+You can also use SQLTidy to rewrite SQL files in place:
+
+.. code-block:: bash
+
+   sqltidy rewrite input.sql -o output.sql
+
+
+
 
 Extending with Plugins
 ----------------------
