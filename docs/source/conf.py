@@ -8,7 +8,10 @@ import os
 import sys
 
 # Add the parent directory to sys.path so Sphinx can find the sqltidy package
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+# Import version from the package
+import sqltidy
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -16,7 +19,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 project = 'SQLTidy'
 copyright = '2025, Jayden Rasband'
 author = 'Jayden Rasband'
-release = '0.2.0'
+release = sqltidy.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

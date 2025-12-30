@@ -1,10 +1,13 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = {attr = "sqltidy.__version__"}
 
 [project]
 name = "sqltidy"
-version = "0.2.1"
+dynamic = ["version"]
 description = "SQL Formatting Made Easy"
 readme = "README.md"
 authors = [{name = "Jayden Rasband"}]
