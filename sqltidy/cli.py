@@ -1,6 +1,7 @@
 import argparse
 import sys
 import json
+from . import __version__
 from .api import format_sql
 from .config import TidyConfig, RewriteConfig
 from .generator import run_generator, load_config_file
@@ -49,6 +50,12 @@ def create_rewrite_config_from_file(config_file: str) -> RewriteConfig:
 def main():
     parser = argparse.ArgumentParser(
         description="A SQL formatting tool"
+    )
+    
+    parser.add_argument(
+        "-v", "--version",
+        action="version",
+        version=f"%(prog)s {__version__}"
     )
 
     # create subparsers for subcommands

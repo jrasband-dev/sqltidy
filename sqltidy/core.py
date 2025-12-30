@@ -8,7 +8,7 @@ class SQLFormatter:
     """Main SQL formatting engine."""
 
     def __init__(self, config: TidyConfig = None):
-        from .rules.rules import load_rules
+        from .rules import load_rules
         from .rules.base import FormatterContext
         self.ctx = FormatterContext(config or TidyConfig())
         self.rules = load_rules()
