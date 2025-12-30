@@ -4,9 +4,25 @@ Generates config files that can override default settings.
 """
 
 import json
+from dataclasses import asdict
 from pathlib import Path
 from typing import Dict, Any
 from .config import TidyConfig, RewriteConfig
+
+
+TIDY_DESCRIPTIONS = {
+    "uppercase_keywords": "Convert SQL keywords to uppercase? (e.g., SELECT, FROM, WHERE)",
+    "newline_after_select": "Add newline after SELECT keyword?",
+    "compact": "Use compact formatting (reduce unnecessary whitespace)?",
+    "leading_commas": "Use leading commas in column lists? (e.g., col1\\n  , col2\\n  , col3)",
+    "indent_select_columns": "Indent SELECT columns on separate lines?",
+}
+
+REWRITE_DESCRIPTIONS = {
+    "enable_subquery_to_cte": "Convert subqueries to Common Table Expressions (CTEs)?",
+    "enable_alias_style_abc": "Apply uppercase A, B, C ... table aliases?",
+    "enable_alias_style_t_numeric": "Apply uppercase T1, T2, T3 ... table aliases?",
+}
 
 
 def prompt_yes_no(question: str, default: bool = True) -> bool:
@@ -35,9 +51,7 @@ def prompt_yes_no(question: str, default: bool = True) -> bool:
 def generate_tidy_config() -> Dict[str, Any]:
     """
     Interactively generate a TidyConfig.
-    
-    Returns:
-        dict: Configuration dictionary with TidyConfig settings
+    Automatically includes any new boolean fields added to TidyConfig.
     """
     print("\n" + "=" * 60)
     print("TIDY CONFIGURATION GENERATOR")
@@ -45,39 +59,16 @@ def generate_tidy_config() -> Dict[str, Any]:
     print("Configure SQL formatting rules for the 'tidy' command.\n")
     
     config = {}
-    
-    # Get default values from TidyConfig dataclass
-    default_config = TidyConfig()
-    
-    print("1. Keyword Formatting")
-    config["uppercase_keywords"] = prompt_yes_no(
-        "Convert SQL keywords to uppercase? (e.g., SELECT, FROM, WHERE)",
-        default=default_config.uppercase_keywords
-    )
-    
-    print("\n2. Select Statement Formatting")
-    config["newline_after_select"] = prompt_yes_no(
-        "Add newline after SELECT keyword?",
-        default=default_config.newline_after_select
-    )
-    
-    print("\n3. Compactness")
-    config["compact"] = prompt_yes_no(
-        "Use compact formatting (reduce unnecessary whitespace)?",
-        default=default_config.compact
-    )
-    
-    print("\n4. Comma Placement")
-    config["leading_commas"] = prompt_yes_no(
-        "Use leading commas in column lists? (e.g., col1\\n  , col2\\n  , col3)",
-        default=default_config.leading_commas
-    )
-    
-    print("\n5. Column Indentation")
-    config["indent_select_columns"] = prompt_yes_no(
-        "Indent SELECT columns on separate lines?",
-        default=default_config.indent_select_columns
-    )
+    default_config = asdict(TidyConfig())
+
+    for field_name, default_value in default_config.items():
+        if not isinstance(default_value, bool):
+            continue  # only prompt for boolean options
+        question = TIDY_DESCRIPTIONS.get(
+            field_name,
+            f"Enable {field_name.replace('_', ' ')}?"
+        )
+        config[field_name] = prompt_yes_no(question, default=default_value)
     
     return config
 
@@ -85,9 +76,7 @@ def generate_tidy_config() -> Dict[str, Any]:
 def generate_rewrite_config() -> Dict[str, Any]:
     """
     Interactively generate a RewriteConfig.
-    
-    Returns:
-        dict: Configuration dictionary with RewriteConfig settings
+    Automatically includes any new boolean fields added to RewriteConfig.
     """
     print("\n" + "=" * 60)
     print("REWRITE CONFIGURATION GENERATOR")
@@ -95,15 +84,16 @@ def generate_rewrite_config() -> Dict[str, Any]:
     print("Configure SQL rewriting rules for the 'rewrite' command.\n")
     
     config = {}
+    default_config = asdict(RewriteConfig())
     
-    # Get default values from RewriteConfig dataclass
-    default_config = RewriteConfig()
-    
-    print("1. Subquery Optimization")
-    config["enable_subquery_to_cte"] = prompt_yes_no(
-        "Convert subqueries to Common Table Expressions (CTEs)?",
-        default=default_config.enable_subquery_to_cte
-    )
+    for field_name, default_value in default_config.items():
+        if not isinstance(default_value, bool):
+            continue  # only prompt for boolean options
+        question = REWRITE_DESCRIPTIONS.get(
+            field_name,
+            f"Enable {field_name.replace('_', ' ')}?"
+        )
+        config[field_name] = prompt_yes_no(question, default=default_value)
     
     return config
 
