@@ -15,3 +15,5 @@ class TidyConfig:
 @dataclass
 class RewriteConfig:
     enable_subquery_to_cte: bool = True
+    enable_alias_style_abc: bool = False
+    enable_alias_style_t_numeric: bool = False
