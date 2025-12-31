@@ -6,6 +6,7 @@ from .api import format_sql
 from .config import TidyConfig, RewriteConfig
 from .generator import run_generator, load_config_file
 from .tokenizer import tokenize_with_types, TokenType, is_keyword
+from .plugins import load_plugin_file, load_plugins_from_directory, load_plugin_module
 
 
 def create_tidy_config_from_file(config_file: str) -> TidyConfig:
@@ -77,6 +78,14 @@ def main():
     tidy_parameter_group = tidy_parser.add_argument_group('Parameters')
     tidy_parameter_group.add_argument("-o", "--output", help="Output file")
     tidy_parameter_group.add_argument("-cfg","--rules", help="Path to custom rules json file")
+    
+    tidy_plugin_group = tidy_parser.add_argument_group('Plugins')
+    tidy_plugin_group.add_argument("--plugin", action="append", dest="plugin_files",
+                                   help="Load plugin from Python file (can be used multiple times)")
+    tidy_plugin_group.add_argument("--plugin-dir", action="append", dest="plugin_dirs",
+                                   help="Load all plugins from directory (can be used multiple times)")
+    tidy_plugin_group.add_argument("--plugin-module", action="append", dest="plugin_modules",
+                                   help="Import plugin module (can be used multiple times)")
 
 
 
@@ -90,6 +99,14 @@ def main():
         description="Rewrite SQL queries according to specified rules"
     )
     
+    
+    rewrite_plugin_group = rewrite_parser.add_argument_group('Plugins')
+    rewrite_plugin_group.add_argument("--plugin", action="append", dest="plugin_files",
+                                      help="Load plugin from Python file (can be used multiple times)")
+    rewrite_plugin_group.add_argument("--plugin-dir", action="append", dest="plugin_dirs",
+                                      help="Load all plugins from directory (can be used multiple times)")
+    rewrite_plugin_group.add_argument("--plugin-module", action="append", dest="plugin_modules",
+                                      help="Import plugin module (can be used multiple times)")
     rewrite_input_group = rewrite_parser.add_argument_group(title='Input')
     rewrite_input_group.add_argument("input", nargs="?", help="SQL file to rewrite")
     
@@ -254,7 +271,33 @@ def main():
             with open(args.input, "r", encoding="utf-8") as f:
                 sql = f.read()
         else:
-            sql = sys.stdin.read()
+        # Load plugins if specified
+        plugin_rules = []
+        if args.plugin_files:
+            for plugin_file in args.plugin_files:
+                try:
+                    rules = load_plugin_file(plugin_file)
+                    plugin_rules.extend([r() for r in rules])
+                except Exception as e:
+                    print(f"Warning: Could not load plugin {plugin_file}: {e}", file=sys.stderr)
+        
+        if args.plugin_dirs:
+            for plugin_dir in args.plugin_dirs:
+                try:
+                    rules = load_plugins_from_directory(plugin_dir)
+                    plugin_rules.extend([r() for r in rules])
+                except Exception as e:
+                    print(f"Warning: Could not load plugins from {plugin_dir}: {e}", file=sys.stderr)
+        
+        if args.plugin_modules:
+            for plugin_module in args.plugin_modules:
+                try:
+                    rules = load_plugin_module(plugin_module)
+                    plugin_rules.extend([r() for r in rules])
+                except Exception as e:
+                    print(f"Warning: Could not load plugin module {plugin_module}: {e}", file=sys.stderr)
+
+        formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules
 
         # Load config from file if provided, otherwise use defaults
         if args.rules:
@@ -288,7 +331,33 @@ def main():
         else:
             config = RewriteConfig()
 
-        formatted_sql = format_sql(sql, config=config)
+        # Load plugins if specified
+        plugin_rules = []
+        if args.plugin_files:
+            for plugin_file in args.plugin_files:
+                try:
+                    rules = load_plugin_file(plugin_file)
+                    plugin_rules.extend([r() for r in rules])
+                except Exception as e:
+                    print(f"Warning: Could not load plugin {plugin_file}: {e}", file=sys.stderr)
+        
+        if args.plugin_dirs:
+            for plugin_dir in args.plugin_dirs:
+                try:
+                    rules = load_plugins_from_directory(plugin_dir)
+                    plugin_rules.extend([r() for r in rules])
+                except Exception as e:
+                    print(f"Warning: Could not load plugins from {plugin_dir}: {e}", file=sys.stderr)
+        
+        if args.plugin_modules:
+            for plugin_module in args.plugin_modules:
+                try:
+                    rules = load_plugin_module(plugin_module)
+                    plugin_rules.extend([r() for r in rules])
+                except Exception as e:
+                    print(f"Warning: Could not load plugin module {plugin_module}: {e}", file=sys.stderr)
+
+        formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules)
 
         # Apply tidy rules if requested
         if args.tidy:
