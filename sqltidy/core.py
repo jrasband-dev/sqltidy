@@ -36,9 +36,10 @@ class SQLFormatter:
     def format(self, sql: str) -> str:
         tokens = self.tokenize(sql)
 
-        # Apply your custom rules
+        # Apply rules that are applicable to the current dialect
         for rule in sorted(self.rules, key=lambda r: getattr(r, "order", 100)):
-            tokens = rule.apply(tokens, self.ctx)
+            if rule.is_applicable(self.ctx):
+                tokens = rule.apply(tokens, self.ctx)
 
         return self.join_tokens(tokens)
 
