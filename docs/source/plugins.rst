@@ -6,13 +6,30 @@ Overview
 
 SQLTidy supports extending functionality through custom rule plugins. This allows you to create custom formatting rules that can be registered and applied to your SQL code.
 
+For more detailed guides, see:
+
+- :doc:`../PLUGINS` - Comprehensive plugin guide
+- :doc:`../PLUGIN_CLI_GUIDE` - Plugin CLI usage
+- :doc:`../CUSTOM_RULES` - Detailed custom rules documentation
+- :doc:`../CUSTOM_RULES_QUICKSTART` - Quick start guide
+
+Plugin API
+----------
+
+The plugin API provides runtime registration of custom rules.
+
+.. automodule:: sqltidy.plugins
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Base Rule Class
 ---------------
 
 All plugins must inherit from the ``BaseRule`` class:
 
 .. automodule:: sqltidy.rules.base
-   :members:
+   :members: BaseRule
    :undoc-members:
    :show-inheritance:
 

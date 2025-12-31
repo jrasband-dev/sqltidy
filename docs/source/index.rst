@@ -10,7 +10,10 @@ Welcome to the SQLTidy documentation! SQLTidy is a Python library for formatting
    :caption: Contents:
 
    getting_started
+   overview
    api
+   dialects
+   rules
    modules
    plugins
 

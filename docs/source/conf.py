@@ -29,10 +29,17 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.coverage',
+    'sphinx.ext.todo',
 ]
 
 templates_path = ['_templates']
 exclude_patterns = []
+
+# Autosummary settings
+autosummary_generate = True
+autosummary_imported_members = False
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -59,9 +66,16 @@ napoleon_attr_annotations = True
 autodoc_default_options = {
     'members': True,
     'member-order': 'bysource',
-    'undoc-members': False,
+    'undoc-members': True,
     'show-inheritance': True,
+    'special-members': '__init__',
+    'exclude-members': '__weakref__, __dict__, __module__',
 }
+
+# Enable type hints in documentation
+autodoc_typehints = 'description'
+autodoc_typehints_description_target = 'documented'
+autodoc_class_signature = 'separated'
 
 # Intersphinx mapping
 intersphinx_mapping = {
