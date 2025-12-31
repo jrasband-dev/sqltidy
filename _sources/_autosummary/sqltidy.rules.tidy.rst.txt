@@ -1,0 +1,20 @@
+sqltidy.rules.tidy
+==================
+
+.. automodule:: sqltidy.rules.tidy
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   compact_whitespace
+   indent_select_columns
+   leading_commas
+   newline_after_select
+   oracle_connect_by
+   quote_identifiers
+   sqlserver_top_formatting
+   uppercase_keywords

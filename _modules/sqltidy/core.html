@@ -42,11 +42,14 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SQLFormatter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Main SQL formatting engine.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="SQLFormatter.__init__">
+<a class="viewcode-back" href="../../api.html#sqltidy.core.SQLFormatter.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TidyConfig</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.rules</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_rules</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.rules.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatterContext</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span> <span class="o">=</span> <span class="n">FormatterContext</span><span class="p">(</span><span class="n">config</span> <span class="ow">or</span> <span class="n">TidyConfig</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="n">load_rules</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="n">load_rules</span><span class="p">()</span></div>
+
 
 <div class="viewcode-block" id="SQLFormatter.tokenize">
 <a class="viewcode-back" href="../../api.html#sqltidy.core.SQLFormatter.tokenize">[docs]</a>
@@ -76,9 +79,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sql</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenize</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
 
-        <span class="c1"># Apply your custom rules</span>
+        <span class="c1"># Apply rules that are applicable to the current dialect</span>
         <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)):</span>
-            <span class="n">tokens</span> <span class="o">=</span> <span class="n">rule</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">rule</span><span class="o">.</span><span class="n">is_applicable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">):</span>
+                <span class="n">tokens</span> <span class="o">=</span> <span class="n">rule</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">join_tokens</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span></div>
 
@@ -120,8 +124,11 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Package Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dialects.html">Dialect System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rules.html">Rules System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plugins.html">Creating Plugins</a></li>
 </ul>
 

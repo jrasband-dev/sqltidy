@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>sqltidy.plugins &#8212; SQLTidy 0.2.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=000c92bf"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sqltidy.rules" href="sqltidy.rules.html" />
+    <link rel="prev" title="sqltidy.generator" href="sqltidy.generator.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-sqltidy.plugins">
+<span id="sqltidy-plugins"></span><h1>sqltidy.plugins<a class="headerlink" href="#module-sqltidy.plugins" title="Link to this heading">¶</a></h1>
+<p>Plugin system for SQLTidy.</p>
+<p>Provides a decorator-based plugin registration system similar to Polars,
+allowing users to easily extend SQLTidy with custom formatting rules.</p>
+<p class="rubric">Example</p>
+<p># my_plugin.py
+from sqltidy.plugins import sqltidy_plugin</p>
+<p>&#64;sqltidy_plugin(rule_type=”tidy”, order=50)
+def remove_semicolons(tokens, ctx):</p>
+<blockquote>
+<div><p>‘’’Remove trailing semicolons.’’’
+if tokens and tokens[-1] == ‘;’:</p>
+<blockquote>
+<div><p>return tokens[:-1]</p>
+</div></blockquote>
+<p>return tokens</p>
+</div></blockquote>
+<p># Use from CLI:
+# sqltidy format input.sql –plugin my_plugin.py</p>
+<p># Or from Python:
+# from sqltidy.plugins import load_plugins
+# load_plugins(‘my_plugin.py’)</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../plugins.html#sqltidy.plugins.clear_plugins" title="sqltidy.plugins.clear_plugins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_plugins</span></code></a>()</p></td>
+<td><p>Clear all registered plugins.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../plugins.html#sqltidy.plugins.create_plugin_formatter" title="sqltidy.plugins.create_plugin_formatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_plugin_formatter</span></code></a>([config, ...])</p></td>
+<td><p>Create a SQLFormatter with plugins loaded.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../plugins.html#sqltidy.plugins.get_registered_plugins" title="sqltidy.plugins.get_registered_plugins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_registered_plugins</span></code></a>()</p></td>
+<td><p>Get all registered plugin rules.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../plugins.html#sqltidy.plugins.load_plugin_file" title="sqltidy.plugins.load_plugin_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_plugin_file</span></code></a>(filepath)</p></td>
+<td><p>Load plugins from a Python file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../plugins.html#sqltidy.plugins.load_plugin_module" title="sqltidy.plugins.load_plugin_module"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_plugin_module</span></code></a>(module_name)</p></td>
+<td><p>Load plugins from an installed Python module.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../plugins.html#sqltidy.plugins.load_plugins_from_directory" title="sqltidy.plugins.load_plugins_from_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_plugins_from_directory</span></code></a>(directory)</p></td>
+<td><p>Load all plugin files from a directory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../plugins.html#sqltidy.plugins.plugin" title="sqltidy.plugins.plugin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plugin</span></code></a>([rule_type, order, ...])</p></td>
+<td><p>Decorator to register a function as a SQLTidy plugin rule.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../plugins.html#sqltidy.plugins.register" title="sqltidy.plugins.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a>(rule_class)</p></td>
+<td><p>Register a rule class directly.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../plugins.html#sqltidy.plugins.register_rule_class" title="sqltidy.plugins.register_rule_class"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_rule_class</span></code></a>(rule_class)</p></td>
+<td><p>Register a rule class directly.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../plugins.html#sqltidy.plugins.sqltidy_plugin" title="sqltidy.plugins.sqltidy_plugin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sqltidy_plugin</span></code></a>([rule_type, order, ...])</p></td>
+<td><p>Decorator to register a function as a SQLTidy plugin rule.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.sqltidy_plugin">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">sqltidy_plugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tidy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supported_dialects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/plugins.html#sqltidy_plugin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.sqltidy_plugin" title="Link to this definition">¶</a></dt>
+<dd><p>Decorator to register a function as a SQLTidy plugin rule.</p>
+<p>This decorator allows you to turn any function into a formatting rule
+without having to create a class or understand the internals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – “tidy” (formatting) or “rewrite” (transformation)</p></li>
+<li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Execution order (lower runs first)</p></li>
+<li><p><strong>supported_dialects</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><em>Set</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – Set of dialects this rule applies to, or None for all</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – Optional custom name for the rule class</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Decorator function</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>&#64;sqltidy_plugin(rule_type=”tidy”, order=100)
+def my_rule(tokens, ctx):</p>
+<blockquote>
+<div><p>‘’’Remove trailing semicolons.’’’
+if tokens and tokens[-1] == ‘;’:</p>
+<blockquote>
+<div><p>return tokens[:-1]</p>
+</div></blockquote>
+<p>return tokens</p>
+</div></blockquote>
+<dl class="simple">
+<dt>The decorated function should have signature:</dt><dd><p>def rule_func(tokens: List[str], ctx: FormatterContext) -&gt; List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.register_rule_class">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">register_rule_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/plugins.html#register_rule_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.register_rule_class" title="Link to this definition">¶</a></dt>
+<dd><p>Register a rule class directly.</p>
+<p>Use this if you prefer to define classes rather than functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rule_class</strong> (<a class="reference internal" href="../api.html#sqltidy.tokenizer.Token.type" title="sqltidy.tokenizer.Token.type"><em>type</em></a>) – A BaseRule subclass</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from sqltidy.plugins import register_rule_class</p>
+<dl>
+<dt>class MyRule(BaseRule):</dt><dd><p>rule_type = “tidy”
+order = 50</p>
+<dl class="simple">
+<dt>def apply(self, tokens, ctx):</dt><dd><p>return tokens</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>register_rule_class(MyRule)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.get_registered_plugins">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">get_registered_plugins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/plugins.html#get_registered_plugins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.get_registered_plugins" title="Link to this definition">¶</a></dt>
+<dd><p>Get all registered plugin rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of rule classes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference internal" href="../api.html#sqltidy.tokenizer.Token.type" title="sqltidy.tokenizer.Token.type">type</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.clear_plugins">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">clear_plugins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/plugins.html#clear_plugins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.clear_plugins" title="Link to this definition">¶</a></dt>
+<dd><p>Clear all registered plugins.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.load_plugin_file">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">load_plugin_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/plugins.html#load_plugin_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.load_plugin_file" title="Link to this definition">¶</a></dt>
+<dd><p>Load plugins from a Python file.</p>
+<p>The file should contain functions decorated with &#64;sqltidy_plugin
+or classes registered with register_rule_class().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>Path</em></a>) – Path to Python file containing plugins</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of rule classes that were loaded</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If file doesn’t exist</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ImportError" title="(in Python v3.14)"><strong>ImportError</strong></a> – If file can’t be imported</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference internal" href="../api.html#sqltidy.tokenizer.Token.type" title="sqltidy.tokenizer.Token.type">type</a>]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from sqltidy.plugins import load_plugin_file</p>
+<p># Load plugins from file
+rules = load_plugin_file(‘my_plugins.py’)</p>
+<p># Add to formatter
+formatter.rules.extend([r() for r in rules])</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.load_plugins_from_directory">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">load_plugins_from_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/plugins.html#load_plugins_from_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.load_plugins_from_directory" title="Link to this definition">¶</a></dt>
+<dd><p>Load all plugin files from a directory.</p>
+<p>Searches for all .py files in the directory and loads them as plugins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>Path</em></a>) – Path to directory containing plugin files</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of all rule classes that were loaded</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference internal" href="../api.html#sqltidy.tokenizer.Token.type" title="sqltidy.tokenizer.Token.type">type</a>]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from sqltidy.plugins import load_plugins_from_directory</p>
+<p># Load all plugins from directory
+rules = load_plugins_from_directory(‘~/.sqltidy/plugins’)</p>
+<p># Add to formatter
+formatter.rules.extend([r() for r in rules])</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.load_plugin_module">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">load_plugin_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/plugins.html#load_plugin_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.load_plugin_module" title="Link to this definition">¶</a></dt>
+<dd><p>Load plugins from an installed Python module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>module_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of Python module to import</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of rule classes that were loaded</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference internal" href="../api.html#sqltidy.tokenizer.Token.type" title="sqltidy.tokenizer.Token.type">type</a>]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from sqltidy.plugins import load_plugin_module</p>
+<p># Load from installed package
+rules = load_plugin_module(‘my_company.sqltidy_plugins’)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.create_plugin_formatter">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">create_plugin_formatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plugin_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plugin_dirs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plugin_modules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/plugins.html#create_plugin_formatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.create_plugin_formatter" title="Link to this definition">¶</a></dt>
+<dd><p>Create a SQLFormatter with plugins loaded.</p>
+<p>Convenience function that creates a formatter and loads all specified plugins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> – TidyConfig or RewriteConfig</p></li>
+<li><p><strong>plugin_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>Path</em></a><em>] </em><em>| </em><em>None</em>) – List of plugin file paths to load</p></li>
+<li><p><strong>plugin_dirs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>Path</em></a><em>] </em><em>| </em><em>None</em>) – List of plugin directories to load</p></li>
+<li><p><strong>plugin_modules</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – List of module names to import</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLFormatter with plugins loaded</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from sqltidy.plugins import create_plugin_formatter
+from sqltidy.config import TidyConfig</p>
+<dl class="simple">
+<dt>formatter = create_plugin_formatter(</dt><dd><p>config=TidyConfig(dialect=’postgresql’),
+plugin_files=[‘my_rules.py’],
+plugin_dirs=[‘~/.sqltidy/plugins’]</p>
+</dd>
+</dl>
+<p>)</p>
+<p>result = formatter.format(sql)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.plugin">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">plugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tidy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supported_dialects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sqltidy.plugins.plugin" title="Link to this definition">¶</a></dt>
+<dd><p>Decorator to register a function as a SQLTidy plugin rule.</p>
+<p>This decorator allows you to turn any function into a formatting rule
+without having to create a class or understand the internals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – “tidy” (formatting) or “rewrite” (transformation)</p></li>
+<li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Execution order (lower runs first)</p></li>
+<li><p><strong>supported_dialects</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><em>Set</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – Set of dialects this rule applies to, or None for all</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – Optional custom name for the rule class</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Decorator function</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>&#64;sqltidy_plugin(rule_type=”tidy”, order=100)
+def my_rule(tokens, ctx):</p>
+<blockquote>
+<div><p>‘’’Remove trailing semicolons.’’’
+if tokens and tokens[-1] == ‘;’:</p>
+<blockquote>
+<div><p>return tokens[:-1]</p>
+</div></blockquote>
+<p>return tokens</p>
+</div></blockquote>
+<dl class="simple">
+<dt>The decorated function should have signature:</dt><dd><p>def rule_func(tokens: List[str], ctx: FormatterContext) -&gt; List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.register">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_class</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sqltidy.plugins.register" title="Link to this definition">¶</a></dt>
+<dd><p>Register a rule class directly.</p>
+<p>Use this if you prefer to define classes rather than functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rule_class</strong> (<a class="reference internal" href="../api.html#sqltidy.tokenizer.Token.type" title="sqltidy.tokenizer.Token.type"><em>type</em></a>) – A BaseRule subclass</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from sqltidy.plugins import register_rule_class</p>
+<dl>
+<dt>class MyRule(BaseRule):</dt><dd><p>rule_type = “tidy”
+order = 50</p>
+<dl class="simple">
+<dt>def apply(self, tokens, ctx):</dt><dd><p>return tokens</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>register_rule_class(MyRule)</p>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">SQLTidy</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Package Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dialects.html">Dialect System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rules.html">Rules System</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Modules Overview</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../modules.html#main-package">Main Package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../modules.html#core-modules">Core Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules.html#dialects-package">Dialects Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules.html#rules-package">Rules Package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plugins.html">Creating Plugins</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../modules.html">Modules Overview</a><ul>
+  <li><a href="sqltidy.html">sqltidy</a><ul>
+      <li>Previous: <a href="sqltidy.generator.html" title="previous chapter">sqltidy.generator</a></li>
+      <li>Next: <a href="sqltidy.rules.html" title="next chapter">sqltidy.rules</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Jayden Rasband.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/_autosummary/sqltidy.plugins.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

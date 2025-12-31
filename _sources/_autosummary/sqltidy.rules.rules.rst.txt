@@ -1,0 +1,23 @@
+sqltidy.rules.rules
+===================
+
+.. automodule:: sqltidy.rules.rules
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      load_rules
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      CompactWhitespaceRule
+      IndentSelectColumnsRule
+      LeadingCommasRule
+      NewlineAfterSelectRule
+      SubqueryToCTERule
+      UppercaseKeywordsRule
+   

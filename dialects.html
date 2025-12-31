@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Dialect System &#8212; SQLTidy 0.2.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=000c92bf"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Rules System" href="rules.html" />
+    <link rel="prev" title="API Reference" href="api.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="dialect-system">
+<h1>Dialect System<a class="headerlink" href="#dialect-system" title="Link to this heading">¶</a></h1>
+<p>SQLTidy supports multiple SQL database systems through its dialect system.
+Each dialect defines database-specific keywords, functions, and parsing rules.</p>
+<section id="supported-dialects">
+<h2>Supported Dialects<a class="headerlink" href="#supported-dialects" title="Link to this heading">¶</a></h2>
+<p>SQLTidy includes built-in support for:</p>
+<ul class="simple">
+<li><p><strong>SQL Server</strong> (T-SQL)</p></li>
+<li><p><strong>PostgreSQL</strong></p></li>
+<li><p><strong>MySQL</strong></p></li>
+<li><p><strong>Oracle</strong> (PL/SQL)</p></li>
+<li><p><strong>SQLite</strong></p></li>
+</ul>
+</section>
+<section id="dialect-registry">
+<h2>Dialect Registry<a class="headerlink" href="#dialect-registry" title="Link to this heading">¶</a></h2>
+<p>The dialect registry manages all available SQL dialects.</p>
+<p id="module-sqltidy.dialects.registry">Dialect registry for managing and accessing SQL dialects.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.dialects.registry.get_dialect">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.registry.</span></span><span class="sig-name descname"><span class="pre">get_dialect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlserver'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/dialects/registry.html#get_dialect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.registry.get_dialect" title="Link to this definition">¶</a></dt>
+<dd><p>Get a dialect by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The dialect name (case-insensitive). Defaults to ‘sqlserver’.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The requested SQLDialect instance.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the dialect is not found.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#sqltidy.dialects.base.SQLDialect" title="sqltidy.dialects.base.SQLDialect"><em>SQLDialect</em></a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dialect</span> <span class="o">=</span> <span class="n">get_dialect</span><span class="p">(</span><span class="s1">&#39;sqlserver&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dialect</span> <span class="o">=</span> <span class="n">get_dialect</span><span class="p">(</span><span class="s1">&#39;postgresql&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.dialects.registry.register_dialect">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.registry.</span></span><span class="sig-name descname"><span class="pre">register_dialect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/dialects/registry.html#register_dialect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.registry.register_dialect" title="Link to this definition">¶</a></dt>
+<dd><p>Register a custom dialect.</p>
+<p>This allows users to add support for additional SQL dialects
+beyond the built-in ones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dialect</strong> (<a class="reference internal" href="#sqltidy.dialects.base.SQLDialect" title="sqltidy.dialects.base.SQLDialect"><em>SQLDialect</em></a>) – An instance of SQLDialect to register.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If a dialect with the same name is already registered.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">CustomDialect</span><span class="p">(</span><span class="n">SQLDialect</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nd">@property</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="s1">&#39;custom&#39;</span>
+<span class="gp">... </span>    <span class="c1"># ... implement other methods</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">register_dialect</span><span class="p">(</span><span class="n">CustomDialect</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.dialects.registry.unregister_dialect">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.registry.</span></span><span class="sig-name descname"><span class="pre">unregister_dialect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/dialects/registry.html#unregister_dialect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.registry.unregister_dialect" title="Link to this definition">¶</a></dt>
+<dd><p>Unregister a dialect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The name of the dialect to unregister.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the dialect is not found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.dialects.registry.list_dialects">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.registry.</span></span><span class="sig-name descname"><span class="pre">list_dialects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/dialects/registry.html#list_dialects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.registry.list_dialects" title="Link to this definition">¶</a></dt>
+<dd><p>List all registered dialect names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A sorted list of dialect names.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">list_dialects</span><span class="p">()</span>
+<span class="go">[&#39;mysql&#39;, &#39;oracle&#39;, &#39;postgresql&#39;, &#39;sqlserver&#39;, &#39;sqlite&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.dialects.registry.is_dialect_available">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.registry.</span></span><span class="sig-name descname"><span class="pre">is_dialect_available</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/dialects/registry.html#is_dialect_available"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.registry.is_dialect_available" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a dialect is available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The dialect name to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the dialect is registered, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">is_dialect_available</span><span class="p">(</span><span class="s1">&#39;sqlserver&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_dialect_available</span><span class="p">(</span><span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="base-dialect">
+<h2>Base Dialect<a class="headerlink" href="#base-dialect" title="Link to this heading">¶</a></h2>
+<p>The base dialect class that all specific dialects inherit from.</p>
+<p id="module-sqltidy.dialects.base">Base class for SQL dialects.</p>
+<p>Each dialect defines its own keywords, data types, functions, and syntax rules.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.base.</span></span><span class="sig-name descname"><span class="pre">SQLDialect</span></span><a class="reference internal" href="_modules/sqltidy/dialects/base.html#SQLDialect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Base class for SQL dialects.</p>
+<p>Each dialect implementation should provide:
+- name: Unique identifier for the dialect
+- keywords: Set of SQL keywords specific to this dialect
+- data_types: Set of data type names
+- functions: Set of built-in function names
+- identifier_chars: Special characters allowed in identifiers (e.g., ‘&#64;’ for SQL Server)
+- quote_chars: Dictionary of quote characters for identifiers and strings
+- comment_styles: List of comment patterns supported</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/dialects/base.html#SQLDialect.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize the dialect.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect.name">
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect.name" title="Link to this definition">¶</a></dt>
+<dd><p>Unique identifier for this dialect (e.g., ‘sqlserver’, ‘postgresql’).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect.keywords">
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">keywords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect.keywords" title="Link to this definition">¶</a></dt>
+<dd><p>Set of SQL keywords for this dialect (lowercase).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect.data_types">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data_types</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect.data_types" title="Link to this definition">¶</a></dt>
+<dd><p>Set of data type names (subset of keywords, used for categorization).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect.functions">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">functions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect.functions" title="Link to this definition">¶</a></dt>
+<dd><p>Set of built-in function names (subset of keywords).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect.identifier_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">identifier_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect.identifier_chars" title="Link to this definition">¶</a></dt>
+<dd><p>Special characters allowed in identifiers.</p>
+<p>Examples:
+- SQL Server: ‘&#64;#$’ (for &#64;variables, #temp tables)
+- PostgreSQL: ‘$’ (for $1, $var)
+- MySQL: ‘’ (no special chars)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect.quote_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">quote_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect.quote_chars" title="Link to this definition">¶</a></dt>
+<dd><p>Quote characters for identifiers and strings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary with ‘identifier’ and ‘string’ keys.</p>
+</dd>
+</dl>
+<p>Examples:
+- SQL Server: {‘identifier’: ‘[’, ‘string’: “’”}
+- PostgreSQL: {‘identifier’: ‘”’, ‘string’: “’”}
+- MySQL: {‘identifier’: ‘`’, ‘string’: “’”}</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect.comment_styles">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">comment_styles</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect.comment_styles" title="Link to this definition">¶</a></dt>
+<dd><p>List of comment patterns supported by this dialect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of comment prefixes (e.g., [’–’, ‘#’, ‘/<a href="#id1"><span class="problematic" id="id2">*</span></a>’])</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect.is_keyword">
+<span class="sig-name descname"><span class="pre">is_keyword</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/dialects/base.html#SQLDialect.is_keyword"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect.is_keyword" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a token is a keyword in this dialect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token to check (case-insensitive)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the token is a keyword, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect.is_data_type">
+<span class="sig-name descname"><span class="pre">is_data_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/dialects/base.html#SQLDialect.is_data_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect.is_data_type" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a token is a data type in this dialect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token to check (case-insensitive)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the token is a data type, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect.is_function">
+<span class="sig-name descname"><span class="pre">is_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/dialects/base.html#SQLDialect.is_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect.is_function" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a token is a built-in function in this dialect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token to check (case-insensitive)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the token is a built-in function, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.dialects.base.SQLDialect.normalize_identifier">
+<span class="sig-name descname"><span class="pre">normalize_identifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/dialects/base.html#SQLDialect.normalize_identifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.base.SQLDialect.normalize_identifier" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize an identifier for this dialect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The identifier to normalize</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Normalized identifier (e.g., stripped quotes, case-adjusted)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="sql-server-dialect">
+<h2>SQL Server Dialect<a class="headerlink" href="#sql-server-dialect" title="Link to this heading">¶</a></h2>
+<p>Microsoft SQL Server (T-SQL) specific dialect.</p>
+<p id="module-sqltidy.dialects.sqlserver">SQL Server dialect implementation.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlserver.SQLServerDialect">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.sqlserver.</span></span><span class="sig-name descname"><span class="pre">SQLServerDialect</span></span><a class="reference internal" href="_modules/sqltidy/dialects/sqlserver.html#SQLServerDialect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.sqlserver.SQLServerDialect" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sqltidy.dialects.base.SQLDialect" title="sqltidy.dialects.base.SQLDialect"><code class="xref py py-class docutils literal notranslate"><span class="pre">SQLDialect</span></code></a></p>
+<p>Microsoft SQL Server / T-SQL dialect.</p>
+<p>Includes comprehensive T-SQL keyword support with 279 keywords covering:
+- DDL/DML operations
+- Query syntax
+- Data types
+- Functions
+- Control flow
+- Advanced features (window functions, temporal tables, etc.)</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlserver.SQLServerDialect.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.sqlserver.SQLServerDialect.name" title="Link to this definition">¶</a></dt>
+<dd><p>Unique identifier for this dialect (e.g., ‘sqlserver’, ‘postgresql’).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlserver.SQLServerDialect.keywords">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">keywords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.sqlserver.SQLServerDialect.keywords" title="Link to this definition">¶</a></dt>
+<dd><p>Comprehensive SQL Server keywords.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlserver.SQLServerDialect.data_types">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data_types</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.sqlserver.SQLServerDialect.data_types" title="Link to this definition">¶</a></dt>
+<dd><p>SQL Server data types.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlserver.SQLServerDialect.functions">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">functions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.sqlserver.SQLServerDialect.functions" title="Link to this definition">¶</a></dt>
+<dd><p>SQL Server built-in functions.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlserver.SQLServerDialect.identifier_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">identifier_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.sqlserver.SQLServerDialect.identifier_chars" title="Link to this definition">¶</a></dt>
+<dd><p>SQL Server allows &#64;, #, and $ in identifiers.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlserver.SQLServerDialect.quote_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">quote_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span><a class="headerlink" href="#sqltidy.dialects.sqlserver.SQLServerDialect.quote_chars" title="Link to this definition">¶</a></dt>
+<dd><p>SQL Server uses square brackets for identifiers, single quotes for strings.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlserver.SQLServerDialect.comment_styles">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">comment_styles</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><a class="headerlink" href="#sqltidy.dialects.sqlserver.SQLServerDialect.comment_styles" title="Link to this definition">¶</a></dt>
+<dd><p>SQL Server supports – and /* <a href="#id3"><span class="problematic" id="id4">*</span></a>/ comments.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="postgresql-dialect">
+<h2>PostgreSQL Dialect<a class="headerlink" href="#postgresql-dialect" title="Link to this heading">¶</a></h2>
+<p>PostgreSQL specific dialect.</p>
+<p id="module-sqltidy.dialects.postgresql">PostgreSQL dialect implementation.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sqltidy.dialects.postgresql.PostgreSQLDialect">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.postgresql.</span></span><span class="sig-name descname"><span class="pre">PostgreSQLDialect</span></span><a class="reference internal" href="_modules/sqltidy/dialects/postgresql.html#PostgreSQLDialect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.postgresql.PostgreSQLDialect" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sqltidy.dialects.base.SQLDialect" title="sqltidy.dialects.base.SQLDialect"><code class="xref py py-class docutils literal notranslate"><span class="pre">SQLDialect</span></code></a></p>
+<p>PostgreSQL dialect.</p>
+<p>Includes comprehensive PostgreSQL keyword support with 250+ keywords covering:
+- DDL/DML operations
+- Query syntax
+- Data types (including advanced types like JSON, ARRAY, HSTORE)
+- Functions (string, date, aggregate, window, etc.)
+- PostgreSQL-specific features (RETURNING, LISTEN/NOTIFY, etc.)</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.postgresql.PostgreSQLDialect.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.postgresql.PostgreSQLDialect.name" title="Link to this definition">¶</a></dt>
+<dd><p>Unique identifier for this dialect (e.g., ‘sqlserver’, ‘postgresql’).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.postgresql.PostgreSQLDialect.keywords">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">keywords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.postgresql.PostgreSQLDialect.keywords" title="Link to this definition">¶</a></dt>
+<dd><p>Comprehensive PostgreSQL keywords.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.postgresql.PostgreSQLDialect.data_types">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data_types</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.postgresql.PostgreSQLDialect.data_types" title="Link to this definition">¶</a></dt>
+<dd><p>PostgreSQL data types.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.postgresql.PostgreSQLDialect.functions">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">functions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.postgresql.PostgreSQLDialect.functions" title="Link to this definition">¶</a></dt>
+<dd><p>PostgreSQL built-in functions.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.postgresql.PostgreSQLDialect.identifier_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">identifier_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.postgresql.PostgreSQLDialect.identifier_chars" title="Link to this definition">¶</a></dt>
+<dd><p>PostgreSQL allows $ in identifiers.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.postgresql.PostgreSQLDialect.quote_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">quote_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span><a class="headerlink" href="#sqltidy.dialects.postgresql.PostgreSQLDialect.quote_chars" title="Link to this definition">¶</a></dt>
+<dd><p>PostgreSQL uses double quotes for identifiers, single quotes for strings.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.postgresql.PostgreSQLDialect.comment_styles">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">comment_styles</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><a class="headerlink" href="#sqltidy.dialects.postgresql.PostgreSQLDialect.comment_styles" title="Link to this definition">¶</a></dt>
+<dd><p>PostgreSQL supports – and /* <a href="#id5"><span class="problematic" id="id6">*</span></a>/ comments.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="mysql-dialect">
+<h2>MySQL Dialect<a class="headerlink" href="#mysql-dialect" title="Link to this heading">¶</a></h2>
+<p>MySQL specific dialect.</p>
+<p id="module-sqltidy.dialects.mysql">MySQL dialect implementation.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sqltidy.dialects.mysql.MySQLDialect">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.mysql.</span></span><span class="sig-name descname"><span class="pre">MySQLDialect</span></span><a class="reference internal" href="_modules/sqltidy/dialects/mysql.html#MySQLDialect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.mysql.MySQLDialect" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sqltidy.dialects.base.SQLDialect" title="sqltidy.dialects.base.SQLDialect"><code class="xref py py-class docutils literal notranslate"><span class="pre">SQLDialect</span></code></a></p>
+<p>MySQL / MariaDB dialect.</p>
+<p>Includes comprehensive MySQL keyword support with 280+ keywords covering:
+- DDL/DML operations
+- Query syntax
+- Data types (including MySQL-specific types)
+- Functions (string, date, aggregate, window, etc.)
+- MySQL-specific features (AUTO_INCREMENT, backticks, LIMIT syntax)</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.mysql.MySQLDialect.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.mysql.MySQLDialect.name" title="Link to this definition">¶</a></dt>
+<dd><p>Unique identifier for this dialect (e.g., ‘sqlserver’, ‘postgresql’).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.mysql.MySQLDialect.keywords">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">keywords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.mysql.MySQLDialect.keywords" title="Link to this definition">¶</a></dt>
+<dd><p>Comprehensive MySQL keywords.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.mysql.MySQLDialect.data_types">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data_types</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.mysql.MySQLDialect.data_types" title="Link to this definition">¶</a></dt>
+<dd><p>MySQL data types.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.mysql.MySQLDialect.functions">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">functions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.mysql.MySQLDialect.functions" title="Link to this definition">¶</a></dt>
+<dd><p>MySQL built-in functions.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.mysql.MySQLDialect.identifier_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">identifier_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.mysql.MySQLDialect.identifier_chars" title="Link to this definition">¶</a></dt>
+<dd><p>MySQL doesn’t allow special chars in unquoted identifiers.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.mysql.MySQLDialect.quote_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">quote_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span><a class="headerlink" href="#sqltidy.dialects.mysql.MySQLDialect.quote_chars" title="Link to this definition">¶</a></dt>
+<dd><p>MySQL uses backticks for identifiers, single quotes for strings.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.mysql.MySQLDialect.comment_styles">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">comment_styles</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><a class="headerlink" href="#sqltidy.dialects.mysql.MySQLDialect.comment_styles" title="Link to this definition">¶</a></dt>
+<dd><p>MySQL supports –, # and /* <a href="#id7"><span class="problematic" id="id8">*</span></a>/ comments.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="oracle-dialect">
+<h2>Oracle Dialect<a class="headerlink" href="#oracle-dialect" title="Link to this heading">¶</a></h2>
+<p>Oracle Database (PL/SQL) specific dialect.</p>
+<p id="module-sqltidy.dialects.oracle">Oracle Database / PL/SQL dialect support.</p>
+<p>This module provides Oracle-specific SQL dialect support including:
+- 400+ PL/SQL keywords
+- Oracle data types (NUMBER, VARCHAR2, CLOB, BLOB, etc.)
+- Oracle built-in functions
+- PL/SQL language features
+- Oracle-specific syntax (DUAL, CONNECT BY, ROWNUM, etc.)</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sqltidy.dialects.oracle.OracleDialect">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.oracle.</span></span><span class="sig-name descname"><span class="pre">OracleDialect</span></span><a class="reference internal" href="_modules/sqltidy/dialects/oracle.html#OracleDialect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.oracle.OracleDialect" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sqltidy.dialects.base.SQLDialect" title="sqltidy.dialects.base.SQLDialect"><code class="xref py py-class docutils literal notranslate"><span class="pre">SQLDialect</span></code></a></p>
+<p>Oracle Database / PL/SQL dialect.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.oracle.OracleDialect.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.oracle.OracleDialect.name" title="Link to this definition">¶</a></dt>
+<dd><p>Unique identifier for this dialect (e.g., ‘sqlserver’, ‘postgresql’).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.oracle.OracleDialect.keywords">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">keywords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.oracle.OracleDialect.keywords" title="Link to this definition">¶</a></dt>
+<dd><p>Oracle PL/SQL keywords.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.oracle.OracleDialect.data_types">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data_types</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.oracle.OracleDialect.data_types" title="Link to this definition">¶</a></dt>
+<dd><p>Oracle data types.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.oracle.OracleDialect.functions">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">functions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.oracle.OracleDialect.functions" title="Link to this definition">¶</a></dt>
+<dd><p>Oracle built-in functions.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.oracle.OracleDialect.identifier_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">identifier_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.oracle.OracleDialect.identifier_chars" title="Link to this definition">¶</a></dt>
+<dd><p>Oracle doesn’t use special identifier characters like $ or &#64;.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.oracle.OracleDialect.quote_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">quote_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.oracle.OracleDialect.quote_chars" title="Link to this definition">¶</a></dt>
+<dd><p>Oracle uses double quotes for identifiers.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.oracle.OracleDialect.comment_styles">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">comment_styles</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.oracle.OracleDialect.comment_styles" title="Link to this definition">¶</a></dt>
+<dd><p>Oracle supports – and /* <a href="#id9"><span class="problematic" id="id10">*</span></a>/ comments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.dialects.oracle.OracleDialect.normalize_identifier">
+<span class="sig-name descname"><span class="pre">normalize_identifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/dialects/oracle.html#OracleDialect.normalize_identifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.oracle.OracleDialect.normalize_identifier" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize an Oracle identifier.</p>
+<p>Oracle identifiers:
+- Unquoted identifiers are case-insensitive (converted to uppercase)
+- Quoted identifiers preserve case
+- Maximum 30 characters (128 in Oracle 12.2+)</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="sqlite-dialect">
+<h2>SQLite Dialect<a class="headerlink" href="#sqlite-dialect" title="Link to this heading">¶</a></h2>
+<p>SQLite specific dialect.</p>
+<p id="module-sqltidy.dialects.sqlite">SQLite dialect support.</p>
+<p>This module provides SQLite-specific SQL dialect support including:
+- SQLite keywords
+- SQLite data types (simplified type system)
+- SQLite built-in functions
+- SQLite-specific features (PRAGMA, AUTOINCREMENT, etc.)</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlite.SQLiteDialect">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.sqlite.</span></span><span class="sig-name descname"><span class="pre">SQLiteDialect</span></span><a class="reference internal" href="_modules/sqltidy/dialects/sqlite.html#SQLiteDialect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.sqlite.SQLiteDialect" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sqltidy.dialects.base.SQLDialect" title="sqltidy.dialects.base.SQLDialect"><code class="xref py py-class docutils literal notranslate"><span class="pre">SQLDialect</span></code></a></p>
+<p>SQLite database dialect.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlite.SQLiteDialect.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.sqlite.SQLiteDialect.name" title="Link to this definition">¶</a></dt>
+<dd><p>Unique identifier for this dialect (e.g., ‘sqlserver’, ‘postgresql’).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlite.SQLiteDialect.keywords">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">keywords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.sqlite.SQLiteDialect.keywords" title="Link to this definition">¶</a></dt>
+<dd><p>SQLite keywords.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlite.SQLiteDialect.data_types">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data_types</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.sqlite.SQLiteDialect.data_types" title="Link to this definition">¶</a></dt>
+<dd><p>SQLite data types.</p>
+<p>SQLite uses a dynamic type system with type affinities:
+- INTEGER
+- TEXT
+- REAL
+- BLOB
+- NUMERIC</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlite.SQLiteDialect.functions">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">functions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.sqlite.SQLiteDialect.functions" title="Link to this definition">¶</a></dt>
+<dd><p>SQLite built-in functions.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlite.SQLiteDialect.identifier_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">identifier_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.sqlite.SQLiteDialect.identifier_chars" title="Link to this definition">¶</a></dt>
+<dd><p>SQLite doesn’t use special identifier characters.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlite.SQLiteDialect.quote_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">quote_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.sqlite.SQLiteDialect.quote_chars" title="Link to this definition">¶</a></dt>
+<dd><p>SQLite quote characters for identifiers.</p>
+<p>SQLite supports multiple quoting styles:
+- Double quotes: “identifier”
+- Backticks: <cite>identifier</cite> (MySQL compatibility)
+- Square brackets: [identifier] (SQL Server compatibility)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlite.SQLiteDialect.comment_styles">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">comment_styles</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.sqlite.SQLiteDialect.comment_styles" title="Link to this definition">¶</a></dt>
+<dd><p>SQLite supports – and /* <a href="#id11"><span class="problematic" id="id12">*</span></a>/ comments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.dialects.sqlite.SQLiteDialect.normalize_identifier">
+<span class="sig-name descname"><span class="pre">normalize_identifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/dialects/sqlite.html#SQLiteDialect.normalize_identifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.sqlite.SQLiteDialect.normalize_identifier" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize a SQLite identifier.</p>
+<p>SQLite identifiers:
+- Case-insensitive by default (but preserved)
+- Can be quoted with “, <a href="#id13"><span class="problematic" id="id14">`</span></a>, or []
+- Maximum length is unlimited (but practical limits apply)</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="usage-example">
+<h2>Usage Example<a class="headerlink" href="#usage-example" title="Link to this heading">¶</a></h2>
+<p>Specify a dialect when formatting SQL:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_sql</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TidyConfig</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">TidyConfig</span><span class="p">(</span><span class="n">dialect</span><span class="o">=</span><span class="s1">&#39;postgresql&#39;</span><span class="p">)</span>
+<span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT * FROM users WHERE id = 1&quot;</span>
+<span class="n">formatted</span> <span class="o">=</span> <span class="n">format_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or use the dialect registry directly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.dialects</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_dialect</span><span class="p">,</span> <span class="n">list_dialects</span>
+
+<span class="c1"># Get available dialects</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">list_dialects</span><span class="p">())</span>
+
+<span class="c1"># Get a specific dialect</span>
+<span class="n">pg_dialect</span> <span class="o">=</span> <span class="n">get_dialect</span><span class="p">(</span><span class="s1">&#39;postgresql&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pg_dialect</span><span class="o">.</span><span class="n">keywords</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">SQLTidy</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Package Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dialect System</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#supported-dialects">Supported Dialects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dialect-registry">Dialect Registry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#base-dialect">Base Dialect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sql-server-dialect">SQL Server Dialect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#postgresql-dialect">PostgreSQL Dialect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mysql-dialect">MySQL Dialect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#oracle-dialect">Oracle Dialect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sqlite-dialect">SQLite Dialect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-example">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rules.html">Rules System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Creating Plugins</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="api.html" title="previous chapter">API Reference</a></li>
+      <li>Next: <a href="rules.html" title="next chapter">Rules System</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Jayden Rasband.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/dialects.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

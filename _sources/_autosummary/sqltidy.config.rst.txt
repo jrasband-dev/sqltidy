@@ -1,0 +1,13 @@
+sqltidy.config
+==============
+
+.. automodule:: sqltidy.config
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      RewriteConfig
+      TidyConfig
+   

@@ -1,0 +1,12 @@
+sqltidy.rules.tidy.oracle\_connect\_by
+======================================
+
+.. automodule:: sqltidy.rules.tidy.oracle_connect_by
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      OracleConnectByFormattingRule
+   

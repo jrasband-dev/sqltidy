@@ -32,7 +32,128 @@
             
   <h1>Source code for sqltidy.tokenizer</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.dialects</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_dialect</span><span class="p">,</span> <span class="n">SQLDialect</span>
+
+
+<div class="viewcode-block" id="TokenType">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.TokenType">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TokenType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Token types for SQL parsing&quot;&quot;&quot;</span>
+    <span class="n">KEYWORD</span> <span class="o">=</span> <span class="s2">&quot;keyword&quot;</span>
+    <span class="n">IDENTIFIER</span> <span class="o">=</span> <span class="s2">&quot;identifier&quot;</span>
+    <span class="n">STRING</span> <span class="o">=</span> <span class="s2">&quot;string&quot;</span>
+    <span class="n">NUMBER</span> <span class="o">=</span> <span class="s2">&quot;number&quot;</span>
+    <span class="n">OPERATOR</span> <span class="o">=</span> <span class="s2">&quot;operator&quot;</span>
+    <span class="n">PUNCTUATION</span> <span class="o">=</span> <span class="s2">&quot;punctuation&quot;</span>
+    <span class="n">COMMENT</span> <span class="o">=</span> <span class="s2">&quot;comment&quot;</span>
+    <span class="n">WHITESPACE</span> <span class="o">=</span> <span class="s2">&quot;whitespace&quot;</span>
+    <span class="n">NEWLINE</span> <span class="o">=</span> <span class="s2">&quot;newline&quot;</span>
+    <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Token">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.Token">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Token</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a SQL token with type information&quot;&quot;&quot;</span>
+    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">TokenType</span></div>
+
+
+
+<div class="viewcode-block" id="GroupType">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.GroupType">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GroupType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Types of token groups&quot;&quot;&quot;</span>
+    <span class="n">STATEMENT</span> <span class="o">=</span> <span class="s2">&quot;statement&quot;</span>           <span class="c1"># Complete SQL statement</span>
+    <span class="n">CLAUSE</span> <span class="o">=</span> <span class="s2">&quot;clause&quot;</span>                 <span class="c1"># SQL clause (SELECT, FROM, WHERE, etc.)</span>
+    <span class="n">PARENTHESIS</span> <span class="o">=</span> <span class="s2">&quot;parenthesis&quot;</span>       <span class="c1"># Content within parentheses</span>
+    <span class="n">FUNCTION</span> <span class="o">=</span> <span class="s2">&quot;function&quot;</span>             <span class="c1"># Function call with arguments</span>
+    <span class="n">EXPRESSION</span> <span class="o">=</span> <span class="s2">&quot;expression&quot;</span>         <span class="c1"># Expression or value list</span>
+    <span class="n">IDENTIFIER_LIST</span> <span class="o">=</span> <span class="s2">&quot;identifier_list&quot;</span>  <span class="c1"># Comma-separated identifiers</span>
+    <span class="n">CONDITION</span> <span class="o">=</span> <span class="s2">&quot;condition&quot;</span>           <span class="c1"># Boolean condition</span>
+    <span class="n">COMMENT_BLOCK</span> <span class="o">=</span> <span class="s2">&quot;comment_block&quot;</span>   <span class="c1"># Comment or block of comments</span></div>
+
+
+
+<div class="viewcode-block" id="TokenGroup">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.TokenGroup">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TokenGroup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a group of related tokens&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="TokenGroup.__init__">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.TokenGroup.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_type</span><span class="p">:</span> <span class="n">GroupType</span><span class="p">,</span> <span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Token</span><span class="p">,</span> <span class="s1">&#39;TokenGroup&#39;</span><span class="p">]],</span> 
+                 <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_type</span> <span class="o">=</span> <span class="n">group_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="n">tokens</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1"># Optional name (e.g., clause name like &quot;SELECT&quot;, &quot;FROM&quot;)</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">token_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">)</span>
+        <span class="n">name_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;TokenGroup </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">group_type</span><span class="o">.</span><span class="n">value</span><span class="si">}{</span><span class="n">name_str</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">token_count</span><span class="si">}</span><span class="s2"> tokens)&gt;&quot;</span>
+    
+<div class="viewcode-block" id="TokenGroup.get_text">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.TokenGroup.get_text">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the text representation of this group&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Token</span><span class="p">):</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">TokenGroup</span><span class="p">):</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get_text</span><span class="p">())</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="TokenGroup.flatten">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.TokenGroup.flatten">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Token</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flatten the group to get all tokens (recursive)&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Token</span><span class="p">):</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">TokenGroup</span><span class="p">):</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+    
+<div class="viewcode-block" id="TokenGroup.filter_type">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.TokenGroup.filter_type">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_type</span><span class="p">:</span> <span class="n">TokenType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Token</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all tokens of a specific type from this group&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">token_type</span><span class="p">]</span></div>
+
+    
+<div class="viewcode-block" id="TokenGroup.get_keywords">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.TokenGroup.get_keywords">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all keyword values from this group&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_type</span><span class="p">(</span><span class="n">TokenType</span><span class="o">.</span><span class="n">KEYWORD</span><span class="p">)]</span></div>
+
+    
+<div class="viewcode-block" id="TokenGroup.get_identifiers">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.TokenGroup.get_identifiers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_identifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all identifier values from this group&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_type</span><span class="p">(</span><span class="n">TokenType</span><span class="o">.</span><span class="n">IDENTIFIER</span><span class="p">)]</span></div>
+</div>
+
+    
+
+<span class="c1"># Backward compatibility: Keep SQL_SERVER_KEYWORDS for existing code</span>
+<span class="c1"># New code should use get_dialect(&#39;sqlserver&#39;).keywords instead</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_sql_server_keywords</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Lazy load SQL Server keywords from dialect&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">get_dialect</span><span class="p">(</span><span class="s1">&#39;sqlserver&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">keywords</span>
+
+<span class="n">SQL_SERVER_KEYWORDS</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Will be lazily initialized</span>
+
 
 <span class="n">TOKEN_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -48,7 +169,7 @@
 <span class="sd">    (&#39;[^&#39;]*&#39;)                       |  # single-quoted string</span>
 <span class="sd">    (&quot;[^&quot;]*&quot;)                       |  # double-quoted string</span>
 
-<span class="sd">    ([A-Za-z_][A-Za-z0-9_]*)        |  # identifiers/keywords</span>
+<span class="sd">    ([A-Za-z_@#][A-Za-z0-9_@#$]*)   |  # identifiers/keywords (including @var, #temp)</span>
 <span class="sd">    ([0-9]+(?:\.[0-9]+)?)           |  # numbers</span>
 
 <span class="sd">    (\S)                               # fallback: any other non-space</span>
@@ -57,9 +178,74 @@
 <span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">get_token_type</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dialect</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SQLDialect</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;sqlserver&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TokenType</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine the type of a token.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        token: The token string to classify</span>
+<span class="sd">        dialect: The SQL dialect to use (name or SQLDialect instance). Defaults to &#39;sqlserver&#39;.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        TokenType enum value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">UNKNOWN</span>
+    
+    <span class="c1"># Get dialect instance</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dialect</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">dialect_obj</span> <span class="o">=</span> <span class="n">get_dialect</span><span class="p">(</span><span class="n">dialect</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dialect_obj</span> <span class="o">=</span> <span class="n">dialect</span>
+    
+    <span class="c1"># Check for comments</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;--&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/*&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;*/&#39;</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">COMMENT</span>
+    
+    <span class="c1"># Check for whitespace</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">token</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">NEWLINE</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">WHITESPACE</span>
+    
+    <span class="c1"># Check for strings</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">))</span> <span class="ow">or</span> \
+       <span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">STRING</span>
+    
+    <span class="c1"># Check for numbers</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">NUMBER</span>
+    
+    <span class="c1"># Check for operators</span>
+    <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;!=&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">OPERATOR</span>
+    
+    <span class="c1"># Check for punctuation</span>
+    <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">PUNCTUATION</span>
+    
+    <span class="c1"># Check for keywords (case-insensitive, dialect-aware)</span>
+    <span class="k">if</span> <span class="n">dialect_obj</span><span class="o">.</span><span class="n">is_keyword</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">KEYWORD</span>
+    
+    <span class="c1"># Check for identifiers (including variables and temp tables)</span>
+    <span class="c1"># Use dialect-specific identifier chars</span>
+    <span class="n">id_chars</span> <span class="o">=</span> <span class="n">dialect_obj</span><span class="o">.</span><span class="n">identifier_chars</span>
+    <span class="k">if</span> <span class="n">id_chars</span><span class="p">:</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;^[A-Za-z_</span><span class="si">{</span><span class="n">id_chars</span><span class="si">}</span><span class="s1">][A-Za-z0-9_</span><span class="si">{</span><span class="n">id_chars</span><span class="si">}</span><span class="s1">]*$&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^[A-Za-z_][A-Za-z0-9_]*$&#39;</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">IDENTIFIER</span>
+    
+    <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">UNKNOWN</span>
+
+
 <div class="viewcode-block" id="tokenize">
 <a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.tokenize">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">tokenize</span><span class="p">(</span><span class="n">sql</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tokenize SQL string into a list of token strings (backward compatible)&quot;&quot;&quot;</span>
     <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">groups</span> <span class="ow">in</span> <span class="n">TOKEN_RE</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">sql</span><span class="p">):</span>
         <span class="c1"># Find the first non-empty capturing group</span>
@@ -77,6 +263,391 @@
             <span class="k">break</span>
 
     <span class="k">return</span> <span class="n">tokens</span></div>
+
+
+
+<div class="viewcode-block" id="tokenize_with_types">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.tokenize_with_types">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tokenize_with_types</span><span class="p">(</span><span class="n">sql</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dialect</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SQLDialect</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;sqlserver&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Token</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tokenize SQL string into a list of Token objects with type information.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        sql: The SQL string to tokenize</span>
+<span class="sd">        dialect: The SQL dialect to use (name or SQLDialect instance). Defaults to &#39;sqlserver&#39;.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List of Token objects with type information</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get dialect instance</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dialect</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">dialect_obj</span> <span class="o">=</span> <span class="n">get_dialect</span><span class="p">(</span><span class="n">dialect</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dialect_obj</span> <span class="o">=</span> <span class="n">dialect</span>
+    
+    <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">groups</span> <span class="ow">in</span> <span class="n">TOKEN_RE</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">sql</span><span class="p">):</span>
+        <span class="c1"># Find the first non-empty capturing group</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            
+            <span class="c1"># Normalize whitespace</span>
+            <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+                <span class="k">if</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">t</span><span class="p">:</span>
+                    <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">WHITESPACE</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">token_type</span> <span class="o">=</span> <span class="n">get_token_type</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dialect_obj</span><span class="p">)</span>
+                <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">token_type</span><span class="p">))</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">tokens</span></div>
+
+
+
+<div class="viewcode-block" id="get_token_type">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.get_token_type">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_token_type</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dialect</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SQLDialect</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;sqlserver&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TokenType</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine the type of a token.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        token: The token string to classify</span>
+<span class="sd">        dialect: The SQL dialect to use (name or SQLDialect instance). Defaults to &#39;sqlserver&#39;.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        TokenType enum value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">UNKNOWN</span>
+    
+    <span class="c1"># Get dialect instance</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dialect</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">dialect_obj</span> <span class="o">=</span> <span class="n">get_dialect</span><span class="p">(</span><span class="n">dialect</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dialect_obj</span> <span class="o">=</span> <span class="n">dialect</span>
+    
+    <span class="c1"># Check for comments</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;--&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/*&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;*/&#39;</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">COMMENT</span>
+    
+    <span class="c1"># Check for whitespace</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">token</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">NEWLINE</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">WHITESPACE</span>
+    
+    <span class="c1"># Check for strings</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">))</span> <span class="ow">or</span> \
+       <span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">STRING</span>
+    
+    <span class="c1"># Check for numbers</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">NUMBER</span>
+    
+    <span class="c1"># Check for operators</span>
+    <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;!=&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">OPERATOR</span>
+    
+    <span class="c1"># Check for punctuation</span>
+    <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">PUNCTUATION</span>
+    
+    <span class="c1"># Check for keywords (case-insensitive, dialect-aware)</span>
+    <span class="k">if</span> <span class="n">dialect_obj</span><span class="o">.</span><span class="n">is_keyword</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">KEYWORD</span>
+    
+    <span class="c1"># Check for identifiers (including variables and temp tables)</span>
+    <span class="c1"># Use dialect-specific identifier chars</span>
+    <span class="n">id_chars</span> <span class="o">=</span> <span class="n">dialect_obj</span><span class="o">.</span><span class="n">identifier_chars</span>
+    <span class="k">if</span> <span class="n">id_chars</span><span class="p">:</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;^[A-Za-z_</span><span class="si">{</span><span class="n">id_chars</span><span class="si">}</span><span class="s1">][A-Za-z0-9_</span><span class="si">{</span><span class="n">id_chars</span><span class="si">}</span><span class="s1">]*$&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^[A-Za-z_][A-Za-z0-9_]*$&#39;</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">IDENTIFIER</span>
+    
+    <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">UNKNOWN</span></div>
+
+
+
+<span class="c1"># ============================================================================</span>
+<span class="c1"># Token Grouping Functions</span>
+<span class="c1"># ============================================================================</span>
+
+<div class="viewcode-block" id="group_parentheses">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.group_parentheses">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">group_parentheses</span><span class="p">(</span><span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Token</span><span class="p">,</span> <span class="n">TokenGroup</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Token</span><span class="p">,</span> <span class="n">TokenGroup</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Group tokens within parentheses into TokenGroup objects.</span>
+<span class="sd">    This handles nested parentheses recursively.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        
+        <span class="c1"># Only process Token objects for parentheses</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">Token</span><span class="p">)</span> <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;(&#39;</span><span class="p">:</span>
+            <span class="c1"># Find matching closing parenthesis</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="ow">and</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tokens</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">Token</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">tokens</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;(&#39;</span><span class="p">:</span>
+                        <span class="n">depth</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">elif</span> <span class="n">tokens</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;)&#39;</span><span class="p">:</span>
+                        <span class="n">depth</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+            <span class="k">if</span> <span class="n">depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Found matching parenthesis</span>
+                <span class="n">inner_tokens</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Exclude the parentheses themselves</span>
+                
+                <span class="c1"># Recursively group inner tokens</span>
+                <span class="n">grouped_inner</span> <span class="o">=</span> <span class="n">group_parentheses</span><span class="p">(</span><span class="n">inner_tokens</span><span class="p">)</span>
+                
+                <span class="c1"># Check if this is a function call</span>
+                <span class="c1"># Look back to see if previous non-whitespace token is an identifier or keyword</span>
+                <span class="n">prev_token</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">Token</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TokenType</span><span class="o">.</span><span class="n">IDENTIFIER</span><span class="p">,</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">KEYWORD</span><span class="p">):</span>
+                            <span class="n">prev_token</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                            <span class="k">break</span>
+                        <span class="k">elif</span> <span class="n">result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TokenType</span><span class="o">.</span><span class="n">WHITESPACE</span><span class="p">,</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">):</span>
+                            <span class="k">break</span>
+                
+                <span class="c1"># SQL function keywords or identifiers followed by parentheses are functions</span>
+                <span class="k">if</span> <span class="n">prev_token</span> <span class="ow">and</span> <span class="p">(</span><span class="n">prev_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">IDENTIFIER</span> <span class="ow">or</span> <span class="n">prev_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">KEYWORD</span><span class="p">):</span>
+                    <span class="c1"># Check if it looks like a function (not a keyword like IF, WHILE, etc.)</span>
+                    <span class="c1"># Simple heuristic: if it&#39;s a common function keyword or an identifier</span>
+                    <span class="n">function_keywords</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;cast&#39;</span><span class="p">,</span> <span class="s1">&#39;convert&#39;</span><span class="p">,</span> <span class="s1">&#39;coalesce&#39;</span><span class="p">,</span> <span class="s1">&#39;nullif&#39;</span><span class="p">,</span> <span class="s1">&#39;isnull&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="s1">&#39;avg&#39;</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="s1">&#39;stdev&#39;</span><span class="p">,</span> <span class="s1">&#39;var&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;row_number&#39;</span><span class="p">,</span> <span class="s1">&#39;rank&#39;</span><span class="p">,</span> <span class="s1">&#39;dense_rank&#39;</span><span class="p">,</span> <span class="s1">&#39;ntile&#39;</span><span class="p">,</span> <span class="s1">&#39;lag&#39;</span><span class="p">,</span> <span class="s1">&#39;lead&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;first_value&#39;</span><span class="p">,</span> <span class="s1">&#39;last_value&#39;</span><span class="p">,</span> <span class="s1">&#39;string_agg&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;dateadd&#39;</span><span class="p">,</span> <span class="s1">&#39;datediff&#39;</span><span class="p">,</span> <span class="s1">&#39;getdate&#39;</span><span class="p">,</span> <span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="s1">&#39;month&#39;</span><span class="p">,</span> <span class="s1">&#39;day&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;upper&#39;</span><span class="p">,</span> <span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="s1">&#39;substring&#39;</span><span class="p">,</span> <span class="s1">&#39;replace&#39;</span><span class="p">,</span> <span class="s1">&#39;trim&#39;</span><span class="p">,</span> <span class="s1">&#39;len&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;abs&#39;</span><span class="p">,</span> <span class="s1">&#39;ceiling&#39;</span><span class="p">,</span> <span class="s1">&#39;floor&#39;</span><span class="p">,</span> <span class="s1">&#39;round&#39;</span><span class="p">,</span> <span class="s1">&#39;power&#39;</span><span class="p">,</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    
+                    <span class="n">is_function</span> <span class="o">=</span> <span class="p">(</span><span class="n">prev_token</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">function_keywords</span> <span class="ow">or</span> 
+                                  <span class="n">prev_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">IDENTIFIER</span><span class="p">)</span>
+                    
+                    <span class="k">if</span> <span class="n">is_function</span><span class="p">:</span>
+                        <span class="c1"># Function call - include function name</span>
+                        <span class="c1"># Remove the token from result</span>
+                        <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">if</span> <span class="n">r</span> <span class="o">!=</span> <span class="n">prev_token</span><span class="p">]</span>
+                        <span class="c1"># Remove whitespace between function and parenthesis</span>
+                        <span class="k">while</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">Token</span><span class="p">)</span> <span class="ow">and</span> \
+                              <span class="n">result</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TokenType</span><span class="o">.</span><span class="n">WHITESPACE</span><span class="p">,</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">):</span>
+                            <span class="n">result</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+                        
+                        <span class="n">group</span> <span class="o">=</span> <span class="n">TokenGroup</span><span class="p">(</span>
+                            <span class="n">GroupType</span><span class="o">.</span><span class="n">FUNCTION</span><span class="p">,</span>
+                            <span class="p">[</span><span class="n">prev_token</span><span class="p">]</span> <span class="o">+</span> <span class="n">grouped_inner</span><span class="p">,</span>
+                            <span class="n">name</span><span class="o">=</span><span class="n">prev_token</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">group</span> <span class="o">=</span> <span class="n">TokenGroup</span><span class="p">(</span><span class="n">GroupType</span><span class="o">.</span><span class="n">PARENTHESIS</span><span class="p">,</span> <span class="n">grouped_inner</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">group</span> <span class="o">=</span> <span class="n">TokenGroup</span><span class="p">(</span><span class="n">GroupType</span><span class="o">.</span><span class="n">PARENTHESIS</span><span class="p">,</span> <span class="n">grouped_inner</span><span class="p">)</span>
+                
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">j</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Unmatched parenthesis</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<div class="viewcode-block" id="group_by_statements">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.group_by_statements">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">group_by_statements</span><span class="p">(</span><span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Token</span><span class="p">,</span> <span class="n">TokenGroup</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">TokenGroup</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Group tokens into complete SQL statements (separated by semicolons).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_statement</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">:</span>
+        <span class="n">current_statement</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        
+        <span class="c1"># Check for statement terminator</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">Token</span><span class="p">)</span> <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;;&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">current_statement</span><span class="p">:</span>
+                <span class="n">statements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TokenGroup</span><span class="p">(</span><span class="n">GroupType</span><span class="o">.</span><span class="n">STATEMENT</span><span class="p">,</span> <span class="n">current_statement</span><span class="p">))</span>
+                <span class="n">current_statement</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1"># Add remaining tokens as a statement (even without semicolon)</span>
+    <span class="k">if</span> <span class="n">current_statement</span><span class="p">:</span>
+        <span class="c1"># Skip if only whitespace/newlines</span>
+        <span class="n">non_ws</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">current_statement</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Token</span><span class="p">)</span> <span class="ow">and</span> 
+                  <span class="n">t</span><span class="o">.</span><span class="n">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TokenType</span><span class="o">.</span><span class="n">WHITESPACE</span><span class="p">,</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">,</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">COMMENT</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">non_ws</span><span class="p">:</span>
+            <span class="n">statements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TokenGroup</span><span class="p">(</span><span class="n">GroupType</span><span class="o">.</span><span class="n">STATEMENT</span><span class="p">,</span> <span class="n">current_statement</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">statements</span></div>
+
+
+
+<div class="viewcode-block" id="group_by_clauses">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.group_by_clauses">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">group_by_clauses</span><span class="p">(</span><span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Token</span><span class="p">,</span> <span class="n">TokenGroup</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">TokenGroup</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Group tokens by SQL clauses (SELECT, FROM, WHERE, etc.).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Clause keywords that start a new clause</span>
+    <span class="n">clause_keywords</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;select&#39;</span><span class="p">,</span> <span class="s1">&#39;from&#39;</span><span class="p">,</span> <span class="s1">&#39;where&#39;</span><span class="p">,</span> <span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;having&#39;</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="s1">&#39;join&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;inner&#39;</span><span class="p">,</span> <span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;full&#39;</span><span class="p">,</span> <span class="s1">&#39;cross&#39;</span><span class="p">,</span> <span class="s1">&#39;on&#39;</span><span class="p">,</span> <span class="s1">&#39;with&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;insert&#39;</span><span class="p">,</span> <span class="s1">&#39;update&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="s1">&#39;alter&#39;</span><span class="p">,</span> <span class="s1">&#39;drop&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;union&#39;</span><span class="p">,</span> <span class="s1">&#39;intersect&#39;</span><span class="p">,</span> <span class="s1">&#39;except&#39;</span><span class="p">,</span> <span class="s1">&#39;into&#39;</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">,</span> <span class="s1">&#39;set&#39;</span>
+    <span class="p">}</span>
+    
+    <span class="n">clauses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_clause</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_clause_name</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">:</span>
+        <span class="c1"># Check if this token starts a new clause</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">Token</span><span class="p">)</span> <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">KEYWORD</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">clause_keywords</span><span class="p">:</span>
+                <span class="c1"># Save previous clause</span>
+                <span class="k">if</span> <span class="n">current_clause</span><span class="p">:</span>
+                    <span class="n">clauses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TokenGroup</span><span class="p">(</span>
+                        <span class="n">GroupType</span><span class="o">.</span><span class="n">CLAUSE</span><span class="p">,</span>
+                        <span class="n">current_clause</span><span class="p">,</span>
+                        <span class="n">name</span><span class="o">=</span><span class="n">current_clause_name</span>
+                    <span class="p">))</span>
+                
+                <span class="c1"># Start new clause</span>
+                <span class="n">current_clause</span> <span class="o">=</span> <span class="p">[</span><span class="n">token</span><span class="p">]</span>
+                <span class="n">current_clause_name</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="k">continue</span>
+        
+        <span class="c1"># Add to current clause</span>
+        <span class="n">current_clause</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+    
+    <span class="c1"># Add final clause</span>
+    <span class="k">if</span> <span class="n">current_clause</span><span class="p">:</span>
+        <span class="n">clauses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TokenGroup</span><span class="p">(</span>
+            <span class="n">GroupType</span><span class="o">.</span><span class="n">CLAUSE</span><span class="p">,</span>
+            <span class="n">current_clause</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">current_clause_name</span>
+        <span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">clauses</span></div>
+
+
+
+<div class="viewcode-block" id="group_tokens">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.group_tokens">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">group_tokens</span><span class="p">(</span><span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Token</span><span class="p">],</span> 
+                 <span class="n">group_parentheses_flag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">group_statements_flag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">group_clauses_flag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Token</span><span class="p">,</span> <span class="n">TokenGroup</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="n">TokenGroup</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Group tokens into logical structures.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        tokens: List of Token objects</span>
+<span class="sd">        group_parentheses_flag: Group tokens within parentheses</span>
+<span class="sd">        group_statements_flag: Group into complete statements (by semicolon)</span>
+<span class="sd">        group_clauses_flag: Group by SQL clauses (SELECT, FROM, WHERE, etc.)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List of tokens and/or TokenGroup objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>  <span class="c1"># Start with copy of tokens</span>
+    
+    <span class="c1"># Apply groupings in order</span>
+    <span class="k">if</span> <span class="n">group_parentheses_flag</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">group_parentheses</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">group_statements_flag</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">group_by_statements</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">group_clauses_flag</span><span class="p">:</span>
+        <span class="c1"># If we have statements, group clauses within each statement</span>
+        <span class="k">if</span> <span class="n">group_statements_flag</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">TokenGroup</span><span class="p">)</span> <span class="ow">and</span> 
+                                         <span class="n">r</span><span class="o">.</span><span class="n">group_type</span> <span class="o">==</span> <span class="n">GroupType</span><span class="o">.</span><span class="n">STATEMENT</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">):</span>
+            <span class="n">new_result</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">stmt</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">clauses</span> <span class="o">=</span> <span class="n">group_by_clauses</span><span class="p">(</span><span class="n">stmt</span><span class="o">.</span><span class="n">tokens</span><span class="p">)</span>
+                <span class="n">new_result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TokenGroup</span><span class="p">(</span><span class="n">GroupType</span><span class="o">.</span><span class="n">STATEMENT</span><span class="p">,</span> <span class="n">clauses</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">stmt</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">new_result</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">group_by_clauses</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<div class="viewcode-block" id="print_token_tree">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.print_token_tree">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">print_token_tree</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Token</span><span class="p">,</span> <span class="n">TokenGroup</span><span class="p">]],</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Print a hierarchical view of tokens and groups.</span>
+<span class="sd">    Useful for debugging and visualization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="s2">&quot;  &quot;</span> <span class="o">*</span> <span class="n">indent</span>
+    
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Token</span><span class="p">):</span>
+            <span class="n">type_str</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">value_str</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">20</span> <span class="k">else</span> <span class="nb">repr</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">value</span><span class="p">[:</span><span class="mi">20</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">Token(</span><span class="si">{</span><span class="n">type_str</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value_str</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">TokenGroup</span><span class="p">):</span>
+            <span class="n">name_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span> <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">TokenGroup(</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">group_type</span><span class="o">.</span><span class="n">value</span><span class="si">}{</span><span class="n">name_str</span><span class="si">}</span><span class="s2">):&quot;</span><span class="p">)</span>
+            <span class="n">print_token_tree</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span> <span class="n">indent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="is_keyword">
+<a class="viewcode-back" href="../../api.html#sqltidy.tokenizer.is_keyword">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_keyword</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dialect</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SQLDialect</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;sqlserver&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if a token is a keyword in the specified dialect (case-insensitive).</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        token: The token to check</span>
+<span class="sd">        dialect: The SQL dialect to use (name or SQLDialect instance). Defaults to &#39;sqlserver&#39;.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        True if the token is a keyword, False otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get dialect instance</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dialect</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">dialect_obj</span> <span class="o">=</span> <span class="n">get_dialect</span><span class="p">(</span><span class="n">dialect</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dialect_obj</span> <span class="o">=</span> <span class="n">dialect</span>
+    
+    <span class="k">return</span> <span class="n">dialect_obj</span><span class="o">.</span><span class="n">is_keyword</span><span class="p">(</span><span class="n">token</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Backward compatibility: Initialize SQL_SERVER_KEYWORDS on first access</span>
+<span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Module-level __getattr__ for lazy initialization of SQL_SERVER_KEYWORDS&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;SQL_SERVER_KEYWORDS&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">SQL_SERVER_KEYWORDS</span>
+        <span class="k">if</span> <span class="n">SQL_SERVER_KEYWORDS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">SQL_SERVER_KEYWORDS</span> <span class="o">=</span> <span class="n">_get_sql_server_keywords</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">SQL_SERVER_KEYWORDS</span>
+    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;module &#39;</span><span class="si">{</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; has no attribute &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 
 </pre></div>
 
@@ -108,8 +679,11 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Package Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dialects.html">Dialect System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rules.html">Rules System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plugins.html">Creating Plugins</a></li>
 </ul>
 

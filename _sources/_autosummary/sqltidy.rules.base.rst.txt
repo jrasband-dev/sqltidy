@@ -1,0 +1,13 @@
+sqltidy.rules.base
+==================
+
+.. automodule:: sqltidy.rules.base
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BaseRule
+      FormatterContext
+   

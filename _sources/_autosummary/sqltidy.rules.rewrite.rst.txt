@@ -1,0 +1,15 @@
+sqltidy.rules.rewrite
+=====================
+
+.. automodule:: sqltidy.rules.rewrite
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   alias_style_abc
+   alias_style_t_numeric
+   subquery_to_cte

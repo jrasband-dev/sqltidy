@@ -1,0 +1,21 @@
+﻿sqltidy
+=======
+
+.. automodule:: sqltidy
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   api
+   cli
+   config
+   core
+   dialects
+   generator
+   plugins
+   rules
+   tokenizer

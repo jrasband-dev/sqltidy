@@ -31,7 +31,8 @@
           <div class="body" role="main">
             
   <h1>Source code for sqltidy.api</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TidyConfig</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TidyConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.rules.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseRule</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLFormatter</span>
 
@@ -39,7 +40,7 @@
 <span class="n">_extra_plugins</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="register_plugin">
-<a class="viewcode-back" href="../../modules.html#sqltidy.api.register_plugin">[docs]</a>
+<a class="viewcode-back" href="../../api.html#sqltidy.register_plugin">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_plugin</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="n">BaseRule</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Register a plugin rule at runtime.</span>
@@ -53,7 +54,7 @@
 
 
 <div class="viewcode-block" id="clear_plugins">
-<a class="viewcode-back" href="../../modules.html#sqltidy.api.clear_plugins">[docs]</a>
+<a class="viewcode-back" href="../../api.html#sqltidy.clear_plugins">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">clear_plugins</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clear all runtime-registered plugin rules.</span>
@@ -62,14 +63,15 @@
 
 
 <div class="viewcode-block" id="format_sql">
-<a class="viewcode-back" href="../../modules.html#sqltidy.api.format_sql">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">format_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TidyConfig</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a class="viewcode-back" href="../../api.html#sqltidy.format_sql">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">format_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TidyConfig</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">custom_rules</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">BaseRule</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Format a SQL string using all registered rules, including runtime plugins.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        sql (str): The SQL string to format.</span>
 <span class="sd">        config (TidyConfig, optional): Formatter configuration.</span>
+<span class="sd">        custom_rules (List[BaseRule], optional): Additional custom rules to apply.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Formatted SQL string.</span>
@@ -78,6 +80,10 @@
 
     <span class="c1"># Inject runtime plugins into the formatter</span>
     <span class="n">formatter</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_extra_plugins</span><span class="p">)</span>
+    
+    <span class="c1"># Inject custom rules if provided</span>
+    <span class="k">if</span> <span class="n">custom_rules</span><span class="p">:</span>
+        <span class="n">formatter</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">custom_rules</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span></div>
 
@@ -111,8 +117,11 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Package Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dialects.html">Dialect System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rules.html">Rules System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plugins.html">Creating Plugins</a></li>
 </ul>
 

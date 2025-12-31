@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sqltidy.dialects.sqlite &#8212; SQLTidy 0.2.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=000c92bf"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for sqltidy.dialects.sqlite</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">SQLite dialect support.</span>
+
+<span class="sd">This module provides SQLite-specific SQL dialect support including:</span>
+<span class="sd">- SQLite keywords</span>
+<span class="sd">- SQLite data types (simplified type system)</span>
+<span class="sd">- SQLite built-in functions</span>
+<span class="sd">- SQLite-specific features (PRAGMA, AUTOINCREMENT, etc.)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLDialect</span>
+
+
+<div class="viewcode-block" id="SQLiteDialect">
+<a class="viewcode-back" href="../../../dialects.html#sqltidy.dialects.sqlite.SQLiteDialect">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SQLiteDialect</span><span class="p">(</span><span class="n">SQLDialect</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;SQLite database dialect.&quot;&quot;&quot;</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;sqlite&#39;</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;SQLite keywords.&quot;&quot;&quot;</span>
+        <span class="c1"># Convert all keywords to lowercase for case-insensitive matching</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">kw</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="p">{</span>
+            <span class="c1"># Core SQL keywords</span>
+            <span class="s1">&#39;SELECT&#39;</span><span class="p">,</span> <span class="s1">&#39;FROM&#39;</span><span class="p">,</span> <span class="s1">&#39;WHERE&#39;</span><span class="p">,</span> <span class="s1">&#39;INSERT&#39;</span><span class="p">,</span> <span class="s1">&#39;UPDATE&#39;</span><span class="p">,</span> <span class="s1">&#39;DELETE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CREATE&#39;</span><span class="p">,</span> <span class="s1">&#39;ALTER&#39;</span><span class="p">,</span> <span class="s1">&#39;DROP&#39;</span><span class="p">,</span> <span class="s1">&#39;TRUNCATE&#39;</span><span class="p">,</span> <span class="s1">&#39;RENAME&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TABLE&#39;</span><span class="p">,</span> <span class="s1">&#39;VIEW&#39;</span><span class="p">,</span> <span class="s1">&#39;INDEX&#39;</span><span class="p">,</span> <span class="s1">&#39;TRIGGER&#39;</span><span class="p">,</span> <span class="s1">&#39;VIRTUAL&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Join keywords</span>
+            <span class="s1">&#39;JOIN&#39;</span><span class="p">,</span> <span class="s1">&#39;INNER&#39;</span><span class="p">,</span> <span class="s1">&#39;LEFT&#39;</span><span class="p">,</span> <span class="s1">&#39;RIGHT&#39;</span><span class="p">,</span> <span class="s1">&#39;FULL&#39;</span><span class="p">,</span> <span class="s1">&#39;OUTER&#39;</span><span class="p">,</span> <span class="s1">&#39;CROSS&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NATURAL&#39;</span><span class="p">,</span> <span class="s1">&#39;ON&#39;</span><span class="p">,</span> <span class="s1">&#39;USING&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Set operations</span>
+            <span class="s1">&#39;UNION&#39;</span><span class="p">,</span> <span class="s1">&#39;INTERSECT&#39;</span><span class="p">,</span> <span class="s1">&#39;EXCEPT&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Clauses</span>
+            <span class="s1">&#39;DISTINCT&#39;</span><span class="p">,</span> <span class="s1">&#39;ALL&#39;</span><span class="p">,</span> <span class="s1">&#39;AS&#39;</span><span class="p">,</span> <span class="s1">&#39;INTO&#39;</span><span class="p">,</span> <span class="s1">&#39;VALUES&#39;</span><span class="p">,</span> <span class="s1">&#39;SET&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ORDER&#39;</span><span class="p">,</span> <span class="s1">&#39;BY&#39;</span><span class="p">,</span> <span class="s1">&#39;GROUP&#39;</span><span class="p">,</span> <span class="s1">&#39;HAVING&#39;</span><span class="p">,</span> <span class="s1">&#39;LIMIT&#39;</span><span class="p">,</span> <span class="s1">&#39;OFFSET&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ASC&#39;</span><span class="p">,</span> <span class="s1">&#39;DESC&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Conditional</span>
+            <span class="s1">&#39;CASE&#39;</span><span class="p">,</span> <span class="s1">&#39;WHEN&#39;</span><span class="p">,</span> <span class="s1">&#39;THEN&#39;</span><span class="p">,</span> <span class="s1">&#39;ELSE&#39;</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Logical operators</span>
+            <span class="s1">&#39;AND&#39;</span><span class="p">,</span> <span class="s1">&#39;OR&#39;</span><span class="p">,</span> <span class="s1">&#39;NOT&#39;</span><span class="p">,</span> <span class="s1">&#39;IN&#39;</span><span class="p">,</span> <span class="s1">&#39;EXISTS&#39;</span><span class="p">,</span> <span class="s1">&#39;BETWEEN&#39;</span><span class="p">,</span> <span class="s1">&#39;LIKE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;IS&#39;</span><span class="p">,</span> <span class="s1">&#39;NULL&#39;</span><span class="p">,</span> <span class="s1">&#39;GLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;MATCH&#39;</span><span class="p">,</span> <span class="s1">&#39;REGEXP&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Constraints</span>
+            <span class="s1">&#39;CONSTRAINT&#39;</span><span class="p">,</span> <span class="s1">&#39;PRIMARY&#39;</span><span class="p">,</span> <span class="s1">&#39;KEY&#39;</span><span class="p">,</span> <span class="s1">&#39;FOREIGN&#39;</span><span class="p">,</span> <span class="s1">&#39;REFERENCES&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;UNIQUE&#39;</span><span class="p">,</span> <span class="s1">&#39;CHECK&#39;</span><span class="p">,</span> <span class="s1">&#39;DEFAULT&#39;</span><span class="p">,</span> <span class="s1">&#39;NOT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;AUTOINCREMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;COLLATE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Data types (SQLite has dynamic typing, but these are type affinities)</span>
+            <span class="s1">&#39;INTEGER&#39;</span><span class="p">,</span> <span class="s1">&#39;INT&#39;</span><span class="p">,</span> <span class="s1">&#39;TINYINT&#39;</span><span class="p">,</span> <span class="s1">&#39;SMALLINT&#39;</span><span class="p">,</span> <span class="s1">&#39;MEDIUMINT&#39;</span><span class="p">,</span> <span class="s1">&#39;BIGINT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;UNSIGNED&#39;</span><span class="p">,</span> <span class="s1">&#39;BIG&#39;</span><span class="p">,</span> <span class="s1">&#39;INT2&#39;</span><span class="p">,</span> <span class="s1">&#39;INT8&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TEXT&#39;</span><span class="p">,</span> <span class="s1">&#39;CHARACTER&#39;</span><span class="p">,</span> <span class="s1">&#39;VARCHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;VARYING&#39;</span><span class="p">,</span> <span class="s1">&#39;NCHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;NATIVE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NVARCHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CLOB&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;REAL&#39;</span><span class="p">,</span> <span class="s1">&#39;DOUBLE&#39;</span><span class="p">,</span> <span class="s1">&#39;PRECISION&#39;</span><span class="p">,</span> <span class="s1">&#39;FLOAT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NUMERIC&#39;</span><span class="p">,</span> <span class="s1">&#39;DECIMAL&#39;</span><span class="p">,</span> <span class="s1">&#39;BOOLEAN&#39;</span><span class="p">,</span> <span class="s1">&#39;DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;DATETIME&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;BLOB&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Transaction control</span>
+            <span class="s1">&#39;BEGIN&#39;</span><span class="p">,</span> <span class="s1">&#39;COMMIT&#39;</span><span class="p">,</span> <span class="s1">&#39;ROLLBACK&#39;</span><span class="p">,</span> <span class="s1">&#39;SAVEPOINT&#39;</span><span class="p">,</span> <span class="s1">&#39;RELEASE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TRANSACTION&#39;</span><span class="p">,</span> <span class="s1">&#39;DEFERRED&#39;</span><span class="p">,</span> <span class="s1">&#39;IMMEDIATE&#39;</span><span class="p">,</span> <span class="s1">&#39;EXCLUSIVE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># SQLite-specific keywords</span>
+            <span class="s1">&#39;PRAGMA&#39;</span><span class="p">,</span> <span class="s1">&#39;DATABASE&#39;</span><span class="p">,</span> <span class="s1">&#39;SCHEMA&#39;</span><span class="p">,</span> <span class="s1">&#39;ATTACH&#39;</span><span class="p">,</span> <span class="s1">&#39;DETACH&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VACUUM&#39;</span><span class="p">,</span> <span class="s1">&#39;ANALYZE&#39;</span><span class="p">,</span> <span class="s1">&#39;REINDEX&#39;</span><span class="p">,</span> <span class="s1">&#39;EXPLAIN&#39;</span><span class="p">,</span> <span class="s1">&#39;QUERY&#39;</span><span class="p">,</span> <span class="s1">&#39;PLAN&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Table options</span>
+            <span class="s1">&#39;TEMPORARY&#39;</span><span class="p">,</span> <span class="s1">&#39;TEMP&#39;</span><span class="p">,</span> <span class="s1">&#39;IF&#39;</span><span class="p">,</span> <span class="s1">&#39;ELSE&#39;</span><span class="p">,</span> <span class="s1">&#39;ELSIF&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;WITHOUT&#39;</span><span class="p">,</span> <span class="s1">&#39;ROWID&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Column options</span>
+            <span class="s1">&#39;GENERATED&#39;</span><span class="p">,</span> <span class="s1">&#39;ALWAYS&#39;</span><span class="p">,</span> <span class="s1">&#39;STORED&#39;</span><span class="p">,</span> <span class="s1">&#39;VIRTUAL&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Conflict resolution</span>
+            <span class="s1">&#39;ON&#39;</span><span class="p">,</span> <span class="s1">&#39;CONFLICT&#39;</span><span class="p">,</span> <span class="s1">&#39;ROLLBACK&#39;</span><span class="p">,</span> <span class="s1">&#39;ABORT&#39;</span><span class="p">,</span> <span class="s1">&#39;FAIL&#39;</span><span class="p">,</span> <span class="s1">&#39;IGNORE&#39;</span><span class="p">,</span> <span class="s1">&#39;REPLACE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Window functions</span>
+            <span class="s1">&#39;OVER&#39;</span><span class="p">,</span> <span class="s1">&#39;PARTITION&#39;</span><span class="p">,</span> <span class="s1">&#39;ROWS&#39;</span><span class="p">,</span> <span class="s1">&#39;RANGE&#39;</span><span class="p">,</span> <span class="s1">&#39;UNBOUNDED&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;PRECEDING&#39;</span><span class="p">,</span> <span class="s1">&#39;FOLLOWING&#39;</span><span class="p">,</span> <span class="s1">&#39;CURRENT&#39;</span><span class="p">,</span> <span class="s1">&#39;ROW&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;GROUPS&#39;</span><span class="p">,</span> <span class="s1">&#39;EXCLUDE&#39;</span><span class="p">,</span> <span class="s1">&#39;TIES&#39;</span><span class="p">,</span> <span class="s1">&#39;OTHERS&#39;</span><span class="p">,</span> <span class="s1">&#39;NO&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># CTEs</span>
+            <span class="s1">&#39;WITH&#39;</span><span class="p">,</span> <span class="s1">&#39;RECURSIVE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Cast and type conversion</span>
+            <span class="s1">&#39;CAST&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPEOF&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Aggregate functions</span>
+            <span class="s1">&#39;COUNT&#39;</span><span class="p">,</span> <span class="s1">&#39;SUM&#39;</span><span class="p">,</span> <span class="s1">&#39;AVG&#39;</span><span class="p">,</span> <span class="s1">&#39;MIN&#39;</span><span class="p">,</span> <span class="s1">&#39;MAX&#39;</span><span class="p">,</span> <span class="s1">&#39;TOTAL&#39;</span><span class="p">,</span> <span class="s1">&#39;GROUP_CONCAT&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Filtering</span>
+            <span class="s1">&#39;FILTER&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Other keywords</span>
+            <span class="s1">&#39;INDEXED&#39;</span><span class="p">,</span> <span class="s1">&#39;BY&#39;</span><span class="p">,</span> <span class="s1">&#39;ESCAPE&#39;</span><span class="p">,</span> <span class="s1">&#39;ISNULL&#39;</span><span class="p">,</span> <span class="s1">&#39;NOTNULL&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;RAISE&#39;</span><span class="p">,</span> <span class="s1">&#39;EACH&#39;</span><span class="p">,</span> <span class="s1">&#39;FOR&#39;</span><span class="p">,</span> <span class="s1">&#39;INSTEAD&#39;</span><span class="p">,</span> <span class="s1">&#39;OF&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;BEFORE&#39;</span><span class="p">,</span> <span class="s1">&#39;AFTER&#39;</span><span class="p">,</span> <span class="s1">&#39;OLD&#39;</span><span class="p">,</span> <span class="s1">&#39;NEW&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;RETURNING&#39;</span><span class="p">,</span>
+        <span class="p">}}</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        SQLite data types.</span>
+<span class="sd">        </span>
+<span class="sd">        SQLite uses a dynamic type system with type affinities:</span>
+<span class="sd">        - INTEGER</span>
+<span class="sd">        - TEXT</span>
+<span class="sd">        - REAL</span>
+<span class="sd">        - BLOB</span>
+<span class="sd">        - NUMERIC</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Convert all data types to lowercase for case-insensitive matching</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">dt</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">dt</span> <span class="ow">in</span> <span class="p">{</span>
+            <span class="c1"># Primary type affinities</span>
+            <span class="s1">&#39;INTEGER&#39;</span><span class="p">,</span> <span class="s1">&#39;TEXT&#39;</span><span class="p">,</span> <span class="s1">&#39;REAL&#39;</span><span class="p">,</span> <span class="s1">&#39;BLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;NUMERIC&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Integer variants (all have INTEGER affinity)</span>
+            <span class="s1">&#39;INT&#39;</span><span class="p">,</span> <span class="s1">&#39;TINYINT&#39;</span><span class="p">,</span> <span class="s1">&#39;SMALLINT&#39;</span><span class="p">,</span> <span class="s1">&#39;MEDIUMINT&#39;</span><span class="p">,</span> <span class="s1">&#39;BIGINT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;UNSIGNED&#39;</span><span class="p">,</span> <span class="s1">&#39;INT2&#39;</span><span class="p">,</span> <span class="s1">&#39;INT8&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Text variants (all have TEXT affinity)</span>
+            <span class="s1">&#39;CHARACTER&#39;</span><span class="p">,</span> <span class="s1">&#39;VARCHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;VARYING&#39;</span><span class="p">,</span> <span class="s1">&#39;NCHAR&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NATIVE&#39;</span><span class="p">,</span> <span class="s1">&#39;NVARCHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CLOB&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Real variants (all have REAL affinity)</span>
+            <span class="s1">&#39;DOUBLE&#39;</span><span class="p">,</span> <span class="s1">&#39;FLOAT&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Numeric variants (all have NUMERIC affinity)</span>
+            <span class="s1">&#39;DECIMAL&#39;</span><span class="p">,</span> <span class="s1">&#39;BOOLEAN&#39;</span><span class="p">,</span> <span class="s1">&#39;DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;DATETIME&#39;</span><span class="p">,</span>
+        <span class="p">}}</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;SQLite built-in functions.&quot;&quot;&quot;</span>
+        <span class="c1"># Convert all functions to lowercase for case-insensitive matching</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">fn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="p">{</span>
+            <span class="c1"># Aggregate functions</span>
+            <span class="s1">&#39;COUNT&#39;</span><span class="p">,</span> <span class="s1">&#39;SUM&#39;</span><span class="p">,</span> <span class="s1">&#39;AVG&#39;</span><span class="p">,</span> <span class="s1">&#39;MIN&#39;</span><span class="p">,</span> <span class="s1">&#39;MAX&#39;</span><span class="p">,</span> <span class="s1">&#39;TOTAL&#39;</span><span class="p">,</span> <span class="s1">&#39;GROUP_CONCAT&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Core functions</span>
+            <span class="s1">&#39;ABS&#39;</span><span class="p">,</span> <span class="s1">&#39;CHANGES&#39;</span><span class="p">,</span> <span class="s1">&#39;CHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;COALESCE&#39;</span><span class="p">,</span> <span class="s1">&#39;GLOB&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;HEX&#39;</span><span class="p">,</span> <span class="s1">&#39;IFNULL&#39;</span><span class="p">,</span> <span class="s1">&#39;IIF&#39;</span><span class="p">,</span> <span class="s1">&#39;INSTR&#39;</span><span class="p">,</span> <span class="s1">&#39;LAST_INSERT_ROWID&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;LENGTH&#39;</span><span class="p">,</span> <span class="s1">&#39;LIKE&#39;</span><span class="p">,</span> <span class="s1">&#39;LIKELIHOOD&#39;</span><span class="p">,</span> <span class="s1">&#39;LIKELY&#39;</span><span class="p">,</span> <span class="s1">&#39;LOAD_EXTENSION&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;LOWER&#39;</span><span class="p">,</span> <span class="s1">&#39;LTRIM&#39;</span><span class="p">,</span> <span class="s1">&#39;NULLIF&#39;</span><span class="p">,</span> <span class="s1">&#39;PRINTF&#39;</span><span class="p">,</span> <span class="s1">&#39;QUOTE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;RANDOM&#39;</span><span class="p">,</span> <span class="s1">&#39;RANDOMBLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;REPLACE&#39;</span><span class="p">,</span> <span class="s1">&#39;ROUND&#39;</span><span class="p">,</span> <span class="s1">&#39;RTRIM&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;SIGN&#39;</span><span class="p">,</span> <span class="s1">&#39;SOUNDEX&#39;</span><span class="p">,</span> <span class="s1">&#39;SQLITE_COMPILEOPTION_GET&#39;</span><span class="p">,</span> <span class="s1">&#39;SQLITE_COMPILEOPTION_USED&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;SQLITE_OFFSET&#39;</span><span class="p">,</span> <span class="s1">&#39;SQLITE_SOURCE_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;SQLITE_VERSION&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;SUBSTR&#39;</span><span class="p">,</span> <span class="s1">&#39;SUBSTRING&#39;</span><span class="p">,</span> <span class="s1">&#39;TOTAL_CHANGES&#39;</span><span class="p">,</span> <span class="s1">&#39;TRIM&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPEOF&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;UNICODE&#39;</span><span class="p">,</span> <span class="s1">&#39;UNLIKELY&#39;</span><span class="p">,</span> <span class="s1">&#39;UPPER&#39;</span><span class="p">,</span> <span class="s1">&#39;ZEROBLOB&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Date/Time functions</span>
+            <span class="s1">&#39;DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="s1">&#39;DATETIME&#39;</span><span class="p">,</span> <span class="s1">&#39;JULIANDAY&#39;</span><span class="p">,</span> <span class="s1">&#39;STRFTIME&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;UNIXEPOCH&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Math functions (SQLite 3.35.0+)</span>
+            <span class="s1">&#39;ACOS&#39;</span><span class="p">,</span> <span class="s1">&#39;ACOSH&#39;</span><span class="p">,</span> <span class="s1">&#39;ASIN&#39;</span><span class="p">,</span> <span class="s1">&#39;ASINH&#39;</span><span class="p">,</span> <span class="s1">&#39;ATAN&#39;</span><span class="p">,</span> <span class="s1">&#39;ATAN2&#39;</span><span class="p">,</span> <span class="s1">&#39;ATANH&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CEIL&#39;</span><span class="p">,</span> <span class="s1">&#39;CEILING&#39;</span><span class="p">,</span> <span class="s1">&#39;COS&#39;</span><span class="p">,</span> <span class="s1">&#39;COSH&#39;</span><span class="p">,</span> <span class="s1">&#39;DEGREES&#39;</span><span class="p">,</span> <span class="s1">&#39;EXP&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;FLOOR&#39;</span><span class="p">,</span> <span class="s1">&#39;LN&#39;</span><span class="p">,</span> <span class="s1">&#39;LOG&#39;</span><span class="p">,</span> <span class="s1">&#39;LOG10&#39;</span><span class="p">,</span> <span class="s1">&#39;LOG2&#39;</span><span class="p">,</span> <span class="s1">&#39;MOD&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;PI&#39;</span><span class="p">,</span> <span class="s1">&#39;POW&#39;</span><span class="p">,</span> <span class="s1">&#39;POWER&#39;</span><span class="p">,</span> <span class="s1">&#39;RADIANS&#39;</span><span class="p">,</span> <span class="s1">&#39;SIN&#39;</span><span class="p">,</span> <span class="s1">&#39;SINH&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;SQRT&#39;</span><span class="p">,</span> <span class="s1">&#39;TAN&#39;</span><span class="p">,</span> <span class="s1">&#39;TANH&#39;</span><span class="p">,</span> <span class="s1">&#39;TRUNC&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Window functions</span>
+            <span class="s1">&#39;ROW_NUMBER&#39;</span><span class="p">,</span> <span class="s1">&#39;RANK&#39;</span><span class="p">,</span> <span class="s1">&#39;DENSE_RANK&#39;</span><span class="p">,</span> <span class="s1">&#39;PERCENT_RANK&#39;</span><span class="p">,</span> <span class="s1">&#39;CUME_DIST&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NTILE&#39;</span><span class="p">,</span> <span class="s1">&#39;LAG&#39;</span><span class="p">,</span> <span class="s1">&#39;LEAD&#39;</span><span class="p">,</span> <span class="s1">&#39;FIRST_VALUE&#39;</span><span class="p">,</span> <span class="s1">&#39;LAST_VALUE&#39;</span><span class="p">,</span> <span class="s1">&#39;NTH_VALUE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># JSON functions (SQLite 3.38.0+)</span>
+            <span class="s1">&#39;JSON&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_ARRAY&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_ARRAY_LENGTH&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_EXTRACT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;JSON_INSERT&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_OBJECT&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_PATCH&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_REMOVE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;JSON_REPLACE&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_SET&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_TYPE&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_VALID&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;JSON_QUOTE&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_GROUP_ARRAY&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_GROUP_OBJECT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;JSON_EACH&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_TREE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># String functions</span>
+            <span class="s1">&#39;CONCAT&#39;</span><span class="p">,</span> <span class="s1">&#39;CONCAT_WS&#39;</span><span class="p">,</span> <span class="s1">&#39;FORMAT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;LPAD&#39;</span><span class="p">,</span> <span class="s1">&#39;RPAD&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Other functions</span>
+            <span class="s1">&#39;CAST&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPEOF&#39;</span><span class="p">,</span>
+        <span class="p">}}</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">identifier_chars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;SQLite doesn&#39;t use special identifier characters.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">quote_chars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        SQLite quote characters for identifiers.</span>
+<span class="sd">        </span>
+<span class="sd">        SQLite supports multiple quoting styles:</span>
+<span class="sd">        - Double quotes: &quot;identifier&quot;</span>
+<span class="sd">        - Backticks: `identifier` (MySQL compatibility)</span>
+<span class="sd">        - Square brackets: [identifier] (SQL Server compatibility)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;&quot;&#39;</span><span class="p">:</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">,</span>   <span class="c1"># Standard SQL quoted identifiers</span>
+            <span class="s1">&#39;`&#39;</span><span class="p">:</span> <span class="s1">&#39;`&#39;</span><span class="p">,</span>   <span class="c1"># MySQL-style backticks</span>
+            <span class="s1">&#39;[&#39;</span><span class="p">:</span> <span class="s1">&#39;]&#39;</span><span class="p">,</span>   <span class="c1"># SQL Server-style brackets</span>
+        <span class="p">}</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">comment_styles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;SQLite supports -- and /* */ comments.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="s1">&#39;/*&#39;</span><span class="p">]</span>
+    
+<div class="viewcode-block" id="SQLiteDialect.normalize_identifier">
+<a class="viewcode-back" href="../../../dialects.html#sqltidy.dialects.sqlite.SQLiteDialect.normalize_identifier">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalize_identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalize a SQLite identifier.</span>
+<span class="sd">        </span>
+<span class="sd">        SQLite identifiers:</span>
+<span class="sd">        - Case-insensitive by default (but preserved)</span>
+<span class="sd">        - Can be quoted with &quot;, `, or []</span>
+<span class="sd">        - Maximum length is unlimited (but practical limits apply)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">identifier</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">identifier</span>
+        
+        <span class="c1"># Remove surrounding quotes if present</span>
+        <span class="k">if</span> <span class="n">identifier</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">identifier</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">identifier</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">identifier</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;`&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">identifier</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;`&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">identifier</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">identifier</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">identifier</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">identifier</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="c1"># Unquoted identifier - SQLite is case-insensitive but preserves case</span>
+        <span class="c1"># For comparison purposes, we&#39;ll uppercase it</span>
+        <span class="k">return</span> <span class="n">identifier</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">SQLTidy</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Package Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dialects.html">Dialect System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rules.html">Rules System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugins.html">Creating Plugins</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Jayden Rasband.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

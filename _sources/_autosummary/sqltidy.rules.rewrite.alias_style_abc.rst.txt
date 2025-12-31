@@ -1,0 +1,12 @@
+sqltidy.rules.rewrite.alias\_style\_abc
+=======================================
+
+.. automodule:: sqltidy.rules.rewrite.alias_style_abc
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AliasStyleABCRule
+   

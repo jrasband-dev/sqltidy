@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sqltidy.rules.rewrite.alias_style_abc &#8212; SQLTidy 0.2.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../../_static/documentation_options.js?v=000c92bf"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for sqltidy.rules.rewrite.alias_style_abc</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseRule</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_num_to_letters</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert 0-based index to A, B, ..., Z, AA, AB, ...&quot;&quot;&quot;</span>
+    <span class="n">letters</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># make it 1-based for easier modulo math</span>
+    <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">n</span><span class="p">,</span> <span class="n">rem</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">26</span><span class="p">)</span>
+        <span class="n">letters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">rem</span><span class="p">))</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">letters</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="AliasStyleABCRule">
+<a class="viewcode-back" href="../../../../rules.html#sqltidy.rules.rewrite.alias_style_abc.AliasStyleABCRule">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AliasStyleABCRule</span><span class="p">(</span><span class="n">BaseRule</span><span class="p">):</span>
+    <span class="n">rule_type</span> <span class="o">=</span> <span class="s2">&quot;rewrite&quot;</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="mi">8</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_cte_scopes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sql</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract CTE scopes and main query, return list of (scope_sql, start_pos, end_pos).&quot;&quot;&quot;</span>
+        <span class="n">scopes</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Check if there&#39;s a WITH clause</span>
+        <span class="n">with_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\bWITH\s+&#39;</span><span class="p">,</span> <span class="n">sql</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">with_match</span><span class="p">:</span>
+            <span class="c1"># No CTEs, entire SQL is one scope</span>
+            <span class="k">return</span> <span class="p">[(</span><span class="n">sql</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sql</span><span class="p">))]</span>
+        
+        <span class="c1"># Track position in the SQL</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">with_match</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+        <span class="n">cte_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(\w+)\s+AS\s*\(&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+        
+        <span class="k">while</span> <span class="n">pos</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sql</span><span class="p">):</span>
+            <span class="n">cte_match</span> <span class="o">=</span> <span class="n">cte_pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cte_match</span><span class="p">:</span>
+                <span class="c1"># No more CTEs, rest is main query</span>
+                <span class="k">if</span> <span class="n">pos</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sql</span><span class="p">):</span>
+                    <span class="n">main_query_start</span> <span class="o">=</span> <span class="n">pos</span>
+                    <span class="n">scopes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">sql</span><span class="p">[</span><span class="n">main_query_start</span><span class="p">:],</span> <span class="n">main_query_start</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sql</span><span class="p">)))</span>
+                <span class="k">break</span>
+            
+            <span class="c1"># Find matching closing parenthesis for this CTE</span>
+            <span class="n">paren_start</span> <span class="o">=</span> <span class="n">cte_match</span><span class="o">.</span><span class="n">end</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">paren_count</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">paren_start</span> <span class="o">+</span> <span class="mi">1</span>
+            
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span> <span class="ow">and</span> <span class="n">paren_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sql</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;(&#39;</span><span class="p">:</span>
+                    <span class="n">paren_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">sql</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;)&#39;</span><span class="p">:</span>
+                    <span class="n">paren_count</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+            <span class="c1"># CTE content is between the opening and closing parens</span>
+            <span class="n">cte_start_pos</span> <span class="o">=</span> <span class="n">cte_match</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+            <span class="n">cte_end_pos</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">cte_content</span> <span class="o">=</span> <span class="n">sql</span><span class="p">[</span><span class="n">cte_start_pos</span><span class="p">:</span><span class="n">cte_end_pos</span><span class="p">]</span>
+            <span class="n">scopes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cte_content</span><span class="p">,</span> <span class="n">cte_start_pos</span><span class="p">,</span> <span class="n">cte_end_pos</span><span class="p">))</span>
+            
+            <span class="c1"># Skip whitespace and check for comma (next CTE) or main query</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">while</span> <span class="n">pos</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sql</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+                <span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+            <span class="k">if</span> <span class="n">pos</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sql</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;,&#39;</span><span class="p">:</span>
+                <span class="c1"># There&#39;s another CTE, skip the comma</span>
+                <span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Main query starts here</span>
+                <span class="k">if</span> <span class="n">pos</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sql</span><span class="p">):</span>
+                    <span class="n">scopes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">sql</span><span class="p">[</span><span class="n">pos</span><span class="p">:],</span> <span class="n">pos</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sql</span><span class="p">)))</span>
+                <span class="k">break</span>
+        
+        <span class="k">return</span> <span class="n">scopes</span>
+
+<div class="viewcode-block" id="AliasStyleABCRule.apply">
+<a class="viewcode-back" href="../../../../rules.html#sqltidy.rules.rewrite.alias_style_abc.AliasStyleABCRule.apply">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;enable_alias_style_abc&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">tokens</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+        <span class="n">scopes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_cte_scopes</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
+        
+        <span class="c1"># Process each scope independently and rebuild SQL</span>
+        <span class="n">result_sql</span> <span class="o">=</span> <span class="n">sql</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="k">for</span> <span class="n">scope_sql</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">end_pos</span> <span class="ow">in</span> <span class="n">scopes</span><span class="p">:</span>
+            <span class="n">new_scope_sql</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_scope_text</span><span class="p">(</span><span class="n">scope_sql</span><span class="p">)</span>
+            
+            <span class="c1"># Replace this scope in the result</span>
+            <span class="n">actual_start</span> <span class="o">=</span> <span class="n">start_pos</span> <span class="o">+</span> <span class="n">offset</span>
+            <span class="n">actual_end</span> <span class="o">=</span> <span class="n">end_pos</span> <span class="o">+</span> <span class="n">offset</span>
+            <span class="n">result_sql</span> <span class="o">=</span> <span class="n">result_sql</span><span class="p">[:</span><span class="n">actual_start</span><span class="p">]</span> <span class="o">+</span> <span class="n">new_scope_sql</span> <span class="o">+</span> <span class="n">result_sql</span><span class="p">[</span><span class="n">actual_end</span><span class="p">:]</span>
+            
+            <span class="c1"># Update offset for subsequent replacements</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_scope_sql</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">scope_sql</span><span class="p">)</span>
+        
+        <span class="kn">from</span><span class="w"> </span><span class="nn">...tokenizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">tokenize</span>
+        <span class="k">return</span> <span class="n">tokenize</span><span class="p">(</span><span class="n">result_sql</span><span class="p">)</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_to_scope_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sql</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply alias transformation to a single scope of SQL text.&quot;&quot;&quot;</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\b(FROM|JOIN)\s+([A-Za-z_][\w\.]*)(?:\s+AS)?\s+([A-Za-z_][\w]*)?&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+
+        <span class="n">mappings</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_replacer</span><span class="p">(</span><span class="n">match</span><span class="p">):</span>
+            <span class="k">nonlocal</span> <span class="n">counter</span>
+            <span class="n">kw</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">alias</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">base</span> <span class="o">=</span> <span class="n">alias</span> <span class="ow">or</span> <span class="n">table</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">base</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mappings</span><span class="p">:</span>
+                <span class="n">mappings</span><span class="p">[</span><span class="n">base</span><span class="p">]</span> <span class="o">=</span> <span class="n">_num_to_letters</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span>
+                <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">new_alias</span> <span class="o">=</span> <span class="n">mappings</span><span class="p">[</span><span class="n">base</span><span class="p">]</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">kw</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s2"> AS </span><span class="si">{</span><span class="n">new_alias</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">new_sql</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">_replacer</span><span class="p">,</span> <span class="n">sql</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mappings</span><span class="p">:</span>
+            <span class="n">ref_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\b(&quot;</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mappings</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;)\b(?=\.)&quot;</span><span class="p">)</span>
+            <span class="n">new_sql</span> <span class="o">=</span> <span class="n">ref_pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">mappings</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)],</span> <span class="n">new_sql</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_sql</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">SQLTidy</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../overview.html">Package Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dialects.html">Dialect System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../rules.html">Rules System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">Modules Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../plugins.html">Creating Plugins</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Jayden Rasband.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

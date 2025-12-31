@@ -1,0 +1,12 @@
+sqltidy.rules.rewrite.subquery\_to\_cte
+=======================================
+
+.. automodule:: sqltidy.rules.rewrite.subquery_to_cte
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SubqueryToCTERule
+   

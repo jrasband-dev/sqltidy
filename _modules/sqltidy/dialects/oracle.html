@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sqltidy.dialects.oracle &#8212; SQLTidy 0.2.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=000c92bf"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for sqltidy.dialects.oracle</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Oracle Database / PL/SQL dialect support.</span>
+
+<span class="sd">This module provides Oracle-specific SQL dialect support including:</span>
+<span class="sd">- 400+ PL/SQL keywords</span>
+<span class="sd">- Oracle data types (NUMBER, VARCHAR2, CLOB, BLOB, etc.)</span>
+<span class="sd">- Oracle built-in functions</span>
+<span class="sd">- PL/SQL language features</span>
+<span class="sd">- Oracle-specific syntax (DUAL, CONNECT BY, ROWNUM, etc.)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLDialect</span>
+
+
+<div class="viewcode-block" id="OracleDialect">
+<a class="viewcode-back" href="../../../dialects.html#sqltidy.dialects.oracle.OracleDialect">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">OracleDialect</span><span class="p">(</span><span class="n">SQLDialect</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Oracle Database / PL/SQL dialect.&quot;&quot;&quot;</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;oracle&#39;</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Oracle PL/SQL keywords.&quot;&quot;&quot;</span>
+        <span class="c1"># Convert all keywords to lowercase for case-insensitive matching</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">kw</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="p">{</span>
+            <span class="c1"># Core SQL keywords</span>
+            <span class="s1">&#39;SELECT&#39;</span><span class="p">,</span> <span class="s1">&#39;FROM&#39;</span><span class="p">,</span> <span class="s1">&#39;WHERE&#39;</span><span class="p">,</span> <span class="s1">&#39;INSERT&#39;</span><span class="p">,</span> <span class="s1">&#39;UPDATE&#39;</span><span class="p">,</span> <span class="s1">&#39;DELETE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CREATE&#39;</span><span class="p">,</span> <span class="s1">&#39;ALTER&#39;</span><span class="p">,</span> <span class="s1">&#39;DROP&#39;</span><span class="p">,</span> <span class="s1">&#39;TRUNCATE&#39;</span><span class="p">,</span> <span class="s1">&#39;RENAME&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TABLE&#39;</span><span class="p">,</span> <span class="s1">&#39;VIEW&#39;</span><span class="p">,</span> <span class="s1">&#39;INDEX&#39;</span><span class="p">,</span> <span class="s1">&#39;SEQUENCE&#39;</span><span class="p">,</span> <span class="s1">&#39;TRIGGER&#39;</span><span class="p">,</span> <span class="s1">&#39;PROCEDURE&#39;</span><span class="p">,</span> <span class="s1">&#39;FUNCTION&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;PACKAGE&#39;</span><span class="p">,</span> <span class="s1">&#39;BODY&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">,</span> <span class="s1">&#39;SYNONYM&#39;</span><span class="p">,</span> <span class="s1">&#39;DATABASE&#39;</span><span class="p">,</span> <span class="s1">&#39;SCHEMA&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TABLESPACE&#39;</span><span class="p">,</span> <span class="s1">&#39;USER&#39;</span><span class="p">,</span> <span class="s1">&#39;ROLE&#39;</span><span class="p">,</span> <span class="s1">&#39;PROFILE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Join keywords</span>
+            <span class="s1">&#39;JOIN&#39;</span><span class="p">,</span> <span class="s1">&#39;INNER&#39;</span><span class="p">,</span> <span class="s1">&#39;LEFT&#39;</span><span class="p">,</span> <span class="s1">&#39;RIGHT&#39;</span><span class="p">,</span> <span class="s1">&#39;FULL&#39;</span><span class="p">,</span> <span class="s1">&#39;OUTER&#39;</span><span class="p">,</span> <span class="s1">&#39;CROSS&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NATURAL&#39;</span><span class="p">,</span> <span class="s1">&#39;ON&#39;</span><span class="p">,</span> <span class="s1">&#39;USING&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Set operations</span>
+            <span class="s1">&#39;UNION&#39;</span><span class="p">,</span> <span class="s1">&#39;INTERSECT&#39;</span><span class="p">,</span> <span class="s1">&#39;MINUS&#39;</span><span class="p">,</span> <span class="s1">&#39;EXCEPT&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Clauses</span>
+            <span class="s1">&#39;DISTINCT&#39;</span><span class="p">,</span> <span class="s1">&#39;ALL&#39;</span><span class="p">,</span> <span class="s1">&#39;AS&#39;</span><span class="p">,</span> <span class="s1">&#39;INTO&#39;</span><span class="p">,</span> <span class="s1">&#39;VALUES&#39;</span><span class="p">,</span> <span class="s1">&#39;SET&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ORDER&#39;</span><span class="p">,</span> <span class="s1">&#39;BY&#39;</span><span class="p">,</span> <span class="s1">&#39;GROUP&#39;</span><span class="p">,</span> <span class="s1">&#39;HAVING&#39;</span><span class="p">,</span> <span class="s1">&#39;LIMIT&#39;</span><span class="p">,</span> <span class="s1">&#39;OFFSET&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ASC&#39;</span><span class="p">,</span> <span class="s1">&#39;DESC&#39;</span><span class="p">,</span> <span class="s1">&#39;NULLS&#39;</span><span class="p">,</span> <span class="s1">&#39;FIRST&#39;</span><span class="p">,</span> <span class="s1">&#39;LAST&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Conditional</span>
+            <span class="s1">&#39;CASE&#39;</span><span class="p">,</span> <span class="s1">&#39;WHEN&#39;</span><span class="p">,</span> <span class="s1">&#39;THEN&#39;</span><span class="p">,</span> <span class="s1">&#39;ELSE&#39;</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;IF&#39;</span><span class="p">,</span> <span class="s1">&#39;ELSIF&#39;</span><span class="p">,</span> <span class="s1">&#39;ELSEIF&#39;</span><span class="p">,</span> <span class="s1">&#39;ENDIF&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Logical operators</span>
+            <span class="s1">&#39;AND&#39;</span><span class="p">,</span> <span class="s1">&#39;OR&#39;</span><span class="p">,</span> <span class="s1">&#39;NOT&#39;</span><span class="p">,</span> <span class="s1">&#39;IN&#39;</span><span class="p">,</span> <span class="s1">&#39;EXISTS&#39;</span><span class="p">,</span> <span class="s1">&#39;BETWEEN&#39;</span><span class="p">,</span> <span class="s1">&#39;LIKE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;IS&#39;</span><span class="p">,</span> <span class="s1">&#39;NULL&#39;</span><span class="p">,</span> <span class="s1">&#39;ANY&#39;</span><span class="p">,</span> <span class="s1">&#39;SOME&#39;</span><span class="p">,</span> <span class="s1">&#39;ALL&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Constraints</span>
+            <span class="s1">&#39;CONSTRAINT&#39;</span><span class="p">,</span> <span class="s1">&#39;PRIMARY&#39;</span><span class="p">,</span> <span class="s1">&#39;KEY&#39;</span><span class="p">,</span> <span class="s1">&#39;FOREIGN&#39;</span><span class="p">,</span> <span class="s1">&#39;REFERENCES&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;UNIQUE&#39;</span><span class="p">,</span> <span class="s1">&#39;CHECK&#39;</span><span class="p">,</span> <span class="s1">&#39;DEFAULT&#39;</span><span class="p">,</span> <span class="s1">&#39;NOT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;DEFERRABLE&#39;</span><span class="p">,</span> <span class="s1">&#39;INITIALLY&#39;</span><span class="p">,</span> <span class="s1">&#39;DEFERRED&#39;</span><span class="p">,</span> <span class="s1">&#39;IMMEDIATE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Oracle-specific hierarchical queries</span>
+            <span class="s1">&#39;CONNECT&#39;</span><span class="p">,</span> <span class="s1">&#39;START&#39;</span><span class="p">,</span> <span class="s1">&#39;WITH&#39;</span><span class="p">,</span> <span class="s1">&#39;PRIOR&#39;</span><span class="p">,</span> <span class="s1">&#39;LEVEL&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NOCYCLE&#39;</span><span class="p">,</span> <span class="s1">&#39;SYS_CONNECT_BY_PATH&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Oracle-specific keywords</span>
+            <span class="s1">&#39;DUAL&#39;</span><span class="p">,</span> <span class="s1">&#39;ROWNUM&#39;</span><span class="p">,</span> <span class="s1">&#39;ROWID&#39;</span><span class="p">,</span> <span class="s1">&#39;UROWID&#39;</span><span class="p">,</span> <span class="s1">&#39;NEXTVAL&#39;</span><span class="p">,</span> <span class="s1">&#39;CURRVAL&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;SYSDATE&#39;</span><span class="p">,</span> <span class="s1">&#39;SYSTIMESTAMP&#39;</span><span class="p">,</span> <span class="s1">&#39;CURRENT_DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;CURRENT_TIMESTAMP&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># PL/SQL block structure</span>
+            <span class="s1">&#39;DECLARE&#39;</span><span class="p">,</span> <span class="s1">&#39;BEGIN&#39;</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">,</span> <span class="s1">&#39;EXCEPTION&#39;</span><span class="p">,</span> <span class="s1">&#39;RAISE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;PRAGMA&#39;</span><span class="p">,</span> <span class="s1">&#39;AUTONOMOUS_TRANSACTION&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># PL/SQL control flow</span>
+            <span class="s1">&#39;LOOP&#39;</span><span class="p">,</span> <span class="s1">&#39;WHILE&#39;</span><span class="p">,</span> <span class="s1">&#39;FOR&#39;</span><span class="p">,</span> <span class="s1">&#39;EXIT&#39;</span><span class="p">,</span> <span class="s1">&#39;CONTINUE&#39;</span><span class="p">,</span> <span class="s1">&#39;GOTO&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;RETURN&#39;</span><span class="p">,</span> <span class="s1">&#39;EXECUTE&#39;</span><span class="p">,</span> <span class="s1">&#39;IMMEDIATE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># PL/SQL cursors</span>
+            <span class="s1">&#39;CURSOR&#39;</span><span class="p">,</span> <span class="s1">&#39;OPEN&#39;</span><span class="p">,</span> <span class="s1">&#39;FETCH&#39;</span><span class="p">,</span> <span class="s1">&#39;CLOSE&#39;</span><span class="p">,</span> <span class="s1">&#39;BULK&#39;</span><span class="p">,</span> <span class="s1">&#39;COLLECT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;FORALL&#39;</span><span class="p">,</span> <span class="s1">&#39;SAVE&#39;</span><span class="p">,</span> <span class="s1">&#39;EXCEPTIONS&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Data types</span>
+            <span class="s1">&#39;VARCHAR2&#39;</span><span class="p">,</span> <span class="s1">&#39;NVARCHAR2&#39;</span><span class="p">,</span> <span class="s1">&#39;CHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;NCHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;NUMBER&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;INTEGER&#39;</span><span class="p">,</span> <span class="s1">&#39;INT&#39;</span><span class="p">,</span> <span class="s1">&#39;SMALLINT&#39;</span><span class="p">,</span> <span class="s1">&#39;FLOAT&#39;</span><span class="p">,</span> <span class="s1">&#39;REAL&#39;</span><span class="p">,</span> <span class="s1">&#39;DOUBLE&#39;</span><span class="p">,</span> <span class="s1">&#39;PRECISION&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;TIMESTAMP&#39;</span><span class="p">,</span> <span class="s1">&#39;INTERVAL&#39;</span><span class="p">,</span> <span class="s1">&#39;DAY&#39;</span><span class="p">,</span> <span class="s1">&#39;MONTH&#39;</span><span class="p">,</span> <span class="s1">&#39;YEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;TO&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;NCLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;BLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;BFILE&#39;</span><span class="p">,</span> <span class="s1">&#39;RAW&#39;</span><span class="p">,</span> <span class="s1">&#39;LONG&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;BINARY_FLOAT&#39;</span><span class="p">,</span> <span class="s1">&#39;BINARY_DOUBLE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;BOOLEAN&#39;</span><span class="p">,</span> <span class="s1">&#39;PLS_INTEGER&#39;</span><span class="p">,</span> <span class="s1">&#39;BINARY_INTEGER&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ROWTYPE&#39;</span><span class="p">,</span> <span class="s1">&#39;RECORD&#39;</span><span class="p">,</span> <span class="s1">&#39;REF&#39;</span><span class="p">,</span> <span class="s1">&#39;VARRAY&#39;</span><span class="p">,</span> <span class="s1">&#39;NESTED&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Table/Index options</span>
+            <span class="s1">&#39;COMPRESS&#39;</span><span class="p">,</span> <span class="s1">&#39;NOCOMPRESS&#39;</span><span class="p">,</span> <span class="s1">&#39;LOGGING&#39;</span><span class="p">,</span> <span class="s1">&#39;NOLOGGING&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CACHE&#39;</span><span class="p">,</span> <span class="s1">&#39;NOCACHE&#39;</span><span class="p">,</span> <span class="s1">&#39;PARALLEL&#39;</span><span class="p">,</span> <span class="s1">&#39;NOPARALLEL&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;PCTFREE&#39;</span><span class="p">,</span> <span class="s1">&#39;PCTUSED&#39;</span><span class="p">,</span> <span class="s1">&#39;INITRANS&#39;</span><span class="p">,</span> <span class="s1">&#39;MAXTRANS&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;STORAGE&#39;</span><span class="p">,</span> <span class="s1">&#39;INITIAL&#39;</span><span class="p">,</span> <span class="s1">&#39;NEXT&#39;</span><span class="p">,</span> <span class="s1">&#39;MINEXTENTS&#39;</span><span class="p">,</span> <span class="s1">&#39;MAXEXTENTS&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Partitioning</span>
+            <span class="s1">&#39;PARTITION&#39;</span><span class="p">,</span> <span class="s1">&#39;SUBPARTITION&#39;</span><span class="p">,</span> <span class="s1">&#39;RANGE&#39;</span><span class="p">,</span> <span class="s1">&#39;LIST&#39;</span><span class="p">,</span> <span class="s1">&#39;HASH&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;PARTITIONS&#39;</span><span class="p">,</span> <span class="s1">&#39;SUBPARTITIONS&#39;</span><span class="p">,</span> <span class="s1">&#39;STORE&#39;</span><span class="p">,</span> <span class="s1">&#39;OVERFLOW&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Privileges</span>
+            <span class="s1">&#39;GRANT&#39;</span><span class="p">,</span> <span class="s1">&#39;REVOKE&#39;</span><span class="p">,</span> <span class="s1">&#39;PRIVILEGES&#39;</span><span class="p">,</span> <span class="s1">&#39;ADMIN&#39;</span><span class="p">,</span> <span class="s1">&#39;OPTION&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CASCADE&#39;</span><span class="p">,</span> <span class="s1">&#39;RESTRICT&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Transaction control</span>
+            <span class="s1">&#39;COMMIT&#39;</span><span class="p">,</span> <span class="s1">&#39;ROLLBACK&#39;</span><span class="p">,</span> <span class="s1">&#39;SAVEPOINT&#39;</span><span class="p">,</span> <span class="s1">&#39;WORK&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;READ&#39;</span><span class="p">,</span> <span class="s1">&#39;WRITE&#39;</span><span class="p">,</span> <span class="s1">&#39;ONLY&#39;</span><span class="p">,</span> <span class="s1">&#39;SERIALIZABLE&#39;</span><span class="p">,</span> <span class="s1">&#39;ISOLATION&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Lock</span>
+            <span class="s1">&#39;LOCK&#39;</span><span class="p">,</span> <span class="s1">&#39;SHARE&#39;</span><span class="p">,</span> <span class="s1">&#39;EXCLUSIVE&#39;</span><span class="p">,</span> <span class="s1">&#39;MODE&#39;</span><span class="p">,</span> <span class="s1">&#39;NOWAIT&#39;</span><span class="p">,</span> <span class="s1">&#39;WAIT&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Analytics/Window functions</span>
+            <span class="s1">&#39;OVER&#39;</span><span class="p">,</span> <span class="s1">&#39;PARTITION&#39;</span><span class="p">,</span> <span class="s1">&#39;ROWS&#39;</span><span class="p">,</span> <span class="s1">&#39;RANGE&#39;</span><span class="p">,</span> <span class="s1">&#39;UNBOUNDED&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;PRECEDING&#39;</span><span class="p">,</span> <span class="s1">&#39;FOLLOWING&#39;</span><span class="p">,</span> <span class="s1">&#39;CURRENT&#39;</span><span class="p">,</span> <span class="s1">&#39;ROW&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;RANK&#39;</span><span class="p">,</span> <span class="s1">&#39;DENSE_RANK&#39;</span><span class="p">,</span> <span class="s1">&#39;ROW_NUMBER&#39;</span><span class="p">,</span> <span class="s1">&#39;NTILE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;LEAD&#39;</span><span class="p">,</span> <span class="s1">&#39;LAG&#39;</span><span class="p">,</span> <span class="s1">&#39;FIRST_VALUE&#39;</span><span class="p">,</span> <span class="s1">&#39;LAST_VALUE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;LISTAGG&#39;</span><span class="p">,</span> <span class="s1">&#39;WITHIN&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Aggregate functions</span>
+            <span class="s1">&#39;COUNT&#39;</span><span class="p">,</span> <span class="s1">&#39;SUM&#39;</span><span class="p">,</span> <span class="s1">&#39;AVG&#39;</span><span class="p">,</span> <span class="s1">&#39;MIN&#39;</span><span class="p">,</span> <span class="s1">&#39;MAX&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;STDDEV&#39;</span><span class="p">,</span> <span class="s1">&#39;VARIANCE&#39;</span><span class="p">,</span> <span class="s1">&#39;MEDIAN&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;GROUPING&#39;</span><span class="p">,</span> <span class="s1">&#39;ROLLUP&#39;</span><span class="p">,</span> <span class="s1">&#39;CUBE&#39;</span><span class="p">,</span> <span class="s1">&#39;SETS&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># String functions</span>
+            <span class="s1">&#39;SUBSTR&#39;</span><span class="p">,</span> <span class="s1">&#39;INSTR&#39;</span><span class="p">,</span> <span class="s1">&#39;LENGTH&#39;</span><span class="p">,</span> <span class="s1">&#39;TRIM&#39;</span><span class="p">,</span> <span class="s1">&#39;LTRIM&#39;</span><span class="p">,</span> <span class="s1">&#39;RTRIM&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;UPPER&#39;</span><span class="p">,</span> <span class="s1">&#39;LOWER&#39;</span><span class="p">,</span> <span class="s1">&#39;INITCAP&#39;</span><span class="p">,</span> <span class="s1">&#39;REPLACE&#39;</span><span class="p">,</span> <span class="s1">&#39;TRANSLATE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CONCAT&#39;</span><span class="p">,</span> <span class="s1">&#39;LPAD&#39;</span><span class="p">,</span> <span class="s1">&#39;RPAD&#39;</span><span class="p">,</span> <span class="s1">&#39;ASCII&#39;</span><span class="p">,</span> <span class="s1">&#39;CHR&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Conversion functions</span>
+            <span class="s1">&#39;TO_CHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;TO_DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;TO_NUMBER&#39;</span><span class="p">,</span> <span class="s1">&#39;TO_TIMESTAMP&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TO_CLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;TO_BLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;CAST&#39;</span><span class="p">,</span> <span class="s1">&#39;CONVERT&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Null handling</span>
+            <span class="s1">&#39;NVL&#39;</span><span class="p">,</span> <span class="s1">&#39;NVL2&#39;</span><span class="p">,</span> <span class="s1">&#39;COALESCE&#39;</span><span class="p">,</span> <span class="s1">&#39;NULLIF&#39;</span><span class="p">,</span> <span class="s1">&#39;DECODE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Date functions</span>
+            <span class="s1">&#39;ADD_MONTHS&#39;</span><span class="p">,</span> <span class="s1">&#39;MONTHS_BETWEEN&#39;</span><span class="p">,</span> <span class="s1">&#39;NEXT_DAY&#39;</span><span class="p">,</span> <span class="s1">&#39;LAST_DAY&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TRUNC&#39;</span><span class="p">,</span> <span class="s1">&#39;ROUND&#39;</span><span class="p">,</span> <span class="s1">&#39;EXTRACT&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Numeric functions</span>
+            <span class="s1">&#39;ABS&#39;</span><span class="p">,</span> <span class="s1">&#39;CEIL&#39;</span><span class="p">,</span> <span class="s1">&#39;FLOOR&#39;</span><span class="p">,</span> <span class="s1">&#39;MOD&#39;</span><span class="p">,</span> <span class="s1">&#39;POWER&#39;</span><span class="p">,</span> <span class="s1">&#39;SQRT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;SIGN&#39;</span><span class="p">,</span> <span class="s1">&#39;EXP&#39;</span><span class="p">,</span> <span class="s1">&#39;LN&#39;</span><span class="p">,</span> <span class="s1">&#39;LOG&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Other functions</span>
+            <span class="s1">&#39;GREATEST&#39;</span><span class="p">,</span> <span class="s1">&#39;LEAST&#39;</span><span class="p">,</span> <span class="s1">&#39;DUMP&#39;</span><span class="p">,</span> <span class="s1">&#39;VSIZE&#39;</span><span class="p">,</span> <span class="s1">&#39;USER&#39;</span><span class="p">,</span> <span class="s1">&#39;UID&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Metadata/System</span>
+            <span class="s1">&#39;COMMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;ANALYZE&#39;</span><span class="p">,</span> <span class="s1">&#39;VALIDATE&#39;</span><span class="p">,</span> <span class="s1">&#39;STRUCTURE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;COMPUTE&#39;</span><span class="p">,</span> <span class="s1">&#39;STATISTICS&#39;</span><span class="p">,</span> <span class="s1">&#39;ESTIMATE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Materialized views</span>
+            <span class="s1">&#39;MATERIALIZED&#39;</span><span class="p">,</span> <span class="s1">&#39;REFRESH&#39;</span><span class="p">,</span> <span class="s1">&#39;FAST&#39;</span><span class="p">,</span> <span class="s1">&#39;COMPLETE&#39;</span><span class="p">,</span> <span class="s1">&#39;FORCE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ON&#39;</span><span class="p">,</span> <span class="s1">&#39;DEMAND&#39;</span><span class="p">,</span> <span class="s1">&#39;COMMIT&#39;</span><span class="p">,</span> <span class="s1">&#39;BUILD&#39;</span><span class="p">,</span> <span class="s1">&#39;DEFERRED&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Flashback</span>
+            <span class="s1">&#39;FLASHBACK&#39;</span><span class="p">,</span> <span class="s1">&#39;VERSIONS&#39;</span><span class="p">,</span> <span class="s1">&#39;SCN&#39;</span><span class="p">,</span> <span class="s1">&#39;TIMESTAMP&#39;</span><span class="p">,</span> <span class="s1">&#39;AS OF&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Oracle Text</span>
+            <span class="s1">&#39;CONTAINS&#39;</span><span class="p">,</span> <span class="s1">&#39;CATSEARCH&#39;</span><span class="p">,</span> <span class="s1">&#39;MATCHES&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># XML</span>
+            <span class="s1">&#39;XMLTYPE&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLELEMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLATTRIBUTES&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLFOREST&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;XMLAGG&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLPARSE&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLSERIALIZE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Collections</span>
+            <span class="s1">&#39;TABLE&#39;</span><span class="p">,</span> <span class="s1">&#39;CAST&#39;</span><span class="p">,</span> <span class="s1">&#39;MULTISET&#39;</span><span class="p">,</span> <span class="s1">&#39;MEMBER&#39;</span><span class="p">,</span> <span class="s1">&#39;SUBMULTISET&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;THE&#39;</span><span class="p">,</span> <span class="s1">&#39;CARDINALITY&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Advanced features</span>
+            <span class="s1">&#39;PIVOT&#39;</span><span class="p">,</span> <span class="s1">&#39;UNPIVOT&#39;</span><span class="p">,</span> <span class="s1">&#39;MODEL&#39;</span><span class="p">,</span> <span class="s1">&#39;DIMENSION&#39;</span><span class="p">,</span> <span class="s1">&#39;MEASURES&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;RULES&#39;</span><span class="p">,</span> <span class="s1">&#39;AUTOMATIC&#39;</span><span class="p">,</span> <span class="s1">&#39;SEQUENTIAL&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Hints (common ones)</span>
+            <span class="s1">&#39;FULL&#39;</span><span class="p">,</span> <span class="s1">&#39;INDEX&#39;</span><span class="p">,</span> <span class="s1">&#39;PARALLEL&#39;</span><span class="p">,</span> <span class="s1">&#39;USE_NL&#39;</span><span class="p">,</span> <span class="s1">&#39;USE_HASH&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;USE_MERGE&#39;</span><span class="p">,</span> <span class="s1">&#39;APPEND&#39;</span><span class="p">,</span> <span class="s1">&#39;CACHE&#39;</span><span class="p">,</span> <span class="s1">&#39;NOCACHE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;FIRST_ROWS&#39;</span><span class="p">,</span> <span class="s1">&#39;ALL_ROWS&#39;</span><span class="p">,</span> <span class="s1">&#39;CHOOSE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># PL/SQL exceptions</span>
+            <span class="s1">&#39;NO_DATA_FOUND&#39;</span><span class="p">,</span> <span class="s1">&#39;TOO_MANY_ROWS&#39;</span><span class="p">,</span> <span class="s1">&#39;INVALID_CURSOR&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VALUE_ERROR&#39;</span><span class="p">,</span> <span class="s1">&#39;INVALID_NUMBER&#39;</span><span class="p">,</span> <span class="s1">&#39;ZERO_DIVIDE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;DUP_VAL_ON_INDEX&#39;</span><span class="p">,</span> <span class="s1">&#39;TIMEOUT_ON_RESOURCE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;OTHERS&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Additional Oracle keywords</span>
+            <span class="s1">&#39;ACCESSIBLE&#39;</span><span class="p">,</span> <span class="s1">&#39;IDENTIFIED&#39;</span><span class="p">,</span> <span class="s1">&#39;PASSWORD&#39;</span><span class="p">,</span> <span class="s1">&#39;EXPIRE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ACCOUNT&#39;</span><span class="p">,</span> <span class="s1">&#39;UNLOCK&#39;</span><span class="p">,</span> <span class="s1">&#39;TEMPORARY&#39;</span><span class="p">,</span> <span class="s1">&#39;GLOBAL&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;PRIVATE&#39;</span><span class="p">,</span> <span class="s1">&#39;PUBLIC&#39;</span><span class="p">,</span> <span class="s1">&#39;AUTHID&#39;</span><span class="p">,</span> <span class="s1">&#39;CURRENT_USER&#39;</span><span class="p">,</span> <span class="s1">&#39;DEFINER&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;DETERMINISTIC&#39;</span><span class="p">,</span> <span class="s1">&#39;PARALLEL_ENABLE&#39;</span><span class="p">,</span> <span class="s1">&#39;RESULT_CACHE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;PIPELINED&#39;</span><span class="p">,</span> <span class="s1">&#39;AGGREGATE&#39;</span><span class="p">,</span>
+        <span class="p">}}</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Oracle data types.&quot;&quot;&quot;</span>
+        <span class="c1"># Convert all data types to lowercase for case-insensitive matching</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">dt</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">dt</span> <span class="ow">in</span> <span class="p">{</span>
+            <span class="c1"># Character types</span>
+            <span class="s1">&#39;VARCHAR2&#39;</span><span class="p">,</span> <span class="s1">&#39;NVARCHAR2&#39;</span><span class="p">,</span> <span class="s1">&#39;CHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;NCHAR&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Numeric types</span>
+            <span class="s1">&#39;NUMBER&#39;</span><span class="p">,</span> <span class="s1">&#39;INTEGER&#39;</span><span class="p">,</span> <span class="s1">&#39;INT&#39;</span><span class="p">,</span> <span class="s1">&#39;SMALLINT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;FLOAT&#39;</span><span class="p">,</span> <span class="s1">&#39;REAL&#39;</span><span class="p">,</span> <span class="s1">&#39;DOUBLE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;BINARY_FLOAT&#39;</span><span class="p">,</span> <span class="s1">&#39;BINARY_DOUBLE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;PLS_INTEGER&#39;</span><span class="p">,</span> <span class="s1">&#39;BINARY_INTEGER&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Date/Time types</span>
+            <span class="s1">&#39;DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;TIMESTAMP&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;INTERVAL DAY TO SECOND&#39;</span><span class="p">,</span> <span class="s1">&#39;INTERVAL YEAR TO MONTH&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># LOB types</span>
+            <span class="s1">&#39;CLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;NCLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;BLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;BFILE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Binary types</span>
+            <span class="s1">&#39;RAW&#39;</span><span class="p">,</span> <span class="s1">&#39;LONG RAW&#39;</span><span class="p">,</span> <span class="s1">&#39;LONG&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Boolean (PL/SQL only)</span>
+            <span class="s1">&#39;BOOLEAN&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Special types</span>
+            <span class="s1">&#39;ROWID&#39;</span><span class="p">,</span> <span class="s1">&#39;UROWID&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;XMLTYPE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># User-defined types</span>
+            <span class="s1">&#39;RECORD&#39;</span><span class="p">,</span> <span class="s1">&#39;REF&#39;</span><span class="p">,</span> <span class="s1">&#39;VARRAY&#39;</span><span class="p">,</span>
+        <span class="p">}}</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Oracle built-in functions.&quot;&quot;&quot;</span>
+        <span class="c1"># Convert all functions to lowercase for case-insensitive matching</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">fn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="p">{</span>
+            <span class="c1"># Aggregate functions</span>
+            <span class="s1">&#39;COUNT&#39;</span><span class="p">,</span> <span class="s1">&#39;SUM&#39;</span><span class="p">,</span> <span class="s1">&#39;AVG&#39;</span><span class="p">,</span> <span class="s1">&#39;MIN&#39;</span><span class="p">,</span> <span class="s1">&#39;MAX&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;STDDEV&#39;</span><span class="p">,</span> <span class="s1">&#39;VARIANCE&#39;</span><span class="p">,</span> <span class="s1">&#39;MEDIAN&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;LISTAGG&#39;</span><span class="p">,</span> <span class="s1">&#39;GROUPING&#39;</span><span class="p">,</span> <span class="s1">&#39;GROUPING_ID&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Window/Analytic functions</span>
+            <span class="s1">&#39;RANK&#39;</span><span class="p">,</span> <span class="s1">&#39;DENSE_RANK&#39;</span><span class="p">,</span> <span class="s1">&#39;ROW_NUMBER&#39;</span><span class="p">,</span> <span class="s1">&#39;NTILE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;LEAD&#39;</span><span class="p">,</span> <span class="s1">&#39;LAG&#39;</span><span class="p">,</span> <span class="s1">&#39;FIRST_VALUE&#39;</span><span class="p">,</span> <span class="s1">&#39;LAST_VALUE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;PERCENT_RANK&#39;</span><span class="p">,</span> <span class="s1">&#39;CUME_DIST&#39;</span><span class="p">,</span> <span class="s1">&#39;PERCENTILE_CONT&#39;</span><span class="p">,</span> <span class="s1">&#39;PERCENTILE_DISC&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;RATIO_TO_REPORT&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># String functions</span>
+            <span class="s1">&#39;SUBSTR&#39;</span><span class="p">,</span> <span class="s1">&#39;INSTR&#39;</span><span class="p">,</span> <span class="s1">&#39;LENGTH&#39;</span><span class="p">,</span> <span class="s1">&#39;TRIM&#39;</span><span class="p">,</span> <span class="s1">&#39;LTRIM&#39;</span><span class="p">,</span> <span class="s1">&#39;RTRIM&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;UPPER&#39;</span><span class="p">,</span> <span class="s1">&#39;LOWER&#39;</span><span class="p">,</span> <span class="s1">&#39;INITCAP&#39;</span><span class="p">,</span> <span class="s1">&#39;REPLACE&#39;</span><span class="p">,</span> <span class="s1">&#39;TRANSLATE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CONCAT&#39;</span><span class="p">,</span> <span class="s1">&#39;LPAD&#39;</span><span class="p">,</span> <span class="s1">&#39;RPAD&#39;</span><span class="p">,</span> <span class="s1">&#39;ASCII&#39;</span><span class="p">,</span> <span class="s1">&#39;CHR&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;REGEXP_SUBSTR&#39;</span><span class="p">,</span> <span class="s1">&#39;REGEXP_INSTR&#39;</span><span class="p">,</span> <span class="s1">&#39;REGEXP_REPLACE&#39;</span><span class="p">,</span> <span class="s1">&#39;REGEXP_LIKE&#39;</span><span class="p">,</span> <span class="s1">&#39;REGEXP_COUNT&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Conversion functions</span>
+            <span class="s1">&#39;TO_CHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;TO_DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;TO_NUMBER&#39;</span><span class="p">,</span> <span class="s1">&#39;TO_TIMESTAMP&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TO_CLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;TO_BLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;TO_NCHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;TO_NCLOB&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CAST&#39;</span><span class="p">,</span> <span class="s1">&#39;CONVERT&#39;</span><span class="p">,</span> <span class="s1">&#39;HEXTORAW&#39;</span><span class="p">,</span> <span class="s1">&#39;RAWTOHEX&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Null handling</span>
+            <span class="s1">&#39;NVL&#39;</span><span class="p">,</span> <span class="s1">&#39;NVL2&#39;</span><span class="p">,</span> <span class="s1">&#39;COALESCE&#39;</span><span class="p">,</span> <span class="s1">&#39;NULLIF&#39;</span><span class="p">,</span> <span class="s1">&#39;DECODE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;LNNVL&#39;</span><span class="p">,</span> <span class="s1">&#39;NANVL&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Date/Time functions</span>
+            <span class="s1">&#39;SYSDATE&#39;</span><span class="p">,</span> <span class="s1">&#39;SYSTIMESTAMP&#39;</span><span class="p">,</span> <span class="s1">&#39;CURRENT_DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;CURRENT_TIMESTAMP&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ADD_MONTHS&#39;</span><span class="p">,</span> <span class="s1">&#39;MONTHS_BETWEEN&#39;</span><span class="p">,</span> <span class="s1">&#39;NEXT_DAY&#39;</span><span class="p">,</span> <span class="s1">&#39;LAST_DAY&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TRUNC&#39;</span><span class="p">,</span> <span class="s1">&#39;ROUND&#39;</span><span class="p">,</span> <span class="s1">&#39;EXTRACT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NEW_TIME&#39;</span><span class="p">,</span> <span class="s1">&#39;TZ_OFFSET&#39;</span><span class="p">,</span> <span class="s1">&#39;FROM_TZ&#39;</span><span class="p">,</span> <span class="s1">&#39;TO_TIMESTAMP_TZ&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NUMTODSINTERVAL&#39;</span><span class="p">,</span> <span class="s1">&#39;NUMTOYMINTERVAL&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Numeric functions</span>
+            <span class="s1">&#39;ABS&#39;</span><span class="p">,</span> <span class="s1">&#39;CEIL&#39;</span><span class="p">,</span> <span class="s1">&#39;FLOOR&#39;</span><span class="p">,</span> <span class="s1">&#39;MOD&#39;</span><span class="p">,</span> <span class="s1">&#39;POWER&#39;</span><span class="p">,</span> <span class="s1">&#39;SQRT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;SIGN&#39;</span><span class="p">,</span> <span class="s1">&#39;EXP&#39;</span><span class="p">,</span> <span class="s1">&#39;LN&#39;</span><span class="p">,</span> <span class="s1">&#39;LOG&#39;</span><span class="p">,</span> <span class="s1">&#39;ROUND&#39;</span><span class="p">,</span> <span class="s1">&#39;TRUNC&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;SIN&#39;</span><span class="p">,</span> <span class="s1">&#39;COS&#39;</span><span class="p">,</span> <span class="s1">&#39;TAN&#39;</span><span class="p">,</span> <span class="s1">&#39;ASIN&#39;</span><span class="p">,</span> <span class="s1">&#39;ACOS&#39;</span><span class="p">,</span> <span class="s1">&#39;ATAN&#39;</span><span class="p">,</span> <span class="s1">&#39;ATAN2&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;SINH&#39;</span><span class="p">,</span> <span class="s1">&#39;COSH&#39;</span><span class="p">,</span> <span class="s1">&#39;TANH&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Comparison functions</span>
+            <span class="s1">&#39;GREATEST&#39;</span><span class="p">,</span> <span class="s1">&#39;LEAST&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Environment/System functions</span>
+            <span class="s1">&#39;USER&#39;</span><span class="p">,</span> <span class="s1">&#39;UID&#39;</span><span class="p">,</span> <span class="s1">&#39;USERENV&#39;</span><span class="p">,</span> <span class="s1">&#39;SYS_CONTEXT&#39;</span><span class="p">,</span> <span class="s1">&#39;SYS_GUID&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;DUMP&#39;</span><span class="p">,</span> <span class="s1">&#39;VSIZE&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Hierarchical functions</span>
+            <span class="s1">&#39;SYS_CONNECT_BY_PATH&#39;</span><span class="p">,</span> <span class="s1">&#39;CONNECT_BY_ROOT&#39;</span><span class="p">,</span> <span class="s1">&#39;CONNECT_BY_ISCYCLE&#39;</span><span class="p">,</span> <span class="s1">&#39;CONNECT_BY_ISLEAF&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># XML functions</span>
+            <span class="s1">&#39;XMLELEMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLATTRIBUTES&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLFOREST&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLAGG&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;XMLPARSE&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLSERIALIZE&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLQUERY&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLTABLE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;EXTRACTVALUE&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLCAST&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLCOLATTVAL&#39;</span><span class="p">,</span> <span class="s1">&#39;XMLCONCAT&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># JSON functions (Oracle 12c+)</span>
+            <span class="s1">&#39;JSON_VALUE&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_QUERY&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_TABLE&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_OBJECT&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_ARRAY&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;JSON_ARRAYAGG&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON_OBJECTAGG&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Collection functions</span>
+            <span class="s1">&#39;CARDINALITY&#39;</span><span class="p">,</span> <span class="s1">&#39;COLLECT&#39;</span><span class="p">,</span> <span class="s1">&#39;POWERMULTISET&#39;</span><span class="p">,</span> <span class="s1">&#39;POWERMULTISET_BY_CARDINALITY&#39;</span><span class="p">,</span>
+            
+            <span class="c1"># Other functions</span>
+            <span class="s1">&#39;SOUNDEX&#39;</span><span class="p">,</span> <span class="s1">&#39;BITAND&#39;</span><span class="p">,</span> <span class="s1">&#39;BITOR&#39;</span><span class="p">,</span> <span class="s1">&#39;BITXOR&#39;</span><span class="p">,</span> <span class="s1">&#39;BITNOT&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;EMPTY_BLOB&#39;</span><span class="p">,</span> <span class="s1">&#39;EMPTY_CLOB&#39;</span><span class="p">,</span>
+        <span class="p">}}</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">identifier_chars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Oracle doesn&#39;t use special identifier characters like $ or @.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">quote_chars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Oracle uses double quotes for identifiers.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;&quot;&#39;</span><span class="p">:</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">,</span>  <span class="c1"># Quoted identifiers: &quot;TableName&quot;</span>
+        <span class="p">}</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">comment_styles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Oracle supports -- and /* */ comments.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="s1">&#39;/*&#39;</span><span class="p">]</span>
+    
+<div class="viewcode-block" id="OracleDialect.normalize_identifier">
+<a class="viewcode-back" href="../../../dialects.html#sqltidy.dialects.oracle.OracleDialect.normalize_identifier">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalize_identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalize an Oracle identifier.</span>
+<span class="sd">        </span>
+<span class="sd">        Oracle identifiers:</span>
+<span class="sd">        - Unquoted identifiers are case-insensitive (converted to uppercase)</span>
+<span class="sd">        - Quoted identifiers preserve case</span>
+<span class="sd">        - Maximum 30 characters (128 in Oracle 12.2+)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">identifier</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">identifier</span>
+        
+        <span class="c1"># Remove surrounding quotes if present</span>
+        <span class="k">if</span> <span class="n">identifier</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">identifier</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">):</span>
+            <span class="c1"># Quoted identifier - preserve case, remove quotes</span>
+            <span class="k">return</span> <span class="n">identifier</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="c1"># Unquoted identifier - convert to uppercase (Oracle convention)</span>
+        <span class="k">return</span> <span class="n">identifier</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">SQLTidy</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Package Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dialects.html">Dialect System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rules.html">Rules System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugins.html">Creating Plugins</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Jayden Rasband.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

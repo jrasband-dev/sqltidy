@@ -14,8 +14,8 @@
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Modules" href="modules.html" />
-    <link rel="prev" title="Getting Started" href="getting_started.html" />
+    <link rel="next" title="Dialect System" href="dialects.html" />
+    <link rel="prev" title="Package Overview" href="overview.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -35,15 +35,17 @@
             
   <section id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
-<section id="module-sqltidy.api">
-<span id="main-api"></span><h2>Main API<a class="headerlink" href="#module-sqltidy.api" title="Link to this heading">¶</a></h2>
-<dl class="py function">
+<p>This document provides comprehensive API documentation for all SQLTidy modules.</p>
+<section id="main-api">
+<h2>Main API<a class="headerlink" href="#main-api" title="Link to this heading">¶</a></h2>
+<p>The main API provides the primary interface for formatting SQL code.</p>
+<dl class="py function" id="module-sqltidy.api">
 <dt class="sig sig-object py" id="sqltidy.api.register_plugin">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.api.</span></span><span class="sig-name descname"><span class="pre">register_plugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="plugins.html#sqltidy.rules.base.BaseRule" title="sqltidy.rules.base.BaseRule"><span class="pre">BaseRule</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/api.html#register_plugin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.api.register_plugin" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sqltidy.api.</span></span><span class="sig-name descname"><span class="pre">register_plugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/api.html#register_plugin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.api.register_plugin" title="Link to this definition">¶</a></dt>
 <dd><p>Register a plugin rule at runtime.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>rule</strong> (<a class="reference internal" href="plugins.html#sqltidy.rules.base.BaseRule" title="sqltidy.rules.base.BaseRule"><em>BaseRule</em></a>) – An instance of a rule to apply.</p>
+<dd class="field-odd"><p><strong>rule</strong> (<a class="reference internal" href="rules.html#sqltidy.rules.base.BaseRule" title="sqltidy.rules.base.BaseRule"><em>BaseRule</em></a>) – An instance of a rule to apply.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -56,13 +58,14 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sqltidy.api.format_sql">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.api.</span></span><span class="sig-name descname"><span class="pre">format_sql</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sql</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sqltidy.config.TidyConfig" title="sqltidy.config.TidyConfig"><span class="pre">TidyConfig</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/sqltidy/api.html#format_sql"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.api.format_sql" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sqltidy.api.</span></span><span class="sig-name descname"><span class="pre">format_sql</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sql</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_rules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/api.html#format_sql"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.api.format_sql" title="Link to this definition">¶</a></dt>
 <dd><p>Format a SQL string using all registered rules, including runtime plugins.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sql</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The SQL string to format.</p></li>
 <li><p><strong>config</strong> (<a class="reference internal" href="#sqltidy.config.TidyConfig" title="sqltidy.config.TidyConfig"><em>TidyConfig</em></a><em>, </em><em>optional</em>) – Formatter configuration.</p></li>
+<li><p><strong>custom_rules</strong> (<em>List</em><em>[</em><a class="reference internal" href="rules.html#sqltidy.rules.base.BaseRule" title="sqltidy.rules.base.BaseRule"><em>BaseRule</em></a><em>]</em><em>, </em><em>optional</em>) – Additional custom rules to apply.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -75,15 +78,26 @@
 </dd></dl>
 
 </section>
-<section id="module-sqltidy.config">
-<span id="configuration"></span><h2>Configuration<a class="headerlink" href="#module-sqltidy.config" title="Link to this heading">¶</a></h2>
-<dl class="py class">
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
+<p>Configuration classes for customizing SQLTidy behavior.</p>
+<dl class="py class" id="module-sqltidy.config">
 <dt class="sig sig-object py" id="sqltidy.config.TidyConfig">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.config.</span></span><span class="sig-name descname"><span class="pre">TidyConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uppercase_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newline_after_select</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leading_commas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent_select_columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/config.html#TidyConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.config.TidyConfig" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.config.</span></span><span class="sig-name descname"><span class="pre">TidyConfig</span></span><a class="reference internal" href="_modules/sqltidy/config.html#TidyConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.config.TidyConfig" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Configuration for SQL formatting (tidy) rules.</p>
+<dl class="simple">
+<dt>Dialect Support:</dt><dd><p>Most options support None (use dialect default), True (enable), or False (disable).</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.config.TidyConfig.dialect">
+<span class="sig-name descname"><span class="pre">dialect</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sqlserver'</span></span><a class="headerlink" href="#sqltidy.config.TidyConfig.dialect" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="sqltidy.config.TidyConfig.uppercase_keywords">
-<span class="sig-name descname"><span class="pre">uppercase_keywords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#sqltidy.config.TidyConfig.uppercase_keywords" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">uppercase_keywords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#sqltidy.config.TidyConfig.uppercase_keywords" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -106,12 +120,30 @@
 <span class="sig-name descname"><span class="pre">indent_select_columns</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#sqltidy.config.TidyConfig.indent_select_columns" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.config.TidyConfig.quote_identifiers">
+<span class="sig-name descname"><span class="pre">quote_identifiers</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#sqltidy.config.TidyConfig.quote_identifiers" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.config.TidyConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlserver'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uppercase_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newline_after_select</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leading_commas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent_select_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quote_identifiers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sqltidy.config.TidyConfig.__init__" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="sqltidy.config.RewriteConfig">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.config.</span></span><span class="sig-name descname"><span class="pre">RewriteConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enable_subquery_to_cte</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_alias_style_abc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_alias_style_t_numeric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/config.html#RewriteConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.config.RewriteConfig" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.config.</span></span><span class="sig-name descname"><span class="pre">RewriteConfig</span></span><a class="reference internal" href="_modules/sqltidy/config.html#RewriteConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.config.RewriteConfig" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Configuration for SQL transformation (rewrite) rules.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.config.RewriteConfig.dialect">
+<span class="sig-name descname"><span class="pre">dialect</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sqlserver'</span></span><a class="headerlink" href="#sqltidy.config.RewriteConfig.dialect" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="sqltidy.config.RewriteConfig.enable_subquery_to_cte">
 <span class="sig-name descname"><span class="pre">enable_subquery_to_cte</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#sqltidy.config.RewriteConfig.enable_subquery_to_cte" title="Link to this definition">¶</a></dt>
@@ -127,85 +159,763 @@
 <span class="sig-name descname"><span class="pre">enable_alias_style_t_numeric</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#sqltidy.config.RewriteConfig.enable_alias_style_t_numeric" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.config.RewriteConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlserver'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_subquery_to_cte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_alias_style_abc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_alias_style_t_numeric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sqltidy.config.RewriteConfig.__init__" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
-<section id="module-sqltidy.core">
-<span id="core"></span><h2>Core<a class="headerlink" href="#module-sqltidy.core" title="Link to this heading">¶</a></h2>
-<dl class="py class">
+<section id="core-formatter">
+<h2>Core Formatter<a class="headerlink" href="#core-formatter" title="Link to this heading">¶</a></h2>
+<p>The core formatter engine that orchestrates tokenization and rule application.</p>
+<dl class="py class" id="module-sqltidy.core">
 <dt class="sig sig-object py" id="sqltidy.core.SQLFormatter">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.core.</span></span><span class="sig-name descname"><span class="pre">SQLFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sqltidy.config.TidyConfig" title="sqltidy.config.TidyConfig"><span class="pre">TidyConfig</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/core.html#SQLFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.core.SQLFormatter" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.core.</span></span><span class="sig-name descname"><span class="pre">SQLFormatter</span></span><a class="reference internal" href="_modules/sqltidy/core.html#SQLFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.core.SQLFormatter" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Main SQL formatting engine.</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.core.SQLFormatter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/core.html#SQLFormatter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.core.SQLFormatter.__init__" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="sqltidy.core.SQLFormatter.tokenize">
-<span class="sig-name descname"><span class="pre">tokenize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sql</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/sqltidy/core.html#SQLFormatter.tokenize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.core.SQLFormatter.tokenize" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">tokenize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sql</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/core.html#SQLFormatter.tokenize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.core.SQLFormatter.tokenize" title="Link to this definition">¶</a></dt>
 <dd><p>Convert raw SQL into proper tokens without external dependencies.</p>
+<dl class="field-list simple">
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sqltidy.core.SQLFormatter.format">
-<span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sql</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/sqltidy/core.html#SQLFormatter.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.core.SQLFormatter.format" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sql</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/core.html#SQLFormatter.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.core.SQLFormatter.format" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sqltidy.core.SQLFormatter.join_tokens">
-<span class="sig-name descname"><span class="pre">join_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/sqltidy/core.html#SQLFormatter.join_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.core.SQLFormatter.join_tokens" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">join_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/core.html#SQLFormatter.join_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.core.SQLFormatter.join_tokens" title="Link to this definition">¶</a></dt>
 <dd><p>Reassemble tokens into formatted SQL text.</p>
+<dl class="field-list simple">
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 </section>
-<section id="module-sqltidy.tokenizer">
-<span id="tokenizer"></span><h2>Tokenizer<a class="headerlink" href="#module-sqltidy.tokenizer" title="Link to this heading">¶</a></h2>
+<section id="tokenizer">
+<h2>Tokenizer<a class="headerlink" href="#tokenizer" title="Link to this heading">¶</a></h2>
+<p>SQL tokenization system for parsing SQL code into tokens.</p>
+<dl class="py class" id="module-sqltidy.tokenizer">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenType">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">TokenType</span></span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#TokenType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.TokenType" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>Token types for SQL parsing</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenType.KEYWORD">
+<span class="sig-name descname"><span class="pre">KEYWORD</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'keyword'</span></span><a class="headerlink" href="#sqltidy.tokenizer.TokenType.KEYWORD" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenType.IDENTIFIER">
+<span class="sig-name descname"><span class="pre">IDENTIFIER</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'identifier'</span></span><a class="headerlink" href="#sqltidy.tokenizer.TokenType.IDENTIFIER" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenType.STRING">
+<span class="sig-name descname"><span class="pre">STRING</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'string'</span></span><a class="headerlink" href="#sqltidy.tokenizer.TokenType.STRING" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenType.NUMBER">
+<span class="sig-name descname"><span class="pre">NUMBER</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'number'</span></span><a class="headerlink" href="#sqltidy.tokenizer.TokenType.NUMBER" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenType.OPERATOR">
+<span class="sig-name descname"><span class="pre">OPERATOR</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'operator'</span></span><a class="headerlink" href="#sqltidy.tokenizer.TokenType.OPERATOR" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenType.PUNCTUATION">
+<span class="sig-name descname"><span class="pre">PUNCTUATION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'punctuation'</span></span><a class="headerlink" href="#sqltidy.tokenizer.TokenType.PUNCTUATION" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenType.COMMENT">
+<span class="sig-name descname"><span class="pre">COMMENT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'comment'</span></span><a class="headerlink" href="#sqltidy.tokenizer.TokenType.COMMENT" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenType.WHITESPACE">
+<span class="sig-name descname"><span class="pre">WHITESPACE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'whitespace'</span></span><a class="headerlink" href="#sqltidy.tokenizer.TokenType.WHITESPACE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenType.NEWLINE">
+<span class="sig-name descname"><span class="pre">NEWLINE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'newline'</span></span><a class="headerlink" href="#sqltidy.tokenizer.TokenType.NEWLINE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenType.UNKNOWN">
+<span class="sig-name descname"><span class="pre">UNKNOWN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'unknown'</span></span><a class="headerlink" href="#sqltidy.tokenizer.TokenType.UNKNOWN" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.Token">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">Token</span></span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#Token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.Token" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NamedTuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NamedTuple</span></code></a></p>
+<p>Represents a SQL token with type information</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.Token.value">
+<span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.tokenizer.Token.value" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.Token.type">
+<span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#sqltidy.tokenizer.TokenType" title="sqltidy.tokenizer.TokenType"><span class="pre">TokenType</span></a></span><a class="headerlink" href="#sqltidy.tokenizer.Token.type" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.Token.__new__">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sqltidy.tokenizer.Token.__new__" title="Link to this definition">¶</a></dt>
+<dd><p>Create new instance of Token(value, type)</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.GroupType">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">GroupType</span></span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#GroupType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.GroupType" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>Types of token groups</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.GroupType.STATEMENT">
+<span class="sig-name descname"><span class="pre">STATEMENT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'statement'</span></span><a class="headerlink" href="#sqltidy.tokenizer.GroupType.STATEMENT" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.GroupType.CLAUSE">
+<span class="sig-name descname"><span class="pre">CLAUSE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'clause'</span></span><a class="headerlink" href="#sqltidy.tokenizer.GroupType.CLAUSE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.GroupType.PARENTHESIS">
+<span class="sig-name descname"><span class="pre">PARENTHESIS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'parenthesis'</span></span><a class="headerlink" href="#sqltidy.tokenizer.GroupType.PARENTHESIS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.GroupType.FUNCTION">
+<span class="sig-name descname"><span class="pre">FUNCTION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'function'</span></span><a class="headerlink" href="#sqltidy.tokenizer.GroupType.FUNCTION" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.GroupType.EXPRESSION">
+<span class="sig-name descname"><span class="pre">EXPRESSION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'expression'</span></span><a class="headerlink" href="#sqltidy.tokenizer.GroupType.EXPRESSION" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.GroupType.IDENTIFIER_LIST">
+<span class="sig-name descname"><span class="pre">IDENTIFIER_LIST</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'identifier_list'</span></span><a class="headerlink" href="#sqltidy.tokenizer.GroupType.IDENTIFIER_LIST" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.GroupType.CONDITION">
+<span class="sig-name descname"><span class="pre">CONDITION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'condition'</span></span><a class="headerlink" href="#sqltidy.tokenizer.GroupType.CONDITION" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.GroupType.COMMENT_BLOCK">
+<span class="sig-name descname"><span class="pre">COMMENT_BLOCK</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'comment_block'</span></span><a class="headerlink" href="#sqltidy.tokenizer.GroupType.COMMENT_BLOCK" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenGroup">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">TokenGroup</span></span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#TokenGroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.TokenGroup" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Represents a group of related tokens</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenGroup.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#TokenGroup.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.TokenGroup.__init__" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenGroup.get_text">
+<span class="sig-name descname"><span class="pre">get_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#TokenGroup.get_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.TokenGroup.get_text" title="Link to this definition">¶</a></dt>
+<dd><p>Get the text representation of this group</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenGroup.flatten">
+<span class="sig-name descname"><span class="pre">flatten</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#TokenGroup.flatten"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.TokenGroup.flatten" title="Link to this definition">¶</a></dt>
+<dd><p>Flatten the group to get all tokens (recursive)</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenGroup.filter_type">
+<span class="sig-name descname"><span class="pre">filter_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#TokenGroup.filter_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.TokenGroup.filter_type" title="Link to this definition">¶</a></dt>
+<dd><p>Get all tokens of a specific type from this group</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenGroup.get_keywords">
+<span class="sig-name descname"><span class="pre">get_keywords</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#TokenGroup.get_keywords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.TokenGroup.get_keywords" title="Link to this definition">¶</a></dt>
+<dd><p>Get all keyword values from this group</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.TokenGroup.get_identifiers">
+<span class="sig-name descname"><span class="pre">get_identifiers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#TokenGroup.get_identifiers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.TokenGroup.get_identifiers" title="Link to this definition">¶</a></dt>
+<dd><p>Get all identifier values from this group</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="sqltidy.tokenizer.tokenize">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">tokenize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sql</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#tokenize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.tokenize" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">tokenize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sql</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#tokenize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.tokenize" title="Link to this definition">¶</a></dt>
+<dd><p>Tokenize SQL string into a list of token strings (backward compatible)</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.tokenize_with_types">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">tokenize_with_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sql</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dialect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlserver'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#tokenize_with_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.tokenize_with_types" title="Link to this definition">¶</a></dt>
+<dd><p>Tokenize SQL string into a list of Token objects with type information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sql</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The SQL string to tokenize</p></li>
+<li><p><strong>dialect</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference internal" href="dialects.html#sqltidy.dialects.base.SQLDialect" title="sqltidy.dialects.base.SQLDialect"><em>SQLDialect</em></a>) – The SQL dialect to use (name or SQLDialect instance). Defaults to ‘sqlserver’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of Token objects with type information</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference internal" href="#sqltidy.tokenizer.Token" title="sqltidy.tokenizer.Token"><em>Token</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.get_token_type">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">get_token_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dialect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlserver'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#get_token_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.get_token_type" title="Link to this definition">¶</a></dt>
+<dd><p>Determine the type of a token.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token string to classify</p></li>
+<li><p><strong>dialect</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference internal" href="dialects.html#sqltidy.dialects.base.SQLDialect" title="sqltidy.dialects.base.SQLDialect"><em>SQLDialect</em></a>) – The SQL dialect to use (name or SQLDialect instance). Defaults to ‘sqlserver’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TokenType enum value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sqltidy.tokenizer.TokenType" title="sqltidy.tokenizer.TokenType"><em>TokenType</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.group_parentheses">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">group_parentheses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#group_parentheses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.group_parentheses" title="Link to this definition">¶</a></dt>
+<dd><p>Group tokens within parentheses into TokenGroup objects.
+This handles nested parentheses recursively.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.group_by_statements">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">group_by_statements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#group_by_statements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.group_by_statements" title="Link to this definition">¶</a></dt>
+<dd><p>Group tokens into complete SQL statements (separated by semicolons).</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.group_by_clauses">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">group_by_clauses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#group_by_clauses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.group_by_clauses" title="Link to this definition">¶</a></dt>
+<dd><p>Group tokens by SQL clauses (SELECT, FROM, WHERE, etc.).</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.group_tokens">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">group_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_parentheses_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_statements_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_clauses_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#group_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.group_tokens" title="Link to this definition">¶</a></dt>
+<dd><p>Group tokens into logical structures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tokens</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a><em>[</em><a class="reference internal" href="#sqltidy.tokenizer.Token" title="sqltidy.tokenizer.Token"><em>Token</em></a><em>]</em>) – List of Token objects</p></li>
+<li><p><strong>group_parentheses_flag</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Group tokens within parentheses</p></li>
+<li><p><strong>group_statements_flag</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Group into complete statements (by semicolon)</p></li>
+<li><p><strong>group_clauses_flag</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Group by SQL clauses (SELECT, FROM, WHERE, etc.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of tokens and/or TokenGroup objects</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference internal" href="#sqltidy.tokenizer.Token" title="sqltidy.tokenizer.Token"><em>Token</em></a> | <a class="reference internal" href="#sqltidy.tokenizer.TokenGroup" title="sqltidy.tokenizer.TokenGroup"><em>TokenGroup</em></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference internal" href="#sqltidy.tokenizer.TokenGroup" title="sqltidy.tokenizer.TokenGroup"><em>TokenGroup</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.print_token_tree">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">print_token_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#print_token_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.print_token_tree" title="Link to this definition">¶</a></dt>
+<dd><p>Print a hierarchical view of tokens and groups.
+Useful for debugging and visualization.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.tokenizer.is_keyword">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.tokenizer.</span></span><span class="sig-name descname"><span class="pre">is_keyword</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dialect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlserver'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/tokenizer.html#is_keyword"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.tokenizer.is_keyword" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a token is a keyword in the specified dialect (case-insensitive).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token to check</p></li>
+<li><p><strong>dialect</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference internal" href="dialects.html#sqltidy.dialects.base.SQLDialect" title="sqltidy.dialects.base.SQLDialect"><em>SQLDialect</em></a>) – The SQL dialect to use (name or SQLDialect instance). Defaults to ‘sqlserver’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the token is a keyword, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
-<section id="module-sqltidy.cli">
-<span id="command-line-interface"></span><h2>Command-Line Interface<a class="headerlink" href="#module-sqltidy.cli" title="Link to this heading">¶</a></h2>
+<section id="generator">
+<h2>Generator<a class="headerlink" href="#generator" title="Link to this heading">¶</a></h2>
+<p>Interactive configuration generator for creating config files.</p>
+<p id="module-sqltidy.generator">Interactive configuration generator for sqltidy.
+Generates config files that can override default settings.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.cli.create_tidy_config_from_file">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.cli.</span></span><span class="sig-name descname"><span class="pre">create_tidy_config_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sqltidy.config.TidyConfig" title="sqltidy.config.TidyConfig"><span class="pre">TidyConfig</span></a></span></span><a class="reference internal" href="_modules/sqltidy/cli.html#create_tidy_config_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.cli.create_tidy_config_from_file" title="Link to this definition">¶</a></dt>
-<dd><p>Load TidyConfig from a JSON configuration file.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.prompt_yes_no">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">prompt_yes_no</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">question</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/generator.html#prompt_yes_no"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.prompt_yes_no" title="Link to this definition">¶</a></dt>
+<dd><p>Prompt user for a yes/no question.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>config_file</strong> – Path to the configuration JSON file</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>question</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The question to ask</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – The default value if user just presses enter</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Configuration object with loaded values</p>
+<dd class="field-even"><p>The user’s choice</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#sqltidy.config.TidyConfig" title="sqltidy.config.TidyConfig">TidyConfig</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.cli.create_rewrite_config_from_file">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.cli.</span></span><span class="sig-name descname"><span class="pre">create_rewrite_config_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sqltidy.config.RewriteConfig" title="sqltidy.config.RewriteConfig"><span class="pre">RewriteConfig</span></a></span></span><a class="reference internal" href="_modules/sqltidy/cli.html#create_rewrite_config_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.cli.create_rewrite_config_from_file" title="Link to this definition">¶</a></dt>
-<dd><p>Load RewriteConfig from a JSON configuration file.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.generate_tidy_config">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">generate_tidy_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/generator.html#generate_tidy_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.generate_tidy_config" title="Link to this definition">¶</a></dt>
+<dd><p>Interactively generate a TidyConfig.
+Automatically includes any new boolean fields added to TidyConfig.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>config_file</strong> – Path to the configuration JSON file</p>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.generator.generate_rewrite_config">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">generate_rewrite_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/generator.html#generate_rewrite_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.generate_rewrite_config" title="Link to this definition">¶</a></dt>
+<dd><p>Interactively generate a RewriteConfig.
+Automatically includes any new boolean fields added to RewriteConfig.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.generator.select_config_type">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">select_config_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/generator.html#select_config_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.select_config_type" title="Link to this definition">¶</a></dt>
+<dd><p>Prompt user to select which config type to generate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>“tidy” or “rewrite”</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Configuration object with loaded values</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#sqltidy.config.RewriteConfig" title="sqltidy.config.RewriteConfig">RewriteConfig</a></p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.cli.main">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.cli.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/cli.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.cli.main" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="sqltidy.generator.get_output_filename">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">get_output_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/generator.html#get_output_filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.get_output_filename" title="Link to this definition">¶</a></dt>
+<dd><p>Prompt user for output filename.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Type of config (“tidy” or “rewrite”)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output filename</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.generator.save_config">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">save_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/generator.html#save_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.save_config" title="Link to this definition">¶</a></dt>
+<dd><p>Save configuration to a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em>) – Configuration dictionary</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Output filename</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to the saved file</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.generator.run_generator">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">run_generator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/generator.html#run_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.run_generator" title="Link to this definition">¶</a></dt>
+<dd><p>Run the interactive configuration generator.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.generator.load_config_file">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">load_config_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/generator.html#load_config_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.load_config_file" title="Link to this definition">¶</a></dt>
+<dd><p>Load configuration from a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to the configuration file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Configuration data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="plugins">
+<h2>Plugins<a class="headerlink" href="#plugins" title="Link to this heading">¶</a></h2>
+<p>Plugin management system for runtime rule registration.</p>
+<p id="module-sqltidy.plugins">Plugin system for SQLTidy.</p>
+<p>Provides a decorator-based plugin registration system similar to Polars,
+allowing users to easily extend SQLTidy with custom formatting rules.</p>
+<p class="rubric">Example</p>
+<p># my_plugin.py
+from sqltidy.plugins import sqltidy_plugin</p>
+<p>&#64;sqltidy_plugin(rule_type=”tidy”, order=50)
+def remove_semicolons(tokens, ctx):</p>
+<blockquote>
+<div><p>‘’’Remove trailing semicolons.’’’
+if tokens and tokens[-1] == ‘;’:</p>
+<blockquote>
+<div><p>return tokens[:-1]</p>
+</div></blockquote>
+<p>return tokens</p>
+</div></blockquote>
+<p># Use from CLI:
+# sqltidy format input.sql –plugin my_plugin.py</p>
+<p># Or from Python:
+# from sqltidy.plugins import load_plugins
+# load_plugins(‘my_plugin.py’)</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.sqltidy_plugin">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">sqltidy_plugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tidy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supported_dialects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/plugins.html#sqltidy_plugin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.sqltidy_plugin" title="Link to this definition">¶</a></dt>
+<dd><p>Decorator to register a function as a SQLTidy plugin rule.</p>
+<p>This decorator allows you to turn any function into a formatting rule
+without having to create a class or understand the internals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – “tidy” (formatting) or “rewrite” (transformation)</p></li>
+<li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Execution order (lower runs first)</p></li>
+<li><p><strong>supported_dialects</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><em>Set</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – Set of dialects this rule applies to, or None for all</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – Optional custom name for the rule class</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Decorator function</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>&#64;sqltidy_plugin(rule_type=”tidy”, order=100)
+def my_rule(tokens, ctx):</p>
+<blockquote>
+<div><p>‘’’Remove trailing semicolons.’’’
+if tokens and tokens[-1] == ‘;’:</p>
+<blockquote>
+<div><p>return tokens[:-1]</p>
+</div></blockquote>
+<p>return tokens</p>
+</div></blockquote>
+<dl class="simple">
+<dt>The decorated function should have signature:</dt><dd><p>def rule_func(tokens: List[str], ctx: FormatterContext) -&gt; List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.register_rule_class">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">register_rule_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/plugins.html#register_rule_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.register_rule_class" title="Link to this definition">¶</a></dt>
+<dd><p>Register a rule class directly.</p>
+<p>Use this if you prefer to define classes rather than functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rule_class</strong> (<a class="reference internal" href="#sqltidy.tokenizer.Token.type" title="sqltidy.tokenizer.Token.type"><em>type</em></a>) – A BaseRule subclass</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from sqltidy.plugins import register_rule_class</p>
+<dl>
+<dt>class MyRule(BaseRule):</dt><dd><p>rule_type = “tidy”
+order = 50</p>
+<dl class="simple">
+<dt>def apply(self, tokens, ctx):</dt><dd><p>return tokens</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>register_rule_class(MyRule)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.get_registered_plugins">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">get_registered_plugins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/plugins.html#get_registered_plugins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.get_registered_plugins" title="Link to this definition">¶</a></dt>
+<dd><p>Get all registered plugin rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of rule classes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference internal" href="#sqltidy.tokenizer.Token.type" title="sqltidy.tokenizer.Token.type">type</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.clear_plugins">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">clear_plugins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/plugins.html#clear_plugins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.clear_plugins" title="Link to this definition">¶</a></dt>
+<dd><p>Clear all registered plugins.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.load_plugin_file">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">load_plugin_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/plugins.html#load_plugin_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.load_plugin_file" title="Link to this definition">¶</a></dt>
+<dd><p>Load plugins from a Python file.</p>
+<p>The file should contain functions decorated with &#64;sqltidy_plugin
+or classes registered with register_rule_class().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>Path</em></a>) – Path to Python file containing plugins</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of rule classes that were loaded</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If file doesn’t exist</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ImportError" title="(in Python v3.14)"><strong>ImportError</strong></a> – If file can’t be imported</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference internal" href="#sqltidy.tokenizer.Token.type" title="sqltidy.tokenizer.Token.type">type</a>]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from sqltidy.plugins import load_plugin_file</p>
+<p># Load plugins from file
+rules = load_plugin_file(‘my_plugins.py’)</p>
+<p># Add to formatter
+formatter.rules.extend([r() for r in rules])</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.load_plugins_from_directory">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">load_plugins_from_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/plugins.html#load_plugins_from_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.load_plugins_from_directory" title="Link to this definition">¶</a></dt>
+<dd><p>Load all plugin files from a directory.</p>
+<p>Searches for all .py files in the directory and loads them as plugins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>Path</em></a>) – Path to directory containing plugin files</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of all rule classes that were loaded</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference internal" href="#sqltidy.tokenizer.Token.type" title="sqltidy.tokenizer.Token.type">type</a>]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from sqltidy.plugins import load_plugins_from_directory</p>
+<p># Load all plugins from directory
+rules = load_plugins_from_directory(‘~/.sqltidy/plugins’)</p>
+<p># Add to formatter
+formatter.rules.extend([r() for r in rules])</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.load_plugin_module">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">load_plugin_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/plugins.html#load_plugin_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.load_plugin_module" title="Link to this definition">¶</a></dt>
+<dd><p>Load plugins from an installed Python module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>module_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of Python module to import</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of rule classes that were loaded</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference internal" href="#sqltidy.tokenizer.Token.type" title="sqltidy.tokenizer.Token.type">type</a>]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from sqltidy.plugins import load_plugin_module</p>
+<p># Load from installed package
+rules = load_plugin_module(‘my_company.sqltidy_plugins’)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.create_plugin_formatter">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">create_plugin_formatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plugin_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plugin_dirs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plugin_modules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/plugins.html#create_plugin_formatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.plugins.create_plugin_formatter" title="Link to this definition">¶</a></dt>
+<dd><p>Create a SQLFormatter with plugins loaded.</p>
+<p>Convenience function that creates a formatter and loads all specified plugins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> – TidyConfig or RewriteConfig</p></li>
+<li><p><strong>plugin_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>Path</em></a><em>] </em><em>| </em><em>None</em>) – List of plugin file paths to load</p></li>
+<li><p><strong>plugin_dirs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>Path</em></a><em>] </em><em>| </em><em>None</em>) – List of plugin directories to load</p></li>
+<li><p><strong>plugin_modules</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – List of module names to import</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLFormatter with plugins loaded</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from sqltidy.plugins import create_plugin_formatter
+from sqltidy.config import TidyConfig</p>
+<dl class="simple">
+<dt>formatter = create_plugin_formatter(</dt><dd><p>config=TidyConfig(dialect=’postgresql’),
+plugin_files=[‘my_rules.py’],
+plugin_dirs=[‘~/.sqltidy/plugins’]</p>
+</dd>
+</dl>
+<p>)</p>
+<p>result = formatter.format(sql)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.plugin">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">plugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tidy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supported_dialects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sqltidy.plugins.plugin" title="Link to this definition">¶</a></dt>
+<dd><p>Decorator to register a function as a SQLTidy plugin rule.</p>
+<p>This decorator allows you to turn any function into a formatting rule
+without having to create a class or understand the internals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – “tidy” (formatting) or “rewrite” (transformation)</p></li>
+<li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Execution order (lower runs first)</p></li>
+<li><p><strong>supported_dialects</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><em>Set</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – Set of dialects this rule applies to, or None for all</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – Optional custom name for the rule class</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Decorator function</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>&#64;sqltidy_plugin(rule_type=”tidy”, order=100)
+def my_rule(tokens, ctx):</p>
+<blockquote>
+<div><p>‘’’Remove trailing semicolons.’’’
+if tokens and tokens[-1] == ‘;’:</p>
+<blockquote>
+<div><p>return tokens[:-1]</p>
+</div></blockquote>
+<p>return tokens</p>
+</div></blockquote>
+<dl class="simple">
+<dt>The decorated function should have signature:</dt><dd><p>def rule_func(tokens: List[str], ctx: FormatterContext) -&gt; List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.plugins.register">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.plugins.</span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_class</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sqltidy.plugins.register" title="Link to this definition">¶</a></dt>
+<dd><p>Register a rule class directly.</p>
+<p>Use this if you prefer to define classes rather than functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rule_class</strong> (<a class="reference internal" href="#sqltidy.tokenizer.Token.type" title="sqltidy.tokenizer.Token.type"><em>type</em></a>) – A BaseRule subclass</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from sqltidy.plugins import register_rule_class</p>
+<dl>
+<dt>class MyRule(BaseRule):</dt><dd><p>rule_type = “tidy”
+order = 50</p>
+<dl class="simple">
+<dt>def apply(self, tokens, ctx):</dt><dd><p>return tokens</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>register_rule_class(MyRule)</p>
+</dd></dl>
+
+</section>
+<section id="command-line-interface">
+<h2>Command-Line Interface<a class="headerlink" href="#command-line-interface" title="Link to this heading">¶</a></h2>
+<p>Command-line interface for formatting SQL files.</p>
 </section>
 </section>
 
@@ -238,15 +948,20 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Package Overview</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-sqltidy.api">Main API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-sqltidy.config">Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-sqltidy.core">Core</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-sqltidy.tokenizer">Tokenizer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-sqltidy.cli">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#main-api">Main API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#core-formatter">Core Formatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tokenizer">Tokenizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generator">Generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plugins">Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-interface">Command-Line Interface</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dialects.html">Dialect System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rules.html">Rules System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugins.html">Creating Plugins</a></li>
 </ul>
 
@@ -254,8 +969,8 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="getting_started.html" title="previous chapter">Getting Started</a></li>
-      <li>Next: <a href="modules.html" title="next chapter">Modules</a></li>
+      <li>Previous: <a href="overview.html" title="previous chapter">Package Overview</a></li>
+      <li>Next: <a href="dialects.html" title="next chapter">Dialect System</a></li>
   </ul></li>
 </ul>
 </div>

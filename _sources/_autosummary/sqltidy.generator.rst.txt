@@ -1,0 +1,19 @@
+sqltidy.generator
+=================
+
+.. automodule:: sqltidy.generator
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      generate_rewrite_config
+      generate_tidy_config
+      get_output_filename
+      load_config_file
+      prompt_yes_no
+      run_generator
+      save_config
+      select_config_type
+   

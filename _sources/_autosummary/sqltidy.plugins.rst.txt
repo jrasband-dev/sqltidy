@@ -1,0 +1,21 @@
+sqltidy.plugins
+===============
+
+.. automodule:: sqltidy.plugins
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      clear_plugins
+      create_plugin_formatter
+      get_registered_plugins
+      load_plugin_file
+      load_plugin_module
+      load_plugins_from_directory
+      plugin
+      register
+      register_rule_class
+      sqltidy_plugin
+   

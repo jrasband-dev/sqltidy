@@ -47,20 +47,55 @@
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#configuration">Configuration</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api.html#module-sqltidy.api">Main API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#module-sqltidy.config">Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#module-sqltidy.core">Core</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#module-sqltidy.tokenizer">Tokenizer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#module-sqltidy.cli">Command-Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Package Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#architecture">Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#processing-flow">Processing Flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#quick-reference">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#module-index">Module Index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#configuration-reference">Configuration Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#extension-points">Extension Points</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#sqltidy-package">sqltidy package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#main-api">Main API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#core-formatter">Core Formatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#tokenizer">Tokenizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#generator">Generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#plugins">Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#command-line-interface">Command-Line Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dialects.html">Dialect System</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dialects.html#supported-dialects">Supported Dialects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dialects.html#dialect-registry">Dialect Registry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dialects.html#base-dialect">Base Dialect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dialects.html#sql-server-dialect">SQL Server Dialect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dialects.html#postgresql-dialect">PostgreSQL Dialect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dialects.html#mysql-dialect">MySQL Dialect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dialects.html#oracle-dialect">Oracle Dialect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dialects.html#sqlite-dialect">SQLite Dialect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dialects.html#usage-example">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rules.html">Rules System</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rules.html#rule-architecture">Rule Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rules.html#tidy-rules">Tidy Rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rules.html#rewrite-rules">Rewrite Rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rules.html#creating-custom-rules">Creating Custom Rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rules.html#configuration">Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#main-package">Main Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#core-modules">Core Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#dialects-package">Dialects Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#rules-package">Rules Package</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="plugins.html">Creating Plugins</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="plugins.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugins.html#plugin-api">Plugin API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugins.html#base-rule-class">Base Rule Class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugins.html#creating-a-custom-plugin">Creating a Custom Plugin</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugins.html#registering-your-plugin">Registering Your Plugin</a></li>
@@ -144,8 +179,11 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Package Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dialects.html">Dialect System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rules.html">Rules System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugins.html">Creating Plugins</a></li>
 </ul>
 

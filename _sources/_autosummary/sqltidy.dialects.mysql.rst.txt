@@ -1,0 +1,12 @@
+sqltidy.dialects.mysql
+======================
+
+.. automodule:: sqltidy.dialects.mysql
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      MySQLDialect
+   

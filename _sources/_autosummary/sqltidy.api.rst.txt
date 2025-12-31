@@ -1,0 +1,14 @@
+sqltidy.api
+===========
+
+.. automodule:: sqltidy.api
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      clear_plugins
+      format_sql
+      register_plugin
+   

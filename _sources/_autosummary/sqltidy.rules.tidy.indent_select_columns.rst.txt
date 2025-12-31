@@ -1,0 +1,12 @@
+sqltidy.rules.tidy.indent\_select\_columns
+==========================================
+
+.. automodule:: sqltidy.rules.tidy.indent_select_columns
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      IndentSelectColumnsRule
+   

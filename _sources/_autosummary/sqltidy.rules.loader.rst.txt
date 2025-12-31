@@ -1,0 +1,12 @@
+sqltidy.rules.loader
+====================
+
+.. automodule:: sqltidy.rules.loader
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      load_rules
+   

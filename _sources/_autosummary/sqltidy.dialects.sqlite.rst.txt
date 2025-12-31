@@ -1,0 +1,12 @@
+sqltidy.dialects.sqlite
+=======================
+
+.. automodule:: sqltidy.dialects.sqlite
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SQLiteDialect
+   

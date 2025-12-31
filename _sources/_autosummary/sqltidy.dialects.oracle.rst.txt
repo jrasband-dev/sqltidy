@@ -1,0 +1,12 @@
+sqltidy.dialects.oracle
+=======================
+
+.. automodule:: sqltidy.dialects.oracle
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      OracleDialect
+   

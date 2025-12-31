@@ -1,0 +1,19 @@
+sqltidy.dialects
+================
+
+.. automodule:: sqltidy.dialects
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   base
+   mysql
+   oracle
+   postgresql
+   registry
+   sqlite
+   sqlserver

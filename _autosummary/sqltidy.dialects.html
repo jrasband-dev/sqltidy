@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>sqltidy.dialects &#8212; SQLTidy 0.2.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=000c92bf"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sqltidy.dialects.base" href="sqltidy.dialects.base.html" />
+    <link rel="prev" title="sqltidy.core" href="sqltidy.core.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-sqltidy.dialects">
+<span id="sqltidy-dialects"></span><h1>sqltidy.dialects<a class="headerlink" href="#module-sqltidy.dialects" title="Link to this heading">¶</a></h1>
+<p>SQL dialect support for SQLTidy.</p>
+<p>This module provides a dialect system that allows SQLTidy to support
+multiple SQL database systems (SQL Server, PostgreSQL, MySQL, Oracle, SQLite).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.</span></span><span class="sig-name descname"><span class="pre">SQLDialect</span></span><a class="reference internal" href="../_modules/sqltidy/dialects/base.html#SQLDialect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.SQLDialect" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Base class for SQL dialects.</p>
+<p>Each dialect implementation should provide:
+- name: Unique identifier for the dialect
+- keywords: Set of SQL keywords specific to this dialect
+- data_types: Set of data type names
+- functions: Set of built-in function names
+- identifier_chars: Special characters allowed in identifiers (e.g., ‘&#64;’ for SQL Server)
+- quote_chars: Dictionary of quote characters for identifiers and strings
+- comment_styles: List of comment patterns supported</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/dialects/base.html#SQLDialect.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.SQLDialect.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize the dialect.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect.name">
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.SQLDialect.name" title="Link to this definition">¶</a></dt>
+<dd><p>Unique identifier for this dialect (e.g., ‘sqlserver’, ‘postgresql’).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect.keywords">
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">keywords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.SQLDialect.keywords" title="Link to this definition">¶</a></dt>
+<dd><p>Set of SQL keywords for this dialect (lowercase).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect.data_types">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data_types</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.SQLDialect.data_types" title="Link to this definition">¶</a></dt>
+<dd><p>Set of data type names (subset of keywords, used for categorization).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect.functions">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">functions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.14)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.SQLDialect.functions" title="Link to this definition">¶</a></dt>
+<dd><p>Set of built-in function names (subset of keywords).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect.identifier_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">identifier_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#sqltidy.dialects.SQLDialect.identifier_chars" title="Link to this definition">¶</a></dt>
+<dd><p>Special characters allowed in identifiers.</p>
+<p>Examples:
+- SQL Server: ‘&#64;#$’ (for &#64;variables, #temp tables)
+- PostgreSQL: ‘$’ (for $1, $var)
+- MySQL: ‘’ (no special chars)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect.quote_chars">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">quote_chars</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.SQLDialect.quote_chars" title="Link to this definition">¶</a></dt>
+<dd><p>Quote characters for identifiers and strings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary with ‘identifier’ and ‘string’ keys.</p>
+</dd>
+</dl>
+<p>Examples:
+- SQL Server: {‘identifier’: ‘[’, ‘string’: “’”}
+- PostgreSQL: {‘identifier’: ‘”’, ‘string’: “’”}
+- MySQL: {‘identifier’: ‘`’, ‘string’: “’”}</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect.comment_styles">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">comment_styles</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#sqltidy.dialects.SQLDialect.comment_styles" title="Link to this definition">¶</a></dt>
+<dd><p>List of comment patterns supported by this dialect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of comment prefixes (e.g., [’–’, ‘#’, ‘/<a href="#id1"><span class="problematic" id="id2">*</span></a>’])</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect.is_keyword">
+<span class="sig-name descname"><span class="pre">is_keyword</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/dialects/base.html#SQLDialect.is_keyword"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.SQLDialect.is_keyword" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a token is a keyword in this dialect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token to check (case-insensitive)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the token is a keyword, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect.is_data_type">
+<span class="sig-name descname"><span class="pre">is_data_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/dialects/base.html#SQLDialect.is_data_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.SQLDialect.is_data_type" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a token is a data type in this dialect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token to check (case-insensitive)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the token is a data type, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect.is_function">
+<span class="sig-name descname"><span class="pre">is_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/dialects/base.html#SQLDialect.is_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.SQLDialect.is_function" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a token is a built-in function in this dialect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token to check (case-insensitive)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the token is a built-in function, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sqltidy.dialects.SQLDialect.normalize_identifier">
+<span class="sig-name descname"><span class="pre">normalize_identifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/dialects/base.html#SQLDialect.normalize_identifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.SQLDialect.normalize_identifier" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize an identifier for this dialect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The identifier to normalize</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Normalized identifier (e.g., stripped quotes, case-adjusted)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.dialects.get_dialect">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.</span></span><span class="sig-name descname"><span class="pre">get_dialect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlserver'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/dialects/registry.html#get_dialect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.get_dialect" title="Link to this definition">¶</a></dt>
+<dd><p>Get a dialect by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The dialect name (case-insensitive). Defaults to ‘sqlserver’.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The requested SQLDialect instance.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the dialect is not found.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../dialects.html#sqltidy.dialects.base.SQLDialect" title="sqltidy.dialects.base.SQLDialect"><em>SQLDialect</em></a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dialect</span> <span class="o">=</span> <span class="n">get_dialect</span><span class="p">(</span><span class="s1">&#39;sqlserver&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dialect</span> <span class="o">=</span> <span class="n">get_dialect</span><span class="p">(</span><span class="s1">&#39;postgresql&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.dialects.register_dialect">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.</span></span><span class="sig-name descname"><span class="pre">register_dialect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/dialects/registry.html#register_dialect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.register_dialect" title="Link to this definition">¶</a></dt>
+<dd><p>Register a custom dialect.</p>
+<p>This allows users to add support for additional SQL dialects
+beyond the built-in ones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dialect</strong> (<a class="reference internal" href="../dialects.html#sqltidy.dialects.base.SQLDialect" title="sqltidy.dialects.base.SQLDialect"><em>SQLDialect</em></a>) – An instance of SQLDialect to register.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If a dialect with the same name is already registered.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">CustomDialect</span><span class="p">(</span><span class="n">SQLDialect</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nd">@property</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="s1">&#39;custom&#39;</span>
+<span class="gp">... </span>    <span class="c1"># ... implement other methods</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">register_dialect</span><span class="p">(</span><span class="n">CustomDialect</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sqltidy.dialects.list_dialects">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.dialects.</span></span><span class="sig-name descname"><span class="pre">list_dialects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/dialects/registry.html#list_dialects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.dialects.list_dialects" title="Link to this definition">¶</a></dt>
+<dd><p>List all registered dialect names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A sorted list of dialect names.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">list_dialects</span><span class="p">()</span>
+<span class="go">[&#39;mysql&#39;, &#39;oracle&#39;, &#39;postgresql&#39;, &#39;sqlserver&#39;, &#39;sqlite&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<p class="rubric">Modules</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../dialects.html#module-sqltidy.dialects.base" title="sqltidy.dialects.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base</span></code></a></p></td>
+<td><p>Base class for SQL dialects.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../dialects.html#module-sqltidy.dialects.mysql" title="sqltidy.dialects.mysql"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mysql</span></code></a></p></td>
+<td><p>MySQL dialect implementation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../dialects.html#module-sqltidy.dialects.oracle" title="sqltidy.dialects.oracle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">oracle</span></code></a></p></td>
+<td><p>Oracle Database / PL/SQL dialect support.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../dialects.html#module-sqltidy.dialects.postgresql" title="sqltidy.dialects.postgresql"><code class="xref py py-obj docutils literal notranslate"><span class="pre">postgresql</span></code></a></p></td>
+<td><p>PostgreSQL dialect implementation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../dialects.html#module-sqltidy.dialects.registry" title="sqltidy.dialects.registry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">registry</span></code></a></p></td>
+<td><p>Dialect registry for managing and accessing SQL dialects.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../dialects.html#module-sqltidy.dialects.sqlite" title="sqltidy.dialects.sqlite"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sqlite</span></code></a></p></td>
+<td><p>SQLite dialect support.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../dialects.html#module-sqltidy.dialects.sqlserver" title="sqltidy.dialects.sqlserver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sqlserver</span></code></a></p></td>
+<td><p>SQL Server dialect implementation.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">SQLTidy</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Package Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dialects.html">Dialect System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rules.html">Rules System</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Modules Overview</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../modules.html#main-package">Main Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules.html#core-modules">Core Modules</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../modules.html#dialects-package">Dialects Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules.html#rules-package">Rules Package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plugins.html">Creating Plugins</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../modules.html">Modules Overview</a><ul>
+  <li><a href="sqltidy.html">sqltidy</a><ul>
+      <li>Previous: <a href="sqltidy.core.html" title="previous chapter">sqltidy.core</a></li>
+      <li>Next: <a href="sqltidy.dialects.base.html" title="next chapter">sqltidy.dialects.base</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Jayden Rasband.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/_autosummary/sqltidy.dialects.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

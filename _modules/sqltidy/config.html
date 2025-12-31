@@ -34,17 +34,33 @@
 <span></span><span class="c1"># Default Rules</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
 
 <div class="viewcode-block" id="TidyConfig">
 <a class="viewcode-back" href="../../api.html#sqltidy.config.TidyConfig">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TidyConfig</span><span class="p">:</span>
-    <span class="n">uppercase_keywords</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Configuration for SQL formatting (tidy) rules.</span>
+<span class="sd">    </span>
+<span class="sd">    Dialect Support:</span>
+<span class="sd">        Most options support None (use dialect default), True (enable), or False (disable).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;sqlserver&#39;</span>  <span class="c1"># SQL dialect: &#39;sqlserver&#39;, &#39;postgresql&#39;, &#39;mysql&#39;, &#39;oracle&#39;, &#39;sqlite&#39;</span>
+    
+    <span class="c1"># Keyword casing (None = use dialect default)</span>
+    <span class="c1"># Defaults: SQL Server/Oracle=UPPERCASE, PostgreSQL/MySQL/SQLite=lowercase</span>
+    <span class="n">uppercase_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="c1"># Formatting options</span>
     <span class="n">newline_after_select</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">compact</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">leading_commas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">indent_select_columns</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
-
+    <span class="n">indent_select_columns</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="c1"># Identifier quoting (disabled by default)</span>
+    <span class="n">quote_identifiers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
 
@@ -52,9 +68,13 @@
 <a class="viewcode-back" href="../../api.html#sqltidy.config.RewriteConfig">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RewriteConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for SQL transformation (rewrite) rules.&quot;&quot;&quot;</span>
+    <span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;sqlserver&#39;</span>  <span class="c1"># SQL dialect: &#39;sqlserver&#39;, &#39;postgresql&#39;, &#39;mysql&#39;, &#39;oracle&#39;, &#39;sqlite&#39;</span>
     <span class="n">enable_subquery_to_cte</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">enable_alias_style_abc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">enable_alias_style_t_numeric</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
 
 </pre></div>
 
@@ -86,8 +106,11 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Package Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dialects.html">Dialect System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rules.html">Rules System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plugins.html">Creating Plugins</a></li>
 </ul>
 

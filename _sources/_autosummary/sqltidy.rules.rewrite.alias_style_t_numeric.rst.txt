@@ -1,0 +1,12 @@
+sqltidy.rules.rewrite.alias\_style\_t\_numeric
+==============================================
+
+.. automodule:: sqltidy.rules.rewrite.alias_style_t_numeric
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AliasStyleTNumericRule
+   

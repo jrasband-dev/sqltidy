@@ -1,0 +1,12 @@
+sqltidy.core
+============
+
+.. automodule:: sqltidy.core
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SQLFormatter
+   

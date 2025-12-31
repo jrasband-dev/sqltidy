@@ -1,0 +1,12 @@
+sqltidy.rules.tidy.newline\_after\_select
+=========================================
+
+.. automodule:: sqltidy.rules.tidy.newline_after_select
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      NewlineAfterSelectRule
+   

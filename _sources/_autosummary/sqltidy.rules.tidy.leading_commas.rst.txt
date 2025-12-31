@@ -1,0 +1,12 @@
+sqltidy.rules.tidy.leading\_commas
+==================================
+
+.. automodule:: sqltidy.rules.tidy.leading_commas
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      LeadingCommasRule
+   
