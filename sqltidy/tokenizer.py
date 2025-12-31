@@ -1,6 +1,7 @@
 import re
 from typing import List, NamedTuple, Optional, Union
 from enum import Enum
+from .dialects import get_dialect, SQLDialect
 
 
 class TokenType(Enum):
@@ -82,97 +83,13 @@ class TokenGroup:
         return [t.value for t in self.filter_type(TokenType.IDENTIFIER)]
     
 
-# Comprehensive SQL Server Keywords
-# Reference: https://learn.microsoft.com/en-us/sql/t-sql/language-elements/reserved-keywords-transact-sql
-SQL_SERVER_KEYWORDS = {
-    # DDL Keywords
-    "add", "alter", "column", "constraint", "create", "database", "drop", 
-    "index", "schema", "table", "view", "procedure", "function", "trigger",
-    "default", "check", "unique", "primary", "foreign", "key", "references",
-    "cascade", "set", "null", "not", "identity", "clustered", "nonclustered",
-    
-    # DML Keywords
-    "select", "insert", "update", "delete", "merge", "truncate", "into", 
-    "values", "output", "from", "where", "having", "group", "order", "by",
-    
-    # Query Keywords
-    "distinct", "top", "with", "as", "all", "any", "some", "exists",
-    "in", "between", "like", "is", "and", "or", "not", "case", "when",
-    "then", "else", "end", "over", "partition", "row_number", "rank",
-    "dense_rank", "ntile", "lag", "lead", "first_value", "last_value",
-    
-    # Join Keywords
-    "join", "inner", "left", "right", "full", "outer", "cross", "apply",
-    "on", "using",
-    
-    # Set Operations
-    "union", "intersect", "except",
-    
-    # Transaction Keywords
-    "begin", "commit", "rollback", "transaction", "tran", "save", "savepoint",
-    
-    # Data Types
-    "int", "bigint", "smallint", "tinyint", "bit", "decimal", "numeric",
-    "money", "smallmoney", "float", "real", "date", "time", "datetime",
-    "datetime2", "smalldatetime", "datetimeoffset", "char", "varchar",
-    "nchar", "nvarchar", "text", "ntext", "binary", "varbinary", "image",
-    "uniqueidentifier", "xml", "json", "sql_variant", "cursor", "timestamp",
-    "rowversion", "hierarchyid", "geometry", "geography",
-    
-    # Function Keywords
-    "cast", "convert", "coalesce", "nullif", "isnull", "try_cast",
-    "try_convert", "try_parse", "parse", "count", "sum", "avg", "min",
-    "max", "stdev", "stdevp", "var", "varp", "count_big", "grouping",
-    "grouping_id", "checksum", "checksum_agg", "string_agg",
-    
-    # Control Flow
-    "if", "else", "while", "break", "continue", "return", "goto",
-    "waitfor", "try", "catch", "throw", "raiserror", "print",
-    
-    # Cursor Keywords
-    "declare", "open", "fetch", "next", "prior", "first", "last",
-    "absolute", "relative", "close", "deallocate",
-    
-    # Advanced Features
-    "pivot", "unpivot", "for", "offset", "fetch", "rows", "only",
-    "option", "plan", "use", "exec", "execute", "sp_executesql",
-    
-    # Security & Permissions
-    "grant", "deny", "revoke", "to", "public", "schema_name",
-    "user", "login", "role", "authorization",
-    
-    # Backup & Restore
-    "backup", "restore", "database", "log", "file", "filegroup",
-    
-    # Index & Statistics
-    "statistics", "rebuild", "reorganize", "update_statistics",
-    "disable", "enable", "resume", "pause",
-    
-    # Temporal Tables
-    "system_time", "period", "generated", "always", "start", "end",
-    "hidden",
-    
-    # Window Functions
-    "rows", "range", "unbounded", "preceding", "following", "current",
-    
-    # Misc Keywords
-    "go", "use", "set", "nocount", "on", "off", "quoted_identifier",
-    "ansi_nulls", "ansi_padding", "ansi_warnings", "arithabort",
-    "concat_null_yields_null", "numeric_roundabort", "xact_abort",
-    "nolock", "readuncommitted", "readcommitted", "repeatableread",
-    "serializable", "snapshot", "rowlock", "paglock", "tablock",
-    "tablockx", "updlock", "xlock", "holdlock", "nowait", "readpast",
-    "within", "contains", "freetext", "containstable", "freetexttable",
-    "without", "encryption", "schemabinding", "returns", "language",
-    
-    # Additional T-SQL Keywords
-    "openxml", "openquery", "openrowset", "opendatasource", "bulk",
-    "formatfile", "errorfile", "maxerrors", "firstrow", "lastrow",
-    "fieldterminator", "rowterminator", "codepage", "datafiletype",
-    "batchsize", "keepnulls", "keepidentity", "kilobytes_per_batch",
-    "rows_per_batch", "order", "check_constraints", "fire_triggers",
-    "tablock", "tabblock",
-}
+# Backward compatibility: Keep SQL_SERVER_KEYWORDS for existing code
+# New code should use get_dialect('sqlserver').keywords instead
+def _get_sql_server_keywords():
+    """Lazy load SQL Server keywords from dialect"""
+    return get_dialect('sqlserver').keywords
+
+SQL_SERVER_KEYWORDS = None  # Will be lazily initialized
 
 
 TOKEN_RE = re.compile(
@@ -198,10 +115,25 @@ TOKEN_RE = re.compile(
 )
 
 
-def get_token_type(token: str) -> TokenType:
-    """Determine the type of a token"""
+def get_token_type(token: str, dialect: Union[str, SQLDialect] = 'sqlserver') -> TokenType:
+    """
+    Determine the type of a token.
+    
+    Args:
+        token: The token string to classify
+        dialect: The SQL dialect to use (name or SQLDialect instance). Defaults to 'sqlserver'.
+        
+    Returns:
+        TokenType enum value
+    """
     if not token:
         return TokenType.UNKNOWN
+    
+    # Get dialect instance
+    if isinstance(dialect, str):
+        dialect_obj = get_dialect(dialect)
+    else:
+        dialect_obj = dialect
     
     # Check for comments
     if token.startswith('--') or (token.startswith('/*') and token.endswith('*/')):
@@ -230,12 +162,18 @@ def get_token_type(token: str) -> TokenType:
     if token in ('(', ')', ',', '.', ';', '[', ']'):
         return TokenType.PUNCTUATION
     
-    # Check for keywords (case-insensitive)
-    if token.lower() in SQL_SERVER_KEYWORDS:
+    # Check for keywords (case-insensitive, dialect-aware)
+    if dialect_obj.is_keyword(token):
         return TokenType.KEYWORD
     
     # Check for identifiers (including variables and temp tables)
-    if re.match(r'^[A-Za-z_@#][A-Za-z0-9_@#$]*$', token):
+    # Use dialect-specific identifier chars
+    id_chars = dialect_obj.identifier_chars
+    if id_chars:
+        pattern = f'^[A-Za-z_{id_chars}][A-Za-z0-9_{id_chars}]*$'
+    else:
+        pattern = r'^[A-Za-z_][A-Za-z0-9_]*$'
+    if re.match(pattern, token):
         return TokenType.IDENTIFIER
     
     return TokenType.UNKNOWN
@@ -262,8 +200,23 @@ def tokenize(sql: str) -> List[str]:
     return tokens
 
 
-def tokenize_with_types(sql: str) -> List[Token]:
-    """Tokenize SQL string into a list of Token objects with type information"""
+def tokenize_with_types(sql: str, dialect: Union[str, SQLDialect] = 'sqlserver') -> List[Token]:
+    """
+    Tokenize SQL string into a list of Token objects with type information.
+    
+    Args:
+        sql: The SQL string to tokenize
+        dialect: The SQL dialect to use (name or SQLDialect instance). Defaults to 'sqlserver'.
+        
+    Returns:
+        List of Token objects with type information
+    """
+    # Get dialect instance
+    if isinstance(dialect, str):
+        dialect_obj = get_dialect(dialect)
+    else:
+        dialect_obj = dialect
+    
     tokens = []
     for groups in TOKEN_RE.findall(sql):
         # Find the first non-empty capturing group
@@ -278,16 +231,75 @@ def tokenize_with_types(sql: str) -> List[Token]:
                 else:
                     tokens.append(Token(" ", TokenType.WHITESPACE))
             else:
-                token_type = get_token_type(t)
+                token_type = get_token_type(t, dialect_obj)
                 tokens.append(Token(t, token_type))
             break
 
     return tokens
 
 
-def is_keyword(token: str) -> bool:
-    """Check if a token is a SQL Server keyword (case-insensitive)"""
-    return token.lower() in SQL_SERVER_KEYWORDS
+def get_token_type(token: str, dialect: Union[str, SQLDialect] = 'sqlserver') -> TokenType:
+    """
+    Determine the type of a token.
+    
+    Args:
+        token: The token string to classify
+        dialect: The SQL dialect to use (name or SQLDialect instance). Defaults to 'sqlserver'.
+        
+    Returns:
+        TokenType enum value
+    """
+    if not token:
+        return TokenType.UNKNOWN
+    
+    # Get dialect instance
+    if isinstance(dialect, str):
+        dialect_obj = get_dialect(dialect)
+    else:
+        dialect_obj = dialect
+    
+    # Check for comments
+    if token.startswith('--') or (token.startswith('/*') and token.endswith('*/')):
+        return TokenType.COMMENT
+    
+    # Check for whitespace
+    if token.isspace():
+        if '\n' in token:
+            return TokenType.NEWLINE
+        return TokenType.WHITESPACE
+    
+    # Check for strings
+    if (token.startswith("'") and token.endswith("'")) or \
+       (token.startswith('"') and token.endswith('"')):
+        return TokenType.STRING
+    
+    # Check for numbers
+    if token.replace('.', '', 1).isdigit():
+        return TokenType.NUMBER
+    
+    # Check for operators
+    if token in ('<=', '>=', '<>', '!=', '<', '>', '=', '+', '-', '*', '/'):
+        return TokenType.OPERATOR
+    
+    # Check for punctuation
+    if token in ('(', ')', ',', '.', ';', '[', ']'):
+        return TokenType.PUNCTUATION
+    
+    # Check for keywords (case-insensitive, dialect-aware)
+    if dialect_obj.is_keyword(token):
+        return TokenType.KEYWORD
+    
+    # Check for identifiers (including variables and temp tables)
+    # Use dialect-specific identifier chars
+    id_chars = dialect_obj.identifier_chars
+    if id_chars:
+        pattern = f'^[A-Za-z_{id_chars}][A-Za-z0-9_{id_chars}]*$'
+    else:
+        pattern = r'^[A-Za-z_][A-Za-z0-9_]*$'
+    if re.match(pattern, token):
+        return TokenType.IDENTIFIER
+    
+    return TokenType.UNKNOWN
 
 
 # ============================================================================
@@ -337,7 +349,7 @@ def group_parentheses(tokens: List[Union[Token, TokenGroup]]) -> List[Union[Toke
                             break
                 
                 # SQL function keywords or identifiers followed by parentheses are functions
-                if prev_token and (is_keyword(prev_token.value) or prev_token.type == TokenType.IDENTIFIER):
+                if prev_token and (prev_token.type == TokenType.IDENTIFIER or prev_token.type == TokenType.KEYWORD):
                     # Check if it looks like a function (not a keyword like IF, WHILE, etc.)
                     # Simple heuristic: if it's a common function keyword or an identifier
                     function_keywords = {
@@ -515,4 +527,35 @@ def print_token_tree(items: List[Union[Token, TokenGroup]], indent: int = 0):
             name_str = f" '{item.name}'" if item.name else ""
             print(f"{prefix}TokenGroup({item.group_type.value}{name_str}):")
             print_token_tree(item.tokens, indent + 1)
+
+
+def is_keyword(token: str, dialect: Union[str, SQLDialect] = 'sqlserver') -> bool:
+    """
+    Check if a token is a keyword in the specified dialect (case-insensitive).
+    
+    Args:
+        token: The token to check
+        dialect: The SQL dialect to use (name or SQLDialect instance). Defaults to 'sqlserver'.
+        
+    Returns:
+        True if the token is a keyword, False otherwise
+    """
+    # Get dialect instance
+    if isinstance(dialect, str):
+        dialect_obj = get_dialect(dialect)
+    else:
+        dialect_obj = dialect
+    
+    return dialect_obj.is_keyword(token)
+
+
+# Backward compatibility: Initialize SQL_SERVER_KEYWORDS on first access
+def __getattr__(name):
+    """Module-level __getattr__ for lazy initialization of SQL_SERVER_KEYWORDS"""
+    if name == 'SQL_SERVER_KEYWORDS':
+        global SQL_SERVER_KEYWORDS
+        if SQL_SERVER_KEYWORDS is None:
+            SQL_SERVER_KEYWORDS = _get_sql_server_keywords()
+        return SQL_SERVER_KEYWORDS
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
