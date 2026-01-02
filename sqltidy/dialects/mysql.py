@@ -1,0 +1,259 @@
+"""
+MySQL dialect implementation.
+"""
+
+from typing import Set
+from .base import SQLDialect
+
+
+class MySQLDialect(SQLDialect):
+    """
+    MySQL / MariaDB dialect.
+    
+    Includes comprehensive MySQL keyword support with 280+ keywords covering:
+    - DDL/DML operations
+    - Query syntax
+    - Data types (including MySQL-specific types)
+    - Functions (string, date, aggregate, window, etc.)
+    - MySQL-specific features (AUTO_INCREMENT, backticks, LIMIT syntax)
+    """
+    
+    @property
+    def name(self) -> str:
+        return 'mysql'
+    
+    @property
+    def keywords(self) -> Set[str]:
+        """Comprehensive MySQL keywords."""
+        return {
+            # DDL Keywords
+            "add", "alter", "column", "constraint", "create", "database", "drop",
+            "index", "schema", "table", "view", "procedure", "function", "trigger",
+            "default", "check", "unique", "primary", "foreign", "key", "references",
+            "cascade", "set", "null", "not", "auto_increment", "comment",
+            
+            # DML Keywords
+            "select", "insert", "update", "delete", "replace", "truncate", "into",
+            "values", "from", "where", "having", "group", "order", "by",
+            
+            # Query Keywords
+            "distinct", "limit", "offset", "with", "as", "all", "any", "some",
+            "exists", "in", "between", "like", "rlike", "regexp", "is", "and",
+            "or", "not", "case", "when", "then", "else", "end", "over", "partition",
+            "row_number", "rank", "dense_rank", "ntile", "lag", "lead", "first_value",
+            "last_value",
+            
+            # Join Keywords
+            "join", "inner", "left", "right", "full", "outer", "cross", "natural",
+            "on", "using", "straight_join",
+            
+            # Set Operations
+            "union", "intersect", "except",
+            
+            # Transaction Keywords
+            "begin", "commit", "rollback", "transaction", "start", "work",
+            "savepoint", "release", "isolation", "level", "read", "write",
+            "serializable", "repeatable", "committed", "uncommitted",
+            
+            # Data Types
+            "int", "integer", "tinyint", "smallint", "mediumint", "bigint",
+            "decimal", "numeric", "float", "double", "real", "bit",
+            "date", "time", "datetime", "timestamp", "year",
+            "char", "varchar", "binary", "varbinary", "blob", "text",
+            "tinyblob", "tinytext", "mediumblob", "mediumtext", "longblob", "longtext",
+            "enum", "set", "json", "geometry", "point", "linestring", "polygon",
+            "multipoint", "multilinestring", "multipolygon", "geometrycollection",
+            
+            # Aggregate Functions
+            "count", "sum", "avg", "min", "max", "group_concat", "std", "stddev",
+            "stddev_pop", "stddev_samp", "variance", "var_pop", "var_samp",
+            "bit_and", "bit_or", "bit_xor",
+            
+            # String Functions
+            "concat", "concat_ws", "substring", "substr", "left", "right", "length",
+            "char_length", "character_length", "upper", "lower", "trim", "ltrim",
+            "rtrim", "replace", "reverse", "repeat", "space", "strcmp", "locate",
+            "position", "instr", "field", "find_in_set", "make_set", "elt",
+            "insert", "lpad", "rpad", "format", "quote", "soundex",
+            
+            # Numeric Functions
+            "abs", "ceil", "ceiling", "floor", "round", "truncate", "mod", "div",
+            "power", "pow", "sqrt", "exp", "ln", "log", "log2", "log10",
+            "pi", "rand", "sign", "sin", "cos", "tan", "asin", "acos", "atan",
+            "atan2", "degrees", "radians",
+            
+            # Date/Time Functions
+            "now", "curdate", "current_date", "curtime", "current_time",
+            "current_timestamp", "localtime", "localtimestamp", "utc_date",
+            "utc_time", "utc_timestamp", "date", "time", "year", "month",
+            "day", "hour", "minute", "second", "microsecond", "quarter", "week",
+            "weekday", "dayofweek", "dayofmonth", "dayofyear", "dayname", "monthname",
+            "date_add", "date_sub", "adddate", "subdate", "addtime", "subtime",
+            "datediff", "timediff", "timestampdiff", "timestampadd", "date_format",
+            "time_format", "str_to_date", "from_unixtime", "unix_timestamp",
+            "makedate", "maketime", "period_add", "period_diff", "to_days",
+            "from_days", "last_day", "extract",
+            
+            # Conversion Functions
+            "cast", "convert", "binary",
+            
+            # Null Functions
+            "ifnull", "nullif", "coalesce", "isnull",
+            
+            # Conditional Functions
+            "if", "case", "when", "then", "else", "end",
+            
+            # Comparison Functions
+            "greatest", "least", "interval",
+            
+            # JSON Functions (MySQL 5.7+)
+            "json_array", "json_object", "json_quote", "json_contains",
+            "json_contains_path", "json_extract", "json_keys", "json_search",
+            "json_append", "json_array_append", "json_array_insert", "json_insert",
+            "json_merge", "json_merge_patch", "json_merge_preserve", "json_remove",
+            "json_replace", "json_set", "json_unquote", "json_depth", "json_length",
+            "json_type", "json_valid", "json_table", "json_schema_valid",
+            "json_schema_validation_report", "json_value", "json_arrayagg",
+            "json_objectagg",
+            
+            # Window Functions (MySQL 8.0+)
+            "row_number", "rank", "dense_rank", "percent_rank", "cume_dist",
+            "ntile", "lag", "lead", "first_value", "last_value", "nth_value",
+            
+            # Control Flow
+            "loop", "while", "repeat", "until", "leave", "iterate", "return",
+            "declare", "cursor", "fetch", "open", "close", "handler", "continue",
+            "exit", "undo",
+            
+            # Advanced Features
+            "explain", "describe", "desc", "show", "use", "optimize", "analyze",
+            "repair", "check", "checksum",
+            
+            # Storage Engines
+            "engine", "innodb", "myisam", "memory", "merge", "archive", "csv",
+            "blackhole", "federated", "ndb", "cluster",
+            
+            # Security & Permissions
+            "grant", "revoke", "to", "on", "all", "privileges", "usage", "execute",
+            "user", "role", "identified", "by", "password", "plugin",
+            
+            # Index Hints
+            "force", "ignore", "use", "index", "for", "join", "group", "order",
+            
+            # Partitioning
+            "partition", "partitions", "subpartition", "subpartitions", "hash",
+            "range", "list", "columns", "linear", "algorithm", "reorganize",
+            "rebuild", "remove", "coalesce", "truncate", "exchange",
+            
+            # Replication
+            "master", "slave", "replication", "replica", "binlog", "relay",
+            
+            # Misc Keywords
+            "lock", "unlock", "tables", "write", "read", "local", "low_priority",
+            "delayed", "high_priority", "quick", "ignore", "no_write_to_binlog",
+            "sql_big_result", "sql_small_result", "sql_buffer_result",
+            "sql_cache", "sql_no_cache", "sql_calc_found_rows", "for", "update",
+            "share", "mode", "nowait", "skip", "locked", "algorithm", "copy",
+            "inplace", "instant", "temporary", "temp", "delayed", "disable",
+            "enable", "comment", "charset", "character", "collate", "collation",
+            "ascii", "unicode", "names", "national", "varying", "zerofill",
+            "unsigned", "signed", "boolean", "bool", "serial",
+        }
+    
+    @property
+    def data_types(self) -> Set[str]:
+        """MySQL data types."""
+        return {
+            # Numeric Types
+            "int", "integer", "tinyint", "smallint", "mediumint", "bigint",
+            "decimal", "numeric", "float", "double", "real", "bit",
+            "serial",  # Alias for BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE
+            
+            # String Types
+            "char", "varchar", "binary", "varbinary",
+            "tinytext", "text", "mediumtext", "longtext",
+            "tinyblob", "blob", "mediumblob", "longblob",
+            
+            # Date and Time Types
+            "date", "time", "datetime", "timestamp", "year",
+            
+            # JSON Type (MySQL 5.7+)
+            "json",
+            
+            # Spatial Types
+            "geometry", "point", "linestring", "polygon",
+            "multipoint", "multilinestring", "multipolygon", "geometrycollection",
+            
+            # Other Types
+            "enum", "set",
+            "bool", "boolean",  # Alias for TINYINT(1)
+        }
+    
+    @property
+    def functions(self) -> Set[str]:
+        """MySQL built-in functions."""
+        return {
+            # Aggregate Functions
+            "count", "sum", "avg", "min", "max", "group_concat",
+            "std", "stddev", "variance", "bit_and", "bit_or", "bit_xor",
+            
+            # String Functions
+            "concat", "concat_ws", "substring", "substr", "left", "right",
+            "length", "char_length", "upper", "lower", "trim", "ltrim", "rtrim",
+            "replace", "reverse", "repeat", "locate", "instr", "format",
+            
+            # Numeric Functions
+            "abs", "ceil", "ceiling", "floor", "round", "truncate", "mod",
+            "power", "pow", "sqrt", "exp", "ln", "log", "pi", "rand",
+            
+            # Date/Time Functions
+            "now", "curdate", "current_date", "curtime", "current_time",
+            "current_timestamp", "date", "time", "year", "month", "day",
+            "hour", "minute", "second", "date_add", "date_sub", "datediff",
+            "date_format", "str_to_date", "unix_timestamp", "from_unixtime",
+            
+            # Conversion Functions
+            "cast", "convert",
+            
+            # Null Functions
+            "ifnull", "nullif", "coalesce", "isnull",
+            
+            # Conditional Functions
+            "if", "greatest", "least",
+            
+            # JSON Functions
+            "json_array", "json_object", "json_extract", "json_set",
+            "json_insert", "json_remove", "json_arrayagg", "json_objectagg",
+            
+            # Window Functions (MySQL 8.0+)
+            "row_number", "rank", "dense_rank", "ntile", "lag", "lead",
+            "first_value", "last_value", "nth_value",
+            
+            # Information Functions
+            "database", "user", "version", "connection_id", "last_insert_id",
+            "found_rows", "row_count",
+            
+            # Encryption Functions
+            "md5", "sha1", "sha2", "aes_encrypt", "aes_decrypt",
+            
+            # Other Functions
+            "uuid", "sleep", "benchmark",
+        }
+    
+    @property
+    def identifier_chars(self) -> str:
+        """MySQL doesn't allow special chars in unquoted identifiers."""
+        return ''
+    
+    @property
+    def quote_chars(self) -> dict:
+        """MySQL uses backticks for identifiers, single quotes for strings."""
+        return {
+            'identifier': '`',
+            'string': "'"
+        }
+    
+    @property
+    def comment_styles(self) -> list:
+        """MySQL supports --, # and /* */ comments."""
+        return ['--', '#', '/*']

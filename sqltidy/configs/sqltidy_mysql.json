@@ -1,0 +1,12 @@
+{
+  "dialect": "mysql",
+  "uppercase_keywords": false,
+  "newline_after_select": true,
+  "compact": true,
+  "leading_commas": true,
+  "indent_select_columns": true,
+  "quote_identifiers": false,
+  "enable_subquery_to_cte": true,
+  "enable_alias_style_abc": false,
+  "enable_alias_style_t_numeric": false
+}

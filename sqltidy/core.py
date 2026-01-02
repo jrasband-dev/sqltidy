@@ -1,17 +1,23 @@
 # sqltidy/core.py
 import re
 from typing import List
-from .config import TidyConfig
+from .config import SQLTidyConfig
 from .tokenizer import TOKEN_RE
 
 class SQLFormatter:
     """Main SQL formatting engine."""
 
-    def __init__(self, config: TidyConfig = None):
+    def __init__(self, config: SQLTidyConfig = None, rule_type: str = None):
+        """Initialize formatter.
+        
+        Args:
+            config: Configuration for formatting.
+            rule_type: Filter rules by type ('tidy' or 'rewrite'). None loads all.
+        """
         from .rules import load_rules
         from .rules.base import FormatterContext
-        self.ctx = FormatterContext(config or TidyConfig())
-        self.rules = load_rules()
+        self.ctx = FormatterContext(config or SQLTidyConfig())
+        self.rules = load_rules(rule_type=rule_type)
 
     def tokenize(self, sql: str) -> List[str]:
         """Convert raw SQL into proper tokens without external dependencies."""
@@ -36,9 +42,10 @@ class SQLFormatter:
     def format(self, sql: str) -> str:
         tokens = self.tokenize(sql)
 
-        # Apply your custom rules
+        # Apply rules that are applicable to the current dialect
         for rule in sorted(self.rules, key=lambda r: getattr(r, "order", 100)):
-            tokens = rule.apply(tokens, self.ctx)
+            if rule.is_applicable(self.ctx):
+                tokens = rule.apply(tokens, self.ctx)
 
         return self.join_tokens(tokens)
 
