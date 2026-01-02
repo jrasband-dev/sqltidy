@@ -1,3 +1,5 @@
+__version__ = "0.3.0"
+
 from .api import (
     format_sql,
     tidy_sql,
@@ -10,7 +12,6 @@ from .api import (
 )
 from .config import SQLTidyConfig, SUPPORTED_DIALECTS
 
-__version__ = "0.2.2"
 
 __all__ = [
     # Main formatting functions
