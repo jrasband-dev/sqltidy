@@ -142,7 +142,7 @@ def test_with_fixtures(simple_sql, sqlserver_config):
 Available fixtures:
 - `simple_sql` - Simple SELECT query
 - `complex_sql` - Complex query with joins
-- `default_config` - Default TidyConfig
+- `default_config` - Default SQLTidyConfig
 - `sqlserver_config` - SQL Server config
 - `postgresql_config` - PostgreSQL config
 - `mysql_config` - MySQL config
@@ -175,7 +175,7 @@ Available fixtures:
 ```python
 import pytest
 from sqltidy import format_sql
-from sqltidy.config import TidyConfig
+from sqltidy.config import SQLTidyConfig
 
 
 class TestMyFeature:
@@ -184,7 +184,7 @@ class TestMyFeature:
     def test_basic_behavior(self):
         """Test basic behavior of feature."""
         sql = "select id from users"
-        config = TidyConfig(dialect='sqlserver')
+        config = SQLTidyConfig(dialect='sqlserver')
         result = format_sql(sql, config=config)
         
         assert 'SELECT' in result
@@ -192,7 +192,7 @@ class TestMyFeature:
     @pytest.mark.parametrize("dialect", ['sqlserver', 'postgresql', 'mysql'])
     def test_across_dialects(self, dialect):
         """Test feature works across dialects."""
-        config = TidyConfig(dialect=dialect)
+        config = SQLTidyConfig(dialect=dialect)
         # ... test code
 ```
 

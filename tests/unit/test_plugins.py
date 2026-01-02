@@ -15,7 +15,7 @@ from sqltidy.plugins import (
     create_plugin_formatter
 )
 from sqltidy.rules.base import BaseRule
-from sqltidy.config import TidyConfig
+from sqltidy.config import SQLTidyConfig
 from sqltidy.api import format_sql
 
 
@@ -311,7 +311,7 @@ class TestPluginIntegration:
         # Test with PostgreSQL dialect
         pg_result = format_sql(
             "SELECT 1",
-            config=TidyConfig(dialect='postgresql'),
+            config=SQLTidyConfig(dialect='postgresql'),
             custom_rules=plugin_rules
         )
         assert 'PG_MARKER' in pg_result
@@ -331,7 +331,7 @@ class TestPluginIntegration:
         
         mysql_result = format_sql(
             "SELECT 1",
-            config=TidyConfig(dialect='mysql'),
+            config=SQLTidyConfig(dialect='mysql'),
             custom_rules=plugin_rules
         )
         assert 'PG_MARKER' not in mysql_result
@@ -373,7 +373,7 @@ def test_rule(tokens, ctx):
     
     def test_create_with_config(self):
         """Test creating formatter with config."""
-        config = TidyConfig(dialect='postgresql')
+        config = SQLTidyConfig(dialect='postgresql')
         formatter = create_plugin_formatter(config=config)
         
         # Check that formatter was created with config

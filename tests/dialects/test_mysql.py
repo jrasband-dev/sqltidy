@@ -10,7 +10,7 @@ import pytest
 from sqltidy.dialects import get_dialect
 from sqltidy.tokenizer import is_keyword
 from sqltidy import format_sql
-from sqltidy.config import TidyConfig
+from sqltidy.config import SQLTidyConfig
 
 
 class TestMySQLDialect:
@@ -57,7 +57,7 @@ class TestMySQLFormatting:
     def test_lowercase_keywords_default(self):
         """Test that MySQL defaults to lowercase keywords."""
         sql = "SELECT id, name FROM users"
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='mysql',
             uppercase_keywords=None,  # Use default
             newline_after_select=False,
@@ -71,7 +71,7 @@ class TestMySQLFormatting:
     def test_limit_clause(self):
         """Test LIMIT clause formatting."""
         sql = "select id from users limit 10"
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='mysql',
             newline_after_select=False,
             compact=True
@@ -83,7 +83,7 @@ class TestMySQLFormatting:
     def test_backtick_identifiers(self):
         """Test backtick identifier quoting."""
         sql = "select id from users"
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='mysql',
             quote_identifiers=True,
             newline_after_select=False

@@ -5,7 +5,7 @@ Tests complete workflows from input SQL to formatted output.
 """
 import pytest
 from sqltidy import format_sql
-from sqltidy.config import TidyConfig
+from sqltidy.config import SQLTidyConfig
 
 
 class TestEndToEndFormatting:
@@ -30,7 +30,7 @@ class TestEndToEndFormatting:
     
     def test_all_dialects_produce_output(self, simple_sql, all_dialects):
         """Test that all dialects can format SQL successfully."""
-        config = TidyConfig(dialect=all_dialects)
+        config = SQLTidyConfig(dialect=all_dialects)
         result = format_sql(simple_sql, config=config)
         
         assert result is not None
@@ -44,7 +44,7 @@ class TestDialectConsistency:
         """Test that keyword casing follows dialect conventions."""
         # SQL Server and Oracle: UPPERCASE
         for dialect in ['sqlserver', 'oracle']:
-            config = TidyConfig(
+            config = SQLTidyConfig(
                 dialect=dialect,
                 uppercase_keywords=None,
                 newline_after_select=False,
@@ -56,7 +56,7 @@ class TestDialectConsistency:
         
         # PostgreSQL, MySQL, SQLite: lowercase
         for dialect in ['postgresql', 'mysql', 'sqlite']:
-            config = TidyConfig(
+            config = SQLTidyConfig(
                 dialect=dialect,
                 uppercase_keywords=None,
                 newline_after_select=False,
@@ -69,7 +69,7 @@ class TestDialectConsistency:
     def test_config_overrides_work(self, simple_sql):
         """Test that config overrides apply correctly."""
         # Force uppercase on PostgreSQL (normally lowercase)
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='postgresql',
             uppercase_keywords=True,
             newline_after_select=False,
@@ -79,7 +79,7 @@ class TestDialectConsistency:
         assert 'SELECT' in result
         
         # Force lowercase on SQL Server (normally uppercase)
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='sqlserver',
             uppercase_keywords=False,
             newline_after_select=False,
@@ -94,7 +94,7 @@ class TestFormattingOptions:
     
     def test_newline_after_select(self, simple_sql):
         """Test newline_after_select option."""
-        config = TidyConfig(
+        config = SQLTidyConfig(
             newline_after_select=True,
             uppercase_keywords=True
         )
@@ -107,7 +107,7 @@ class TestFormattingOptions:
         """Test compact whitespace option."""
         sql = "SELECT    id,     name   FROM    users"
         
-        config = TidyConfig(compact=True, newline_after_select=False)
+        config = SQLTidyConfig(compact=True, newline_after_select=False)
         result = format_sql(sql, config=config)
         
         # Should not have multiple consecutive spaces
@@ -117,7 +117,7 @@ class TestFormattingOptions:
         """Test leading commas formatting."""
         sql = "select id, name, email from users"
         
-        config = TidyConfig(
+        config = SQLTidyConfig(
             leading_commas=True,
             newline_after_select=True,
             uppercase_keywords=False
@@ -134,7 +134,7 @@ class TestFormattingOptions:
         sql = "select id, name from users"
         
         # SQL Server: brackets
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='sqlserver',
             quote_identifiers=True,
             newline_after_select=False
@@ -143,7 +143,7 @@ class TestFormattingOptions:
         assert '[' in result or ']' in result
         
         # MySQL: backticks
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='mysql',
             quote_identifiers=True,
             newline_after_select=False
@@ -157,29 +157,29 @@ class TestEdgeCases:
     
     def test_empty_string(self):
         """Test formatting empty string."""
-        result = format_sql("", config=TidyConfig())
+        result = format_sql("", config=SQLTidyConfig())
         assert result == ""
     
     def test_whitespace_only(self):
         """Test formatting whitespace-only string."""
-        result = format_sql("   \n  \t  ", config=TidyConfig())
+        result = format_sql("   \n  \t  ", config=SQLTidyConfig())
         assert result.strip() == ""
     
     def test_single_keyword(self):
         """Test formatting single keyword."""
-        result = format_sql("SELECT", config=TidyConfig())
+        result = format_sql("SELECT", config=SQLTidyConfig())
         assert 'SELECT' in result or 'select' in result
     
     def test_preserves_literals(self):
         """Test that string literals are preserved."""
         sql = "SELECT 'John Doe' AS name"
-        result = format_sql(sql, config=TidyConfig())
+        result = format_sql(sql, config=SQLTidyConfig())
         
         assert 'John Doe' in result or 'John' in result
     
     def test_preserves_numbers(self):
         """Test that numbers are preserved."""
         sql = "SELECT id FROM users WHERE age > 25"
-        result = format_sql(sql, config=TidyConfig(newline_after_select=False))
+        result = format_sql(sql, config=SQLTidyConfig(newline_after_select=False))
         
         assert '25' in result

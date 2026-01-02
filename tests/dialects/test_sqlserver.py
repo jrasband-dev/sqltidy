@@ -10,7 +10,7 @@ import pytest
 from sqltidy.dialects import get_dialect
 from sqltidy.tokenizer import is_keyword
 from sqltidy import format_sql
-from sqltidy.config import TidyConfig
+from sqltidy.config import SQLTidyConfig
 
 
 class TestSQLServerDialect:
@@ -61,7 +61,7 @@ class TestSQLServerFormatting:
     def test_uppercase_keywords_default(self):
         """Test that SQL Server defaults to uppercase keywords."""
         sql = "select id, name from users"
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='sqlserver',
             uppercase_keywords=None,  # Use default
             newline_after_select=False,
@@ -75,7 +75,7 @@ class TestSQLServerFormatting:
     def test_top_keyword_formatting(self):
         """Test TOP keyword formatting."""
         sql = "select top 10 id from users"
-        config = TidyConfig(dialect='sqlserver')
+        config = SQLTidyConfig(dialect='sqlserver')
         result = format_sql(sql, config=config)
         
         assert 'TOP' in result.upper()
@@ -83,7 +83,7 @@ class TestSQLServerFormatting:
     def test_with_nolock_hint(self):
         """Test WITH (NOLOCK) table hints."""
         sql = "select id from users with (nolock)"
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='sqlserver',
             newline_after_select=False,
             compact=True

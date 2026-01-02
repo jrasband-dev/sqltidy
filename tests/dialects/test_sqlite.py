@@ -10,7 +10,7 @@ import pytest
 from sqltidy.dialects import get_dialect
 from sqltidy.tokenizer import is_keyword
 from sqltidy import format_sql
-from sqltidy.config import TidyConfig
+from sqltidy.config import SQLTidyConfig
 
 
 class TestSQLiteDialect:
@@ -56,7 +56,7 @@ class TestSQLiteFormatting:
     def test_lowercase_keywords_default(self):
         """Test that SQLite defaults to lowercase keywords."""
         sql = "SELECT id, name FROM users"
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='sqlite',
             uppercase_keywords=None,  # Use default
             newline_after_select=False,
@@ -70,7 +70,7 @@ class TestSQLiteFormatting:
     def test_autoincrement(self):
         """Test AUTOINCREMENT keyword."""
         sql = "create table users (id integer primary key autoincrement, name text)"
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='sqlite',
             newline_after_select=False,
             compact=True

@@ -10,7 +10,7 @@ import pytest
 from sqltidy.dialects import get_dialect
 from sqltidy.tokenizer import is_keyword
 from sqltidy import format_sql
-from sqltidy.config import TidyConfig
+from sqltidy.config import SQLTidyConfig
 
 
 class TestPostgreSQLDialect:
@@ -59,7 +59,7 @@ class TestPostgreSQLFormatting:
     def test_lowercase_keywords_default(self):
         """Test that PostgreSQL defaults to lowercase keywords."""
         sql = "SELECT id, name FROM users"
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='postgresql',
             uppercase_keywords=None,  # Use default
             newline_after_select=False,
@@ -73,7 +73,7 @@ class TestPostgreSQLFormatting:
     def test_returning_clause(self):
         """Test RETURNING clause formatting."""
         sql = "insert into users (name) values ('John') returning id"
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='postgresql',
             newline_after_select=False,
             compact=True

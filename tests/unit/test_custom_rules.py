@@ -18,7 +18,7 @@ from sqltidy.rules.helpers import (
     uppercase_keywords,
 )
 from sqltidy.rules.base import FormatterContext
-from sqltidy.config import TidyConfig
+from sqltidy.config import SQLTidyConfig
 from sqltidy.tokenizer import tokenize
 
 
@@ -62,7 +62,7 @@ class TestCreateSimpleRule:
         RuleClass = create_simple_rule("MyRule", my_apply)
         rule = RuleClass()
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         tokens = ['select', 'id', 'from', 'users']
         
@@ -80,7 +80,7 @@ class TestTokenReplacementRule:
             'order': 'sales_order'
         })
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         tokens = ['select', 'id', 'from', 'user']
         
@@ -91,7 +91,7 @@ class TestTokenReplacementRule:
         """Test that replacement is case-insensitive by default."""
         rule = create_token_replacement_rule({'user': 'app_user'})
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         
         # Test uppercase
@@ -113,7 +113,7 @@ class TestPatternRule:
             replacement=['JOIN']
         )
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         tokens = ['SELECT', '*', 'FROM', 'a', 'INNER', 'JOIN', 'b']
         
@@ -127,7 +127,7 @@ class TestPatternRule:
             replacement=['IS', 'NOT_NULL']
         )
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         tokens = ['WHERE', 'a', 'IS', 'NOT', 'NULL', 'AND', 'b', 'IS', 'NOT', 'NULL']
         
@@ -145,7 +145,7 @@ class TestKeywordWrapperRule:
             prefix='\n'
         )
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         tokens = ['SELECT', '*', 'FROM', 'users', 'WHERE', 'active', '=', '1']
         
@@ -160,7 +160,7 @@ class TestKeywordWrapperRule:
             suffix='\n'
         )
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         tokens = ['SELECT', 'id', 'FROM', 'users']
         
@@ -176,7 +176,7 @@ class TestFilterRule:
         """Test filtering tokens."""
         rule = create_filter_rule(lambda t: t != ';')
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         tokens = ['SELECT', '*', 'FROM', 'users', ';']
         
@@ -192,7 +192,7 @@ class TestTransformRule:
         """Test transforming tokens."""
         rule = create_transform_rule(lambda t: t.upper())
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         tokens = ['select', ' ', 'id', ' ', 'from', ' ', 'users']
         
@@ -208,7 +208,7 @@ class TestConvenienceFunctions:
         """Test remove_trailing_semicolons helper."""
         rule = remove_trailing_semicolons()
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         tokens = ['SELECT', '*', 'FROM', 'users']
         
@@ -219,7 +219,7 @@ class TestConvenienceFunctions:
         """Test add_newline_before_keyword helper."""
         rule = add_newline_before_keyword('WHERE')
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         tokens = ['SELECT', '*', 'FROM', 'users', 'WHERE', 'id', '=', '1']
         
@@ -230,7 +230,7 @@ class TestConvenienceFunctions:
         """Test replace_token helper."""
         rule = replace_token('user', 'app_user')
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         tokens = ['SELECT', '*', 'FROM', 'user']
         
@@ -241,7 +241,7 @@ class TestConvenienceFunctions:
         """Test uppercase_keywords helper."""
         rule = uppercase_keywords('select', 'from', 'where')
         
-        config = TidyConfig()
+        config = SQLTidyConfig()
         ctx = FormatterContext(config)
         tokens = ['select', 'id', 'from', 'users', 'where', 'active', '=', '1']
         
@@ -263,7 +263,7 @@ class TestIntegrationWithFormatter:
         rule = create_token_replacement_rule({'user': 'app_user'})
         
         # Add to formatter
-        formatter = SQLFormatter(TidyConfig(
+        formatter = SQLFormatter(SQLTidyConfig(
             uppercase_keywords=False,
             newline_after_select=False,
             compact=True
@@ -285,7 +285,7 @@ class TestIntegrationWithFormatter:
         rule2 = uppercase_keywords('select', 'from', 'where')
         
         # Add to formatter
-        formatter = SQLFormatter(TidyConfig(
+        formatter = SQLFormatter(SQLTidyConfig(
             newline_after_select=False,
             compact=True
         ))

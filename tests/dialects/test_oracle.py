@@ -10,7 +10,7 @@ import pytest
 from sqltidy.dialects import get_dialect
 from sqltidy.tokenizer import is_keyword
 from sqltidy import format_sql
-from sqltidy.config import TidyConfig
+from sqltidy.config import SQLTidyConfig
 
 
 class TestOracleDialect:
@@ -60,7 +60,7 @@ class TestOracleFormatting:
     def test_uppercase_keywords_default(self):
         """Test that Oracle defaults to uppercase keywords."""
         sql = "select id, name from users"
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='oracle',
             uppercase_keywords=None,  # Use default
             newline_after_select=False,
@@ -74,7 +74,7 @@ class TestOracleFormatting:
     def test_dual_table(self):
         """Test DUAL table usage."""
         sql = "select sysdate from dual"
-        config = TidyConfig(
+        config = SQLTidyConfig(
             dialect='oracle',
             newline_after_select=False,
             compact=True
@@ -86,7 +86,7 @@ class TestOracleFormatting:
     def test_connect_by_clause(self):
         """Test hierarchical CONNECT BY queries."""
         sql = "select * from employees start with manager_id is null connect by prior employee_id = manager_id"
-        config = TidyConfig(dialect='oracle')
+        config = SQLTidyConfig(dialect='oracle')
         result = format_sql(sql, config=config)
         
         assert 'CONNECT' in result.upper()
