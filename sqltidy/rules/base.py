@@ -1,10 +1,10 @@
 from typing import List, Optional, Set
-from ..config import TidyConfig
+from ..config import SQLTidyConfig
 
 
 class FormatterContext:
     """Holds configuration for the formatting run."""
-    def __init__(self, config: TidyConfig):
+    def __init__(self, config: SQLTidyConfig):
         self.config = config
 
 

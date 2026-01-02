@@ -51,18 +51,25 @@ def _load_modules_from_directory(dir_path, package_prefix):
     return rules
 
 
-def load_rules():
-    """Load all rules from tidy/ and rewrite/ directories, plus any plugins."""
+def load_rules(rule_type=None):
+    """Load all rules from tidy/ and rewrite/ directories, plus any plugins.
+    
+    Args:
+        rule_type (str, optional): Filter rules by type ('tidy' or 'rewrite'). 
+                                   None loads all rules.
+    """
     rules = []
     rules_dir = Path(__file__).parent
 
-    # Load tidy rules
-    tidy_dir = rules_dir / "tidy"
-    rules.extend(_load_modules_from_directory(tidy_dir, "sqltidy.rules.tidy"))
+    # Load tidy rules if requested or no filter
+    if rule_type is None or rule_type == 'tidy':
+        tidy_dir = rules_dir / "tidy"
+        rules.extend(_load_modules_from_directory(tidy_dir, "sqltidy.rules.tidy"))
 
-    # Load rewrite rules
-    rewrite_dir = rules_dir / "rewrite"
-    rules.extend(_load_modules_from_directory(rewrite_dir, "sqltidy.rules.rewrite"))
+    # Load rewrite rules if requested or no filter
+    if rule_type is None or rule_type == 'rewrite':
+        rewrite_dir = rules_dir / "rewrite"
+        rules.extend(_load_modules_from_directory(rewrite_dir, "sqltidy.rules.rewrite"))
 
     # Load plugin rules from rules/plugins/
     plugin_dir = rules_dir / "plugins"

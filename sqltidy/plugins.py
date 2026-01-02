@@ -285,7 +285,7 @@ def create_plugin_formatter(
     Convenience function that creates a formatter and loads all specified plugins.
     
     Args:
-        config: TidyConfig or RewriteConfig
+        config: SQLTidyConfig
         plugin_files: List of plugin file paths to load
         plugin_dirs: List of plugin directories to load
         plugin_modules: List of module names to import
@@ -295,10 +295,10 @@ def create_plugin_formatter(
     
     Example:
         from sqltidy.plugins import create_plugin_formatter
-        from sqltidy.config import TidyConfig
+        from sqltidy.config import SQLTidyConfig
         
         formatter = create_plugin_formatter(
-            config=TidyConfig(dialect='postgresql'),
+            config=SQLTidyConfig(dialect='postgresql'),
             plugin_files=['my_rules.py'],
             plugin_dirs=['~/.sqltidy/plugins']
         )
@@ -306,9 +306,9 @@ def create_plugin_formatter(
         result = formatter.format(sql)
     """
     from sqltidy.core import SQLFormatter
-    from sqltidy.config import TidyConfig
+    from sqltidy.config import SQLTidyConfig
     
-    formatter = SQLFormatter(config or TidyConfig())
+    formatter = SQLFormatter(config or SQLTidyConfig())
     
     # Load plugins from files
     if plugin_files:

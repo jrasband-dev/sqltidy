@@ -1,5 +1,31 @@
-from .api import format_sql, register_plugin, clear_plugins
+from .api import (
+    format_sql,
+    tidy_sql,
+    rewrite_sql,
+    tidy_and_rewrite_sql,
+    register_plugin,
+    clear_plugins,
+    load_plugin,
+    load_user_plugins,
+)
+from .config import SQLTidyConfig, SUPPORTED_DIALECTS
 
 __version__ = "0.2.2"
 
-__all__ = ["format_sql", "register_plugin", "clear_plugins", "__version__"]
+__all__ = [
+    # Main formatting functions
+    "format_sql",
+    "tidy_sql",
+    "rewrite_sql",
+    "tidy_and_rewrite_sql",
+    # Plugin management
+    "register_plugin",
+    "clear_plugins",
+    "load_plugin",
+    "load_user_plugins",
+    # Configuration
+    "SQLTidyConfig",
+    "SUPPORTED_DIALECTS",
+    # Version
+    "__version__",
+]
