@@ -1,0 +1,190 @@
+================================================================================
+SQLTIDY CODE QUALITY METRICS SUMMARY
+================================================================================
+Generated: 2026-01-02
+Repository: jrasband-dev/sqltidy
+Branch: copilot/scan-repo-for-issues
+
+================================================================================
+OVERALL HEALTH METRICS
+================================================================================
+
+Code Quality Score (Pylint):     5.30 / 10.00  ⚠️
+Test Status:                     FAILING ❌
+Type Coverage:                   INCOMPLETE ⚠️
+Security Posture:                SAFE ✅
+
+================================================================================
+DETAILED METRICS
+================================================================================
+
+TESTS
+-----
+Total Test Files:                110 discovered
+Tests Run:                       0 (blocked by import error)
+Test Success Rate:               N/A
+Blocking Issues:                 1 (ImportError in test_custom_rules.py)
+
+CODE STYLE (FLAKE8)
+-------------------
+Total Style Violations:          1,121
+Files Affected:                  Multiple across codebase
+
+Top Violations:
+  W293 (Blank line with whitespace):        744
+  E501 (Line too long):                     298
+  E231 (Missing whitespace):                 20
+  W291 (Trailing whitespace):                12
+  F401 (Unused imports):                      8
+  F811 (Function redefinition):               1 ⚠️ CRITICAL
+
+CODE QUALITY (PYLINT)
+---------------------
+Total Issues:                    897
+Critical Issues:                 0
+Errors:                          Multiple
+Warnings:                        Multiple
+
+Top Issues:
+  Trailing whitespace:                      612
+  Duplicate values:                         110
+  Lines too long:                            37
+  Missing docstrings:                        28
+  Broad exception handling:                  17
+  Code duplication:                          14
+  Wrong import order:                         7
+
+Complexity Issues:
+  Too many branches:                          6
+  Too many locals:                            3
+  Too many return statements:                 3
+
+TYPE SAFETY (MYPY)
+------------------
+Type Errors:                     30
+Files with Errors:               5
+
+Error Distribution:
+  sqltidy/tokenizer.py:                     21 errors
+  sqltidy/plugins.py:                        6 errors
+  sqltidy/core.py:                           2 errors
+  sqltidy/generator.py:                      1 error
+  sqltidy/api.py:                            1 error
+
+Common Issues:
+  - Missing type annotations:               Multiple
+  - Union type handling:                    Multiple
+  - Incompatible defaults:                  2
+  - Function redefinition:                  1
+
+SECURITY (BANDIT)
+-----------------
+Critical Vulnerabilities:        0 ✅
+High Severity:                   0 ✅
+Medium Severity:                 0 ✅
+Low Severity:                    3 ⚠️
+
+Security Issues:
+  B404 (subprocess import):                  1 (Low)
+  B606 (process without shell):              1 (Low)
+  B603 (subprocess call):                    1 (Low)
+
+Total Lines Scanned:             3,606
+Lines Skipped (#nosec):          0
+
+CODEQL ANALYSIS
+---------------
+Status:                          No changes to analyze
+Critical Issues:                 N/A
+Findings:                        N/A
+
+================================================================================
+CODE COVERAGE
+================================================================================
+
+Lines of Code:                   3,606
+Python Files:                    33
+Test Files:                      Cannot count (tests not running)
+Test Coverage:                   UNKNOWN (tests blocked)
+
+================================================================================
+PRIORITY ISSUES SUMMARY
+================================================================================
+
+P0 - CRITICAL (Must Fix Immediately)
+-------------------------------------
+1. Test import error in test_custom_rules.py
+   - Blocks all testing
+   - Missing module: sqltidy.rules.helpers
+
+P1 - HIGH (Should Fix Soon)
+----------------------------
+1. Function redefinition in tokenizer.py (line 241)
+   - Causes unexpected behavior
+   - Duplicate: get_token_type function
+
+2. Union type attribute access issues (tokenizer.py)
+   - Potential runtime errors
+   - 2 instances
+
+P2 - MEDIUM (Should Fix)
+-------------------------
+1. Missing type annotations (30 instances)
+2. Platform compatibility (os.startfile on non-Windows)
+3. Unused imports (8 instances)
+4. Missing docstrings (28 instances)
+5. Code duplication (14 instances)
+
+P3 - LOW (Nice to Have)
+-----------------------
+1. Trailing whitespace (744 instances)
+2. Lines too long (298 instances)
+3. Import order issues (7 instances)
+4. Blank line formatting (multiple instances)
+
+================================================================================
+RECOMMENDED ACTIONS
+================================================================================
+
+IMMEDIATE (Within 1 day)
+------------------------
+[ ] Fix test import error - either create helpers module or update tests
+[ ] Remove duplicate get_token_type function definition
+[ ] Run basic test suite to verify fixes
+
+SHORT TERM (Within 1 week)
+---------------------------
+[ ] Add missing type annotations
+[ ] Fix platform compatibility issues
+[ ] Remove unused imports
+[ ] Add type checking to CI/CD pipeline
+
+MEDIUM TERM (Within 1 month)
+-----------------------------
+[ ] Refactor duplicate code patterns
+[ ] Add missing docstrings
+[ ] Improve exception handling (avoid broad Exception catches)
+[ ] Reduce function complexity
+
+LONG TERM (Within 3 months)
+----------------------------
+[ ] Add automated code formatting (black/autopep8)
+[ ] Increase test coverage
+[ ] Establish coding standards documentation
+[ ] Set up pre-commit hooks for linting
+
+================================================================================
+TOOL VERSIONS
+================================================================================
+
+Python:                          3.12.3
+pytest:                          9.0.2
+pytest-cov:                      7.0.0
+pylint:                          4.0.4
+flake8:                          7.3.0
+mypy:                            1.19.1
+bandit:                          1.9.2
+
+================================================================================
+END OF REPORT
+================================================================================
