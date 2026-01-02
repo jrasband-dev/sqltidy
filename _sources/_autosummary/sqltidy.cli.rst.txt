@@ -1,0 +1,14 @@
+sqltidy.cli
+===========
+
+.. automodule:: sqltidy.cli
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      create_config_from_file
+      main
+      resolve_config_path
+   

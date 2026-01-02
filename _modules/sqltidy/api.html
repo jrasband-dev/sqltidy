@@ -31,10 +31,13 @@
           <div class="body" role="main">
             
   <h1>Source code for sqltidy.api</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TidyConfig</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLTidyConfig</span><span class="p">,</span> <span class="n">SUPPORTED_DIALECTS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.rules.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseRule</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLFormatter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_plugin_file</span><span class="p">,</span> <span class="n">load_plugins_from_directory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_user_plugins_dir</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="c1"># In-memory list to hold extra plugin rules registered at runtime</span>
 <span class="n">_extra_plugins</span> <span class="o">=</span> <span class="p">[]</span>
@@ -64,19 +67,44 @@
 
 <div class="viewcode-block" id="format_sql">
 <a class="viewcode-back" href="../../api.html#sqltidy.format_sql">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">format_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TidyConfig</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">custom_rules</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">BaseRule</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">format_sql</span><span class="p">(</span>
+    <span class="n">sql</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SQLTidyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dialect</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">custom_rules</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">BaseRule</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rule_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Format a SQL string using all registered rules, including runtime plugins.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        sql (str): The SQL string to format.</span>
-<span class="sd">        config (TidyConfig, optional): Formatter configuration.</span>
+<span class="sd">        config (SQLTidyConfig, optional): Formatter configuration. If not provided,</span>
+<span class="sd">            will use dialect parameter or default configuration.</span>
+<span class="sd">        dialect (str, optional): SQL dialect shorthand. One of: &#39;sqlserver&#39;, &#39;postgresql&#39;,</span>
+<span class="sd">            &#39;mysql&#39;, &#39;oracle&#39;, &#39;sqlite&#39;. Ignored if config is provided.</span>
 <span class="sd">        custom_rules (List[BaseRule], optional): Additional custom rules to apply.</span>
+<span class="sd">        rule_type (str, optional): Filter rules by type (&#39;tidy&#39; or &#39;rewrite&#39;). None loads all.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Formatted SQL string.</span>
+<span class="sd">        </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If dialect is provided but not in SUPPORTED_DIALECTS.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">formatter</span> <span class="o">=</span> <span class="n">SQLFormatter</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+    <span class="c1"># Resolve config from dialect if provided</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dialect</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dialect</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SUPPORTED_DIALECTS</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Unsupported dialect: &#39;</span><span class="si">{</span><span class="n">dialect</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Must be one of: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SUPPORTED_DIALECTS</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">get_dialect_defaults</span><span class="p">(</span><span class="n">dialect</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="p">()</span>
+    
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">SQLFormatter</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">rule_type</span><span class="o">=</span><span class="n">rule_type</span><span class="p">)</span>
 
     <span class="c1"># Inject runtime plugins into the formatter</span>
     <span class="n">formatter</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_extra_plugins</span><span class="p">)</span>
@@ -86,6 +114,140 @@
         <span class="n">formatter</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">custom_rules</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="tidy_sql">
+<a class="viewcode-back" href="../../api.html#sqltidy.tidy_sql">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tidy_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;sqlserver&#39;</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SQLTidyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply formatting (tidy) rules to SQL without structural transformations.</span>
+<span class="sd">    </span>
+<span class="sd">    This function only applies cosmetic formatting rules like keyword casing,</span>
+<span class="sd">    indentation, and whitespace normalization. It does not modify the SQL structure.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sql (str): The SQL string to format.</span>
+<span class="sd">        dialect (str): SQL dialect. One of: &#39;sqlserver&#39;, &#39;postgresql&#39;, &#39;mysql&#39;,</span>
+<span class="sd">            &#39;oracle&#39;, &#39;sqlite&#39;. Default is &#39;sqlserver&#39;.</span>
+<span class="sd">        config (SQLTidyConfig, optional): Custom configuration. If provided, dialect is ignored.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Formatted SQL string.</span>
+<span class="sd">        </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; sql = &quot;select name,email from users where active=1&quot;</span>
+<span class="sd">        &gt;&gt;&gt; tidy_sql(sql, dialect=&#39;postgresql&#39;)</span>
+<span class="sd">        &#39;select\n    name\n    ,email\nfrom users\nwhere active=1&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">format_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">dialect</span><span class="p">,</span> <span class="n">rule_type</span><span class="o">=</span><span class="s1">&#39;tidy&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="rewrite_sql">
+<a class="viewcode-back" href="../../api.html#sqltidy.rewrite_sql">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rewrite_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;sqlserver&#39;</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SQLTidyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply transformation (rewrite) rules to SQL.</span>
+<span class="sd">    </span>
+<span class="sd">    This function applies structural transformations like converting subqueries to CTEs</span>
+<span class="sd">    or standardizing alias styles. It does not apply formatting rules.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sql (str): The SQL string to transform.</span>
+<span class="sd">        dialect (str): SQL dialect. One of: &#39;sqlserver&#39;, &#39;postgresql&#39;, &#39;mysql&#39;,</span>
+<span class="sd">            &#39;oracle&#39;, &#39;sqlite&#39;. Default is &#39;sqlserver&#39;.</span>
+<span class="sd">        config (SQLTidyConfig, optional): Custom configuration. If provided, dialect is ignored.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Transformed SQL string.</span>
+<span class="sd">        </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; sql = &quot;SELECT (SELECT COUNT(*) FROM users) as total FROM orders&quot;</span>
+<span class="sd">        &gt;&gt;&gt; rewrite_sql(sql)</span>
+<span class="sd">        &#39;WITH cte_1 AS (SELECT COUNT(*) FROM users) SELECT total FROM orders&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">format_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">dialect</span><span class="p">,</span> <span class="n">rule_type</span><span class="o">=</span><span class="s1">&#39;rewrite&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="tidy_and_rewrite_sql">
+<a class="viewcode-back" href="../../api.html#sqltidy.tidy_and_rewrite_sql">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tidy_and_rewrite_sql</span><span class="p">(</span>
+    <span class="n">sql</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;sqlserver&#39;</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SQLTidyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply both transformation and formatting rules to SQL.</span>
+<span class="sd">    </span>
+<span class="sd">    This function first applies rewrite rules (structural transformations), then</span>
+<span class="sd">    applies tidy rules (formatting). This is equivalent to running rewrite_sql()</span>
+<span class="sd">    followed by tidy_sql().</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sql (str): The SQL string to transform and format.</span>
+<span class="sd">        dialect (str): SQL dialect. One of: &#39;sqlserver&#39;, &#39;postgresql&#39;, &#39;mysql&#39;,</span>
+<span class="sd">            &#39;oracle&#39;, &#39;sqlite&#39;. Default is &#39;sqlserver&#39;.</span>
+<span class="sd">        config (SQLTidyConfig, optional): Custom configuration. If provided, dialect is ignored.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Transformed and formatted SQL string.</span>
+<span class="sd">        </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; sql = &quot;select (select count(*) from users) as total from orders&quot;</span>
+<span class="sd">        &gt;&gt;&gt; tidy_and_rewrite_sql(sql, dialect=&#39;postgresql&#39;)</span>
+<span class="sd">        &#39;with cte_1 as (\n    select count(*)\n    from users\n)\nselect\n    total\nfrom orders&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># First apply rewrite rules</span>
+    <span class="n">sql</span> <span class="o">=</span> <span class="n">format_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">dialect</span><span class="p">,</span> <span class="n">rule_type</span><span class="o">=</span><span class="s1">&#39;rewrite&#39;</span><span class="p">)</span>
+    <span class="c1"># Then apply tidy rules</span>
+    <span class="n">sql</span> <span class="o">=</span> <span class="n">format_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">dialect</span><span class="p">,</span> <span class="n">rule_type</span><span class="o">=</span><span class="s1">&#39;tidy&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sql</span></div>
+
+
+
+<div class="viewcode-block" id="load_user_plugins">
+<a class="viewcode-back" href="../../api.html#sqltidy.load_user_plugins">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_user_plugins</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">type</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load all plugins from the user&#39;s plugin directory (~/.sqltidy/plugins/).</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[type]: List of rule classes found in user plugins.</span>
+<span class="sd">        </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; rules = load_user_plugins()</span>
+<span class="sd">        &gt;&gt;&gt; for rule_cls in rules:</span>
+<span class="sd">        ...     register_plugin(rule_cls())</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plugins_dir</span> <span class="o">=</span> <span class="n">get_user_plugins_dir</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugins_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    
+    <span class="k">return</span> <span class="n">load_plugins_from_directory</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">plugins_dir</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="load_plugin">
+<a class="viewcode-back" href="../../api.html#sqltidy.load_plugin">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_plugin</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">type</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load plugin rules from a Python file.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        filepath (str): Path to the plugin Python file.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[type]: List of rule classes found in the plugin file.</span>
+<span class="sd">        </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; rules = load_plugin(&#39;my_custom_rules.py&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; for rule_cls in rules:</span>
+<span class="sd">        ...     register_plugin(rule_cls())</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">load_plugin_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
 
 </pre></div>
 
@@ -150,7 +312,7 @@
       &#169;2025, Jayden Rasband.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
     </div>

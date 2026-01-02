@@ -86,18 +86,25 @@
 
 <div class="viewcode-block" id="load_rules">
 <a class="viewcode-back" href="../../../rules.html#sqltidy.rules.load_rules">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_rules</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load all rules from tidy/ and rewrite/ directories, plus any plugins.&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_rules</span><span class="p">(</span><span class="n">rule_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load all rules from tidy/ and rewrite/ directories, plus any plugins.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        rule_type (str, optional): Filter rules by type (&#39;tidy&#39; or &#39;rewrite&#39;). </span>
+<span class="sd">                                   None loads all rules.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rules</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">rules_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
 
-    <span class="c1"># Load tidy rules</span>
-    <span class="n">tidy_dir</span> <span class="o">=</span> <span class="n">rules_dir</span> <span class="o">/</span> <span class="s2">&quot;tidy&quot;</span>
-    <span class="n">rules</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_load_modules_from_directory</span><span class="p">(</span><span class="n">tidy_dir</span><span class="p">,</span> <span class="s2">&quot;sqltidy.rules.tidy&quot;</span><span class="p">))</span>
+    <span class="c1"># Load tidy rules if requested or no filter</span>
+    <span class="k">if</span> <span class="n">rule_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">rule_type</span> <span class="o">==</span> <span class="s1">&#39;tidy&#39;</span><span class="p">:</span>
+        <span class="n">tidy_dir</span> <span class="o">=</span> <span class="n">rules_dir</span> <span class="o">/</span> <span class="s2">&quot;tidy&quot;</span>
+        <span class="n">rules</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_load_modules_from_directory</span><span class="p">(</span><span class="n">tidy_dir</span><span class="p">,</span> <span class="s2">&quot;sqltidy.rules.tidy&quot;</span><span class="p">))</span>
 
-    <span class="c1"># Load rewrite rules</span>
-    <span class="n">rewrite_dir</span> <span class="o">=</span> <span class="n">rules_dir</span> <span class="o">/</span> <span class="s2">&quot;rewrite&quot;</span>
-    <span class="n">rules</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_load_modules_from_directory</span><span class="p">(</span><span class="n">rewrite_dir</span><span class="p">,</span> <span class="s2">&quot;sqltidy.rules.rewrite&quot;</span><span class="p">))</span>
+    <span class="c1"># Load rewrite rules if requested or no filter</span>
+    <span class="k">if</span> <span class="n">rule_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">rule_type</span> <span class="o">==</span> <span class="s1">&#39;rewrite&#39;</span><span class="p">:</span>
+        <span class="n">rewrite_dir</span> <span class="o">=</span> <span class="n">rules_dir</span> <span class="o">/</span> <span class="s2">&quot;rewrite&quot;</span>
+        <span class="n">rules</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_load_modules_from_directory</span><span class="p">(</span><span class="n">rewrite_dir</span><span class="p">,</span> <span class="s2">&quot;sqltidy.rules.rewrite&quot;</span><span class="p">))</span>
 
     <span class="c1"># Load plugin rules from rules/plugins/</span>
     <span class="n">plugin_dir</span> <span class="o">=</span> <span class="n">rules_dir</span> <span class="o">/</span> <span class="s2">&quot;plugins&quot;</span>
@@ -185,7 +192,7 @@
       &#169;2025, Jayden Rasband.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
     </div>

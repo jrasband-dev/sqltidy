@@ -167,8 +167,14 @@ The default implementation checks <cite>supported_dialects</cite>.</p>
 <p>The rule loader system dynamically loads and manages rules.</p>
 <dl class="py function" id="module-sqltidy.rules.loader">
 <dt class="sig sig-object py" id="sqltidy.rules.loader.load_rules">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.rules.loader.</span></span><span class="sig-name descname"><span class="pre">load_rules</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/rules/loader.html#load_rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.rules.loader.load_rules" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sqltidy.rules.loader.</span></span><span class="sig-name descname"><span class="pre">load_rules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sqltidy/rules/loader.html#load_rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.rules.loader.load_rules" title="Link to this definition">¶</a></dt>
 <dd><p>Load all rules from tidy/ and rewrite/ directories, plus any plugins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rule_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Filter rules by type (‘tidy’ or ‘rewrite’).
+None loads all rules.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -921,12 +927,12 @@ SELECT TOP 1 WITH TIES * FROM ranked_items ORDER BY score</p>
 <h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
 <p>Rules can be enabled or disabled via configuration:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_sql</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TidyConfig</span><span class="p">,</span> <span class="n">RewriteConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLTidyConfig</span><span class="p">,</span> <span class="n">SQLTidyConfig</span>
 
-<span class="n">config</span> <span class="o">=</span> <span class="n">TidyConfig</span><span class="p">(</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="p">(</span>
     <span class="n">uppercase_keywords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">leading_commas</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">rewrite</span><span class="o">=</span><span class="n">RewriteConfig</span><span class="p">(</span>
+    <span class="n">rewrite</span><span class="o">=</span><span class="n">SQLTidyConfig</span><span class="p">(</span>
         <span class="n">enable_subquery_to_cte</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
 <span class="p">)</span>
@@ -1006,7 +1012,7 @@ SELECT TOP 1 WITH TIES * FROM ranked_items ORDER BY score</p>
       &#169;2025, Jayden Rasband.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |

@@ -10,5 +10,10 @@ sqltidy.api
    
       clear_plugins
       format_sql
+      load_plugin
+      load_user_plugins
       register_plugin
+      rewrite_sql
+      tidy_and_rewrite_sql
+      tidy_sql
    

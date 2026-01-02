@@ -64,7 +64,7 @@ Processing Flow
 ---------------
 
 1. **Input**: SQL string provided by user
-2. **Configuration**: Load config (defaults or custom ``TidyConfig``)
+2. **Configuration**: Load config (defaults or custom ``SQLTidyConfig``)
 3. **Dialect Detection**: Determine SQL dialect (or use configured dialect)
 4. **Tokenization**: Parse SQL into tokens using ``Tokenizer``
 5. **Rule Application**: Apply enabled rules in order:
@@ -84,7 +84,7 @@ Import the main API:
 .. code-block:: python
 
    from sqltidy import format_sql, register_plugin, clear_plugins
-   from sqltidy.config import TidyConfig, RewriteConfig
+   from sqltidy.config import SQLTidyConfig, SQLTidyConfig
 
 Format SQL with defaults:
 
@@ -97,11 +97,11 @@ Format with custom configuration:
 
 .. code-block:: python
 
-   config = TidyConfig(
+   config = SQLTidyConfig(
        uppercase_keywords=True,
        leading_commas=True,
        dialect='postgresql',
-       rewrite=RewriteConfig(
+       rewrite=SQLTidyConfig(
            enable_subquery_to_cte=True
        )
    )
@@ -140,8 +140,8 @@ Main Configuration Classes
 
 .. autosummary::
 
-   sqltidy.config.TidyConfig
-   sqltidy.config.RewriteConfig
+   sqltidy.config.SQLTidyConfig
+   sqltidy.config.SQLTidyConfig
 
 See :doc:`api` for full configuration documentation.
 
@@ -153,7 +153,7 @@ SQLTidy provides several extension points:
 1. **Custom Rules**: Create rules by inheriting from ``BaseRule``
 2. **Runtime Plugins**: Register rules dynamically with ``register_plugin()``
 3. **Custom Dialects**: Register new SQL dialects
-4. **Configuration**: Override defaults via ``TidyConfig``
+4. **Configuration**: Override defaults via ``SQLTidyConfig``
 
 For examples, see:
 

@@ -8,12 +8,23 @@ sqltidy.generator
 
    .. autosummary::
    
-      generate_rewrite_config
-      generate_tidy_config
-      get_output_filename
+      add_plugin
+      create_config
+      edit_config
+      generate_config_interactive
+      get_bundled_config_path
+      get_bundled_configs_dir
+      get_config_path
+      get_default_filename
+      get_user_configs_dir
+      get_user_plugins_dir
+      initialize_user_configs
+      list_configs
+      list_plugins
       load_config_file
       prompt_yes_no
-      run_generator
-      save_config
-      select_config_type
+      remove_plugin
+      reset_config
+      select_dialect
+      update_config
    

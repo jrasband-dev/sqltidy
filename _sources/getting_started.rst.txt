@@ -27,14 +27,14 @@ The simplest way to use SQLTidy is to import the ``format_sql`` function:
    print(formatted)
 
 
-You can customize formatting behavior using a ``TidyConfig`` object:
+You can customize formatting behavior using a ``SQLTidyConfig`` object:
 
 .. code-block:: python
 
    from sqltidy import format_sql
-   from sqltidy.config import TidyConfig
+   from sqltidy.config import SQLTidyConfig
    
-   config = TidyConfig()
+   config = SQLTidyConfig()
    sql = "SELECT * FROM users"
    formatted = format_sql(sql, config=config)
 
@@ -93,13 +93,13 @@ For more information about creating custom rules, see the :doc:`plugins` documen
 Configuration
 -------------
 
-Configuration options can be set using the ``TidyConfig`` class:
+Configuration options can be set using the ``SQLTidyConfig`` class:
 
 .. code-block:: python
 
-   from sqltidy.config import TidyConfig
+   from sqltidy.config import SQLTidyConfig
    
-   config = TidyConfig(
+   config = SQLTidyConfig(
        # Add your configuration options here
    )
 

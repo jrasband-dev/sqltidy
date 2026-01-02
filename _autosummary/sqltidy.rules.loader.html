@@ -38,15 +38,21 @@
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../rules.html#sqltidy.rules.loader.load_rules" title="sqltidy.rules.loader.load_rules"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_rules</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../rules.html#sqltidy.rules.loader.load_rules" title="sqltidy.rules.loader.load_rules"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_rules</span></code></a>([rule_type])</p></td>
 <td><p>Load all rules from tidy/ and rewrite/ directories, plus any plugins.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="sqltidy.rules.loader.load_rules">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.rules.loader.</span></span><span class="sig-name descname"><span class="pre">load_rules</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/rules/loader.html#load_rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.rules.loader.load_rules" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sqltidy.rules.loader.</span></span><span class="sig-name descname"><span class="pre">load_rules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/rules/loader.html#load_rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.rules.loader.load_rules" title="Link to this definition">¶</a></dt>
 <dd><p>Load all rules from tidy/ and rewrite/ directories, plus any plugins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rule_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Filter rules by type (‘tidy’ or ‘rewrite’).
+None loads all rules.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -125,7 +131,7 @@
       &#169;2025, Jayden Rasband.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |

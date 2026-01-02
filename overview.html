@@ -106,7 +106,7 @@
 <h2>Processing Flow<a class="headerlink" href="#processing-flow" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p><strong>Input</strong>: SQL string provided by user</p></li>
-<li><p><strong>Configuration</strong>: Load config (defaults or custom <code class="docutils literal notranslate"><span class="pre">TidyConfig</span></code>)</p></li>
+<li><p><strong>Configuration</strong>: Load config (defaults or custom <code class="docutils literal notranslate"><span class="pre">SQLTidyConfig</span></code>)</p></li>
 <li><p><strong>Dialect Detection</strong>: Determine SQL dialect (or use configured dialect)</p></li>
 <li><p><strong>Tokenization</strong>: Parse SQL into tokens using <code class="docutils literal notranslate"><span class="pre">Tokenizer</span></code></p></li>
 <li><p><strong>Rule Application</strong>: Apply enabled rules in order:</p>
@@ -124,7 +124,7 @@
 <h2>Quick Reference<a class="headerlink" href="#quick-reference" title="Link to this heading">¶</a></h2>
 <p>Import the main API:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_sql</span><span class="p">,</span> <span class="n">register_plugin</span><span class="p">,</span> <span class="n">clear_plugins</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TidyConfig</span><span class="p">,</span> <span class="n">RewriteConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLTidyConfig</span><span class="p">,</span> <span class="n">SQLTidyConfig</span>
 </pre></div>
 </div>
 <p>Format SQL with defaults:</p>
@@ -133,11 +133,11 @@
 </pre></div>
 </div>
 <p>Format with custom configuration:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">TidyConfig</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="p">(</span>
     <span class="n">uppercase_keywords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">leading_commas</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">dialect</span><span class="o">=</span><span class="s1">&#39;postgresql&#39;</span><span class="p">,</span>
-    <span class="n">rewrite</span><span class="o">=</span><span class="n">RewriteConfig</span><span class="p">(</span>
+    <span class="n">rewrite</span><span class="o">=</span><span class="n">SQLTidyConfig</span><span class="p">(</span>
         <span class="n">enable_subquery_to_cte</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
 <span class="p">)</span>
@@ -174,11 +174,11 @@
 <h3>Main Configuration Classes<a class="headerlink" href="#main-configuration-classes" title="Link to this heading">¶</a></h3>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="api.html#sqltidy.config.TidyConfig" title="sqltidy.config.TidyConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sqltidy.config.TidyConfig</span></code></a></p></td>
-<td><p>Configuration for SQL formatting (tidy) rules.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api.html#sqltidy.config.SQLTidyConfig" title="sqltidy.config.SQLTidyConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sqltidy.config.SQLTidyConfig</span></code></a></p></td>
+<td><p>Unified configuration for SQL formatting and transformation.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api.html#sqltidy.config.RewriteConfig" title="sqltidy.config.RewriteConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sqltidy.config.RewriteConfig</span></code></a></p></td>
-<td><p>Configuration for SQL transformation (rewrite) rules.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api.html#sqltidy.config.SQLTidyConfig" title="sqltidy.config.SQLTidyConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sqltidy.config.SQLTidyConfig</span></code></a></p></td>
+<td><p>Unified configuration for SQL formatting and transformation.</p></td>
 </tr>
 </tbody>
 </table>
@@ -192,7 +192,7 @@
 <li><p><strong>Custom Rules</strong>: Create rules by inheriting from <code class="docutils literal notranslate"><span class="pre">BaseRule</span></code></p></li>
 <li><p><strong>Runtime Plugins</strong>: Register rules dynamically with <code class="docutils literal notranslate"><span class="pre">register_plugin()</span></code></p></li>
 <li><p><strong>Custom Dialects</strong>: Register new SQL dialects</p></li>
-<li><p><strong>Configuration</strong>: Override defaults via <code class="docutils literal notranslate"><span class="pre">TidyConfig</span></code></p></li>
+<li><p><strong>Configuration</strong>: Override defaults via <code class="docutils literal notranslate"><span class="pre">SQLTidyConfig</span></code></p></li>
 </ol>
 <p>For examples, see:</p>
 <ul class="simple">
@@ -273,7 +273,7 @@
       &#169;2025, Jayden Rasband.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |

@@ -8,6 +8,5 @@ sqltidy.config
 
    .. autosummary::
    
-      RewriteConfig
-      TidyConfig
+      SQLTidyConfig
    

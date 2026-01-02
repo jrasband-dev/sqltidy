@@ -186,12 +186,12 @@ Rules can be enabled or disabled via configuration:
 .. code-block:: python
 
    from sqltidy import format_sql
-   from sqltidy.config import TidyConfig, RewriteConfig
+   from sqltidy.config import SQLTidyConfig, SQLTidyConfig
    
-   config = TidyConfig(
+   config = SQLTidyConfig(
        uppercase_keywords=True,
        leading_commas=True,
-       rewrite=RewriteConfig(
+       rewrite=SQLTidyConfig(
            enable_subquery_to_cte=True
        )
    )

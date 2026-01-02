@@ -341,7 +341,7 @@
 <span class="sd">    Convenience function that creates a formatter and loads all specified plugins.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        config: TidyConfig or RewriteConfig</span>
+<span class="sd">        config: SQLTidyConfig</span>
 <span class="sd">        plugin_files: List of plugin file paths to load</span>
 <span class="sd">        plugin_dirs: List of plugin directories to load</span>
 <span class="sd">        plugin_modules: List of module names to import</span>
@@ -351,10 +351,10 @@
 <span class="sd">    </span>
 <span class="sd">    Example:</span>
 <span class="sd">        from sqltidy.plugins import create_plugin_formatter</span>
-<span class="sd">        from sqltidy.config import TidyConfig</span>
+<span class="sd">        from sqltidy.config import SQLTidyConfig</span>
 <span class="sd">        </span>
 <span class="sd">        formatter = create_plugin_formatter(</span>
-<span class="sd">            config=TidyConfig(dialect=&#39;postgresql&#39;),</span>
+<span class="sd">            config=SQLTidyConfig(dialect=&#39;postgresql&#39;),</span>
 <span class="sd">            plugin_files=[&#39;my_rules.py&#39;],</span>
 <span class="sd">            plugin_dirs=[&#39;~/.sqltidy/plugins&#39;]</span>
 <span class="sd">        )</span>
@@ -362,9 +362,9 @@
 <span class="sd">        result = formatter.format(sql)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLFormatter</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TidyConfig</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLTidyConfig</span>
     
-    <span class="n">formatter</span> <span class="o">=</span> <span class="n">SQLFormatter</span><span class="p">(</span><span class="n">config</span> <span class="ow">or</span> <span class="n">TidyConfig</span><span class="p">())</span>
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">SQLFormatter</span><span class="p">(</span><span class="n">config</span> <span class="ow">or</span> <span class="n">SQLTidyConfig</span><span class="p">())</span>
     
     <span class="c1"># Load plugins from files</span>
     <span class="k">if</span> <span class="n">plugin_files</span><span class="p">:</span>
@@ -463,7 +463,7 @@
       &#169;2025, Jayden Rasband.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
     </div>

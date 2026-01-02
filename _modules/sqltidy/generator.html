@@ -33,25 +33,104 @@
   <h1>Source code for sqltidy.generator</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Interactive configuration generator for sqltidy.</span>
-<span class="sd">Generates config files that can override default settings.</span>
+<span class="sd">Generates dialect-specific config files.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TidyConfig</span><span class="p">,</span> <span class="n">RewriteConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLTidyConfig</span><span class="p">,</span> <span class="n">SUPPORTED_DIALECTS</span>
 
 
-<span class="n">TIDY_DESCRIPTIONS</span> <span class="o">=</span> <span class="p">{</span>
+<div class="viewcode-block" id="get_user_configs_dir">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_user_configs_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user_configs_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the path to user&#39;s config directory.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.sqltidy&quot;</span> <span class="o">/</span> <span class="s2">&quot;configs&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="get_bundled_configs_dir">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_bundled_configs_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_bundled_configs_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the path to bundled config templates.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;configs&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="initialize_user_configs">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.initialize_user_configs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_user_configs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize user config directory with all bundled configs if not already present.</span>
+<span class="sd">    Copies all bundled configs to user directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">get_user_configs_dir</span><span class="p">()</span>
+    <span class="n">bundled_dir</span> <span class="o">=</span> <span class="n">get_bundled_configs_dir</span><span class="p">()</span>
+    
+    <span class="c1"># Create user config directory if it doesn&#39;t exist</span>
+    <span class="n">user_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="c1"># Copy all bundled configs if they don&#39;t exist in user directory</span>
+    <span class="k">if</span> <span class="n">bundled_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">bundled_configs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bundled_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;sqltidy_*.json&quot;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">bundled_config</span> <span class="ow">in</span> <span class="n">bundled_configs</span><span class="p">:</span>
+            <span class="n">user_config</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="n">bundled_config</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">user_config</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">bundled_config</span><span class="p">,</span> <span class="n">user_config</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_config_path">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_config_path">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_config_path</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the path to a config file, checking user directory first, then bundled.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        dialect: SQL dialect name</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Path to the config file (user config if exists, otherwise bundled)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user_path</span> <span class="o">=</span> <span class="n">get_user_configs_dir</span><span class="p">()</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">dialect</span><span class="si">}</span><span class="s2">.json&quot;</span>
+    <span class="k">if</span> <span class="n">user_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">user_path</span>
+    <span class="k">return</span> <span class="n">get_bundled_config_path</span><span class="p">(</span><span class="n">dialect</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_bundled_config_path">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_bundled_config_path">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_bundled_config_path</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the path to a bundled config template for a specific dialect.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        dialect: SQL dialect name</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Path to the bundled config file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">get_bundled_configs_dir</span><span class="p">()</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">dialect</span><span class="si">}</span><span class="s2">.json&quot;</span></div>
+
+
+
+<span class="c1"># Field descriptions for interactive prompts</span>
+<span class="n">FIELD_DESCRIPTIONS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># Tidy/Formatting rules</span>
     <span class="s2">&quot;uppercase_keywords&quot;</span><span class="p">:</span> <span class="s2">&quot;Convert SQL keywords to uppercase? (e.g., SELECT, FROM, WHERE)&quot;</span><span class="p">,</span>
     <span class="s2">&quot;newline_after_select&quot;</span><span class="p">:</span> <span class="s2">&quot;Add newline after SELECT keyword?&quot;</span><span class="p">,</span>
     <span class="s2">&quot;compact&quot;</span><span class="p">:</span> <span class="s2">&quot;Use compact formatting (reduce unnecessary whitespace)?&quot;</span><span class="p">,</span>
     <span class="s2">&quot;leading_commas&quot;</span><span class="p">:</span> <span class="s2">&quot;Use leading commas in column lists? (e.g., col1</span><span class="se">\\</span><span class="s2">n  , col2</span><span class="se">\\</span><span class="s2">n  , col3)&quot;</span><span class="p">,</span>
     <span class="s2">&quot;indent_select_columns&quot;</span><span class="p">:</span> <span class="s2">&quot;Indent SELECT columns on separate lines?&quot;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">REWRITE_DESCRIPTIONS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;quote_identifiers&quot;</span><span class="p">:</span> <span class="s2">&quot;Quote all identifiers (table/column names)?&quot;</span><span class="p">,</span>
+    
+    <span class="c1"># Rewrite/Transformation rules</span>
     <span class="s2">&quot;enable_subquery_to_cte&quot;</span><span class="p">:</span> <span class="s2">&quot;Convert subqueries to Common Table Expressions (CTEs)?&quot;</span><span class="p">,</span>
     <span class="s2">&quot;enable_alias_style_abc&quot;</span><span class="p">:</span> <span class="s2">&quot;Apply uppercase A, B, C ... table aliases?&quot;</span><span class="p">,</span>
     <span class="s2">&quot;enable_alias_style_t_numeric&quot;</span><span class="p">:</span> <span class="s2">&quot;Apply uppercase T1, T2, T3 ... table aliases?&quot;</span><span class="p">,</span>
@@ -60,18 +139,22 @@
 
 <div class="viewcode-block" id="prompt_yes_no">
 <a class="viewcode-back" href="../../api.html#sqltidy.generator.prompt_yes_no">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">prompt_yes_no</span><span class="p">(</span><span class="n">question</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prompt_yes_no</span><span class="p">(</span><span class="n">question</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prompt user for a yes/no question.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        question: The question to ask</span>
-<span class="sd">        default: The default value if user just presses enter</span>
+<span class="sd">        default: The default value if user just presses enter (can be None)</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        bool: The user&#39;s choice</span>
+<span class="sd">        bool or None: The user&#39;s choice</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">default_str</span> <span class="o">=</span> <span class="s2">&quot;[Y/n]&quot;</span> <span class="k">if</span> <span class="n">default</span> <span class="k">else</span> <span class="s2">&quot;[y/N]&quot;</span>
+    <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">default_str</span> <span class="o">=</span> <span class="s2">&quot;[y/n]&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">default_str</span> <span class="o">=</span> <span class="s2">&quot;[Y/n]&quot;</span> <span class="k">if</span> <span class="n">default</span> <span class="k">else</span> <span class="s2">&quot;[y/N]&quot;</span>
+    
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">response</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">question</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">default_str</span><span class="si">}</span><span class="s2">: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="p">:</span>
@@ -84,169 +167,403 @@
 
 
 
-<div class="viewcode-block" id="generate_tidy_config">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.generate_tidy_config">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_tidy_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<div class="viewcode-block" id="select_dialect">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.select_dialect">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_dialect</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Interactively generate a TidyConfig.</span>
-<span class="sd">    Automatically includes any new boolean fields added to TidyConfig.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TIDY CONFIGURATION GENERATOR&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Configure SQL formatting rules for the &#39;tidy&#39; command.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    
-    <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">default_config</span> <span class="o">=</span> <span class="n">asdict</span><span class="p">(</span><span class="n">TidyConfig</span><span class="p">())</span>
-
-    <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="ow">in</span> <span class="n">default_config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
-            <span class="k">continue</span>  <span class="c1"># only prompt for boolean options</span>
-        <span class="n">question</span> <span class="o">=</span> <span class="n">TIDY_DESCRIPTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="n">field_name</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;Enable </span><span class="si">{</span><span class="n">field_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">?&quot;</span>
-        <span class="p">)</span>
-        <span class="n">config</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">prompt_yes_no</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default_value</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">config</span></div>
-
-
-
-<div class="viewcode-block" id="generate_rewrite_config">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.generate_rewrite_config">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_rewrite_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Interactively generate a RewriteConfig.</span>
-<span class="sd">    Automatically includes any new boolean fields added to RewriteConfig.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;REWRITE CONFIGURATION GENERATOR&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Configure SQL rewriting rules for the &#39;rewrite&#39; command.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    
-    <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">default_config</span> <span class="o">=</span> <span class="n">asdict</span><span class="p">(</span><span class="n">RewriteConfig</span><span class="p">())</span>
-    
-    <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="ow">in</span> <span class="n">default_config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
-            <span class="k">continue</span>  <span class="c1"># only prompt for boolean options</span>
-        <span class="n">question</span> <span class="o">=</span> <span class="n">REWRITE_DESCRIPTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="n">field_name</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;Enable </span><span class="si">{</span><span class="n">field_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">?&quot;</span>
-        <span class="p">)</span>
-        <span class="n">config</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">prompt_yes_no</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default_value</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">config</span></div>
-
-
-
-<div class="viewcode-block" id="select_config_type">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.select_config_type">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">select_config_type</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Prompt user to select which config type to generate.</span>
+<span class="sd">    Prompt user to select a SQL dialect.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        str: &quot;tidy&quot; or &quot;rewrite&quot;</span>
+<span class="sd">        str: Selected dialect name</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SQLTIDY CONFIGURATION GENERATOR&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Select which configuration to generate:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;1. Tidy configuration&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;2. Rewrite configuration&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Select SQL dialect:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dialect</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">SUPPORTED_DIALECTS</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">dialect</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">choice</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enter your choice (1-2): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">choice</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;tidy&quot;</span>
-        <span class="k">elif</span> <span class="n">choice</span> <span class="o">==</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;rewrite&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please enter 1 or 2&quot;</span><span class="p">)</span></div>
+        <span class="n">choice</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enter your choice (1-</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">SUPPORTED_DIALECTS</span><span class="p">)</span><span class="si">}</span><span class="s2">): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">SUPPORTED_DIALECTS</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">SUPPORTED_DIALECTS</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Please enter a number between 1 and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">SUPPORTED_DIALECTS</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="get_output_filename">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_output_filename">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_output_filename</span><span class="p">(</span><span class="n">config_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="generate_config_interactive">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.generate_config_interactive">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_config_interactive</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">existing_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SQLTidyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SQLTidyConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Prompt user for output filename.</span>
+<span class="sd">    Interactively generate or update a SQLTidyConfig.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        config_type: Type of config (&quot;tidy&quot; or &quot;rewrite&quot;)</span>
+<span class="sd">        dialect: SQL dialect for the configuration</span>
+<span class="sd">        existing_config: Existing config to update (if None, creates new from defaults)</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        str: Output filename</span>
+<span class="sd">        SQLTidyConfig: The generated or updated configuration</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">config_type</span> <span class="o">==</span> <span class="s2">&quot;tidy&quot;</span><span class="p">:</span>
-        <span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;tidy_config.json&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CONFIGURATION GENERATOR - </span><span class="si">{</span><span class="n">dialect</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">existing_config</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Updating existing configuration. Press Enter to keep current value.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">existing_config</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;rewrite_config.json&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating new configuration with dialect defaults.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">get_dialect_defaults</span><span class="p">(</span><span class="n">dialect</span><span class="p">)</span>
     
-    <span class="n">filename</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Output filename [</span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s2">]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">filename</span> <span class="k">if</span> <span class="n">filename</span> <span class="k">else</span> <span class="n">default</span></div>
+    <span class="c1"># Get current values as dict</span>
+    <span class="n">config_dict</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    
+    <span class="c1"># Prompt for each field (except dialect)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;FORMATTING RULES (TIDY)&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="n">tidy_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;uppercase_keywords&#39;</span><span class="p">,</span> <span class="s1">&#39;newline_after_select&#39;</span><span class="p">,</span> <span class="s1">&#39;compact&#39;</span><span class="p">,</span> 
+                   <span class="s1">&#39;leading_commas&#39;</span><span class="p">,</span> <span class="s1">&#39;indent_select_columns&#39;</span><span class="p">,</span> <span class="s1">&#39;quote_identifiers&#39;</span><span class="p">]</span>
+    
+    <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">tidy_fields</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">field_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config_dict</span><span class="p">:</span>
+            <span class="k">continue</span>
+        
+        <span class="n">current_value</span> <span class="o">=</span> <span class="n">config_dict</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span>
+        <span class="n">question</span> <span class="o">=</span> <span class="n">FIELD_DESCRIPTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">field_name</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;Enable </span><span class="si">{</span><span class="n">field_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">?&quot;</span>
+        <span class="p">)</span>
+        
+        <span class="n">new_value</span> <span class="o">=</span> <span class="n">prompt_yes_no</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">current_value</span><span class="p">)</span>
+        <span class="n">config_dict</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TRANSFORMATION RULES (REWRITE)&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="n">rewrite_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;enable_subquery_to_cte&#39;</span><span class="p">,</span> <span class="s1">&#39;enable_alias_style_abc&#39;</span><span class="p">,</span> 
+                      <span class="s1">&#39;enable_alias_style_t_numeric&#39;</span><span class="p">]</span>
+    
+    <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">rewrite_fields</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">field_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config_dict</span><span class="p">:</span>
+            <span class="k">continue</span>
+        
+        <span class="n">current_value</span> <span class="o">=</span> <span class="n">config_dict</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span>
+        <span class="n">question</span> <span class="o">=</span> <span class="n">FIELD_DESCRIPTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">field_name</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;Enable </span><span class="si">{</span><span class="n">field_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">?&quot;</span>
+        <span class="p">)</span>
+        
+        <span class="n">new_value</span> <span class="o">=</span> <span class="n">prompt_yes_no</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">current_value</span><span class="p">)</span>
+        <span class="n">config_dict</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+    
+    <span class="c1"># Update dialect to ensure it&#39;s set correctly</span>
+    <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;dialect&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dialect</span>
+    
+    <span class="k">return</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">config_dict</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="save_config">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.save_config">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">save_config</span><span class="p">(</span><span class="n">config_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<div class="viewcode-block" id="get_default_filename">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_default_filename">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_default_filename</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get default config filename for a dialect.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">dialect</span><span class="si">}</span><span class="s2">.json&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="create_config">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.create_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_config</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">template_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Save configuration to a JSON file.</span>
+<span class="sd">    Create a new configuration file.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        config_data: Configuration dictionary</span>
-<span class="sd">        filename: Output filename</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        Path: Path to the saved file</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">config_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">filepath</span></div>
-
-
-
-<div class="viewcode-block" id="run_generator">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.run_generator">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">run_generator</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Run the interactive configuration generator.</span>
+<span class="sd">        dialect: SQL dialect (if None, will prompt)</span>
+<span class="sd">        template_file: Optional template config file to copy from</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">config_type</span> <span class="o">=</span> <span class="n">select_config_type</span><span class="p">()</span>
+        <span class="c1"># Select dialect if not provided</span>
+        <span class="k">if</span> <span class="n">dialect</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dialect</span> <span class="o">=</span> <span class="n">select_dialect</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">dialect</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SUPPORTED_DIALECTS</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Unsupported dialect &#39;</span><span class="si">{</span><span class="n">dialect</span><span class="si">}</span><span class="s2">&#39;. Must be one of: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SUPPORTED_DIALECTS</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
         
-        <span class="k">if</span> <span class="n">config_type</span> <span class="o">==</span> <span class="s2">&quot;tidy&quot;</span><span class="p">:</span>
-            <span class="n">config_data</span> <span class="o">=</span> <span class="n">generate_tidy_config</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">config_data</span> <span class="o">=</span> <span class="n">generate_rewrite_config</span><span class="p">()</span>
+        <span class="c1"># Load template if provided</span>
+        <span class="n">base_config</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">template_file</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Loading template from: </span><span class="si">{</span><span class="n">template_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">base_config</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">template_file</span><span class="p">)</span>
+                <span class="n">base_config</span><span class="o">.</span><span class="n">dialect</span> <span class="o">=</span> <span class="n">dialect</span>  <span class="c1"># Override dialect</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Could not load template file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Proceeding with dialect defaults...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Generate config interactively</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">generate_config_interactive</span><span class="p">(</span><span class="n">dialect</span><span class="p">,</span> <span class="n">base_config</span><span class="p">)</span>
         
         <span class="c1"># Get output filename</span>
-        <span class="n">output_file</span> <span class="o">=</span> <span class="n">get_output_filename</span><span class="p">(</span><span class="n">config_type</span><span class="p">)</span>
+        <span class="n">default_filename</span> <span class="o">=</span> <span class="n">get_default_filename</span><span class="p">(</span><span class="n">dialect</span><span class="p">)</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Output filename [</span><span class="si">{</span><span class="n">default_filename</span><span class="si">}</span><span class="s2">]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">default_filename</span>
         
         <span class="c1"># Save config</span>
-        <span class="n">filepath</span> <span class="o">=</span> <span class="n">save_config</span><span class="p">(</span><span class="n">config_data</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✓ Configuration saved successfully!&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File: </span><span class="si">{</span><span class="n">filepath</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File: </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Usage:&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">config_type</span> <span class="o">==</span> <span class="s2">&quot;tidy&quot;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  sqltidy tidy -cfg </span><span class="si">{</span><span class="n">output_file</span><span class="si">}</span><span class="s2"> &lt;input_file&gt;&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  sqltidy rewrite -cfg </span><span class="si">{</span><span class="n">output_file</span><span class="si">}</span><span class="s2"> &lt;input_file&gt;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  sqltidy tidy -cfg </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> &lt;input_file&gt;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  sqltidy rewrite -cfg </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> &lt;input_file&gt;&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">()</span>
         
     <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Configuration generation cancelled.&quot;</span><span class="p">)</span>
-        <span class="k">return</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Configuration creation cancelled.&quot;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">raise</span></div>
+
+
+
+<div class="viewcode-block" id="update_config">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.update_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_config</span><span class="p">(</span><span class="n">config_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update an existing configuration file interactively.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        config_file: Path to existing config file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load existing config</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading configuration from: </span><span class="si">{</span><span class="n">config_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">existing_config</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+        <span class="n">dialect</span> <span class="o">=</span> <span class="n">existing_config</span><span class="o">.</span><span class="n">dialect</span>
+        
+        <span class="c1"># Update interactively</span>
+        <span class="n">updated_config</span> <span class="o">=</span> <span class="n">generate_config_interactive</span><span class="p">(</span><span class="n">dialect</span><span class="p">,</span> <span class="n">existing_config</span><span class="p">)</span>
+        
+        <span class="c1"># Save back to same file</span>
+        <span class="n">updated_config</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✓ Configuration updated successfully!&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File: </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+        
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error: Config file not found: </span><span class="si">{</span><span class="n">config_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Configuration update cancelled.&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span></div>
+
+
+
+<div class="viewcode-block" id="list_configs">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.list_configs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_configs</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List config files in user config directory.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        directory: Directory to search (default: current directory)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Initialize user configs with bundled defaults</span>
+    <span class="n">initialize_user_configs</span><span class="p">()</span>
+    
+    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">get_user_configs_dir</span><span class="p">()</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">User config directory: </span><span class="si">{</span><span class="n">user_dir</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># List all files in the user config directory</span>
+    <span class="n">all_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">user_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">all_files</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Directory is empty.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="c1"># Separate config files from other files</span>
+    <span class="n">config_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">all_files</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sqltidy_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">)]</span>
+    <span class="n">other_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">all_files</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config_files</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">config_files</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Config files:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">config_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">config_files</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cfg</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">config_file</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (dialect: </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">dialect</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (invalid/unreadable: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">other_files</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Other files:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">other_files</span><span class="p">):</span>
+            <span class="n">file_type</span> <span class="o">=</span> <span class="s2">&quot;directory&quot;</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;file&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">file_type</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="edit_config">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.edit_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">edit_config</span><span class="p">(</span><span class="n">config_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Edit a config file in the user&#39;s config directory.</span>
+<span class="sd">    Copies from bundled config if user config doesn&#39;t exist yet.</span>
+<span class="sd">    Opens the file in the system&#39;s default editor.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        config_name: Name of the config file or dialect (e.g., &#39;postgresql&#39; or &#39;sqltidy_postgresql.json&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bundled_dir</span> <span class="o">=</span> <span class="n">get_bundled_configs_dir</span><span class="p">()</span>
+    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">get_user_configs_dir</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">bundled_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: No bundled configs found.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="n">bundled_configs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bundled_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;sqltidy_*.json&quot;</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">bundled_configs</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: No bundled configs found.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="c1"># If no config specified, let user choose</span>
+    <span class="k">if</span> <span class="n">config_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Available configs to edit:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">config_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">bundled_configs</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cfg</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">config_file</span><span class="p">))</span>
+                <span class="n">dialect</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">dialect</span>
+                <span class="c1"># Check if user has customized this config</span>
+                <span class="n">user_config</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="n">config_file</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot; (customized)&quot;</span> <span class="k">if</span> <span class="n">user_config</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">dialect</span><span class="si">}{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">choice</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Select config to edit (1-</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bundled_configs</span><span class="p">)</span><span class="si">}</span><span class="s2">): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">bundled_configs</span><span class="p">):</span>
+                    <span class="n">source_file</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">bundled_configs</span><span class="p">)[</span><span class="n">idx</span><span class="p">]</span>
+                    <span class="k">break</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Please enter a number between 1 and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bundled_configs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Try to find the config by name or dialect</span>
+        <span class="c1"># First try as dialect name</span>
+        <span class="k">if</span> <span class="n">config_name</span> <span class="ow">in</span> <span class="n">SUPPORTED_DIALECTS</span><span class="p">:</span>
+            <span class="n">source_file</span> <span class="o">=</span> <span class="n">bundled_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">.json&quot;</span>
+        <span class="c1"># Then try as filename</span>
+        <span class="k">elif</span> <span class="n">config_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sqltidy_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">config_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
+            <span class="n">source_file</span> <span class="o">=</span> <span class="n">bundled_dir</span> <span class="o">/</span> <span class="n">config_name</span>
+        <span class="c1"># Then try adding the prefix/suffix</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">source_file</span> <span class="o">=</span> <span class="n">bundled_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">.json&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">source_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Config &#39;</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">&#39; not found in bundled configs.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Available configs: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">d</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">SUPPORTED_DIALECTS</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+    
+    <span class="c1"># Ensure user config directory exists and is initialized with defaults</span>
+    <span class="n">initialize_user_configs</span><span class="p">()</span>
+    
+    <span class="c1"># Path to user&#39;s config file</span>
+    <span class="n">user_config_file</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="n">source_file</span><span class="o">.</span><span class="n">name</span>
+    
+    <span class="c1"># The file should already exist from initialization, just inform the user</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Opening user config: </span><span class="si">{</span><span class="n">user_config_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Open in default editor</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;nt&#39;</span><span class="p">:</span>  <span class="c1"># Windows</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">startfile</span><span class="p">(</span><span class="n">user_config_file</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;posix&#39;</span><span class="p">:</span>  <span class="c1"># macOS and Linux</span>
+            <span class="n">opener</span> <span class="o">=</span> <span class="s2">&quot;open&quot;</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()</span><span class="o">.</span><span class="n">sysname</span> <span class="o">==</span> <span class="s2">&quot;Darwin&quot;</span> <span class="k">else</span> <span class="s2">&quot;xdg-open&quot;</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">opener</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_config_file</span><span class="p">)])</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">This config will be used instead of the bundled default.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;To reset to default, delete: </span><span class="si">{</span><span class="n">user_config_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Couldn&#39;t open editor automatically: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Please manually edit: </span><span class="si">{</span><span class="n">user_config_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="reset_config">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.reset_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reset_config</span><span class="p">(</span><span class="n">config_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reset a user config to bundled default by removing the user&#39;s customization.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        config_name: Name of the config file or dialect to reset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">get_user_configs_dir</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No user configs to reset.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="n">user_configs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">user_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;sqltidy_*.json&quot;</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_configs</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No user configs to reset.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="c1"># If no config specified, let user choose</span>
+    <span class="k">if</span> <span class="n">config_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Customized configs:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">config_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">user_configs</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cfg</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">config_file</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">dialect</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">choice</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Select config to reset (1-</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">user_configs</span><span class="p">)</span><span class="si">}</span><span class="s2">): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_configs</span><span class="p">):</span>
+                    <span class="n">config_file</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">user_configs</span><span class="p">)[</span><span class="n">idx</span><span class="p">]</span>
+                    <span class="k">break</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Please enter a number between 1 and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">user_configs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Try to find the config by name or dialect</span>
+        <span class="k">if</span> <span class="n">config_name</span> <span class="ow">in</span> <span class="n">SUPPORTED_DIALECTS</span><span class="p">:</span>
+            <span class="n">config_file</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">.json&quot;</span>
+        <span class="k">elif</span> <span class="n">config_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sqltidy_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">config_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
+            <span class="n">config_file</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="n">config_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">config_file</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">.json&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No user customization found for &#39;</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+    
+    <span class="c1"># Confirm deletion</span>
+    <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Reset </span><span class="si">{</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> to bundled default? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">confirm</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">):</span>
+        <span class="n">config_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Reset </span><span class="si">{</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> to bundled default.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Reset cancelled.&quot;</span><span class="p">)</span></div>
 
 
 
@@ -264,6 +581,151 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Plugin Management</span>
+
+<div class="viewcode-block" id="get_user_plugins_dir">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_user_plugins_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user_plugins_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the path to user&#39;s plugin directory.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.sqltidy&quot;</span> <span class="o">/</span> <span class="s2">&quot;plugins&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="add_plugin">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.add_plugin">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_plugin</span><span class="p">(</span><span class="n">plugin_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a plugin file to the user&#39;s plugin directory.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plugin_file: Path to the plugin Python file to add</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">source_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">plugin_file</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">source_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Plugin file not found: </span><span class="si">{</span><span class="n">plugin_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">source_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;.py&#39;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Plugin file must be a Python file (.py): </span><span class="si">{</span><span class="n">plugin_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="c1"># Validate the plugin file by attempting to load it</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_plugin_file</span>
+        <span class="n">rules</span> <span class="o">=</span> <span class="n">load_plugin_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source_path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rules</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: No rules found in </span><span class="si">{</span><span class="n">plugin_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Make sure your file uses @sqltidy_plugin decorator or defines BaseRule classes.&quot;</span><span class="p">)</span>
+            <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Add anyway? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">confirm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plugin not added.&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error validating plugin: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Add anyway? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">confirm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plugin not added.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+    
+    <span class="c1"># Create user plugins directory if it doesn&#39;t exist</span>
+    <span class="n">plugins_dir</span> <span class="o">=</span> <span class="n">get_user_plugins_dir</span><span class="p">()</span>
+    <span class="n">plugins_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="c1"># Copy plugin file to user directory</span>
+    <span class="n">dest_path</span> <span class="o">=</span> <span class="n">plugins_dir</span> <span class="o">/</span> <span class="n">source_path</span><span class="o">.</span><span class="n">name</span>
+    
+    <span class="k">if</span> <span class="n">dest_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin &#39;</span><span class="si">{</span><span class="n">source_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; already exists. Overwrite? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">confirm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plugin not added.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+    
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">source_path</span><span class="p">,</span> <span class="n">dest_path</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Added plugin: </span><span class="si">{</span><span class="n">source_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Location: </span><span class="si">{</span><span class="n">dest_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="list_plugins">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.list_plugins">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_plugins</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List all installed plugins in the user&#39;s plugin directory.&quot;&quot;&quot;</span>
+    <span class="n">plugins_dir</span> <span class="o">=</span> <span class="n">get_user_plugins_dir</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugins_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No plugins installed.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin directory: </span><span class="si">{</span><span class="n">plugins_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="n">plugin_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">plugins_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.py&quot;</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_files</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No plugins installed.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin directory: </span><span class="si">{</span><span class="n">plugins_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Installed Plugins (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">plugin_files</span><span class="p">)</span><span class="si">}</span><span class="s2">):&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Location: </span><span class="si">{</span><span class="n">plugins_dir</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">plugin_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">plugin_files</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">plugin_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Try to load and show rules from the plugin</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_plugin_file</span>
+            <span class="n">rules</span> <span class="o">=</span> <span class="n">load_plugin_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">plugin_file</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">rules</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">rule_cls</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
+                    <span class="n">rule</span> <span class="o">=</span> <span class="n">rule_cls</span><span class="p">()</span>
+                    <span class="n">rule_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s1">&#39;rule_type&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+                    <span class="n">order</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    - </span><span class="si">{</span><span class="n">rule_cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> (type=</span><span class="si">{</span><span class="n">rule_type</span><span class="si">}</span><span class="s2">, order=</span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Error loading: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="remove_plugin">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.remove_plugin">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_plugin</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove a plugin from the user&#39;s plugin directory.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plugin_name: Name of the plugin file to remove</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plugins_dir</span> <span class="o">=</span> <span class="n">get_user_plugins_dir</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugins_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No plugins installed.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="c1"># Add .py extension if not provided</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
+        <span class="n">plugin_name</span> <span class="o">+=</span> <span class="s1">&#39;.py&#39;</span>
+    
+    <span class="n">plugin_file</span> <span class="o">=</span> <span class="n">plugins_dir</span> <span class="o">/</span> <span class="n">plugin_name</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin not found: </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Use &#39;sqltidy plugin list&#39; to see installed plugins.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="c1"># Confirm deletion</span>
+    <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Remove plugin &#39;</span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">&#39;? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">confirm</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">):</span>
+        <span class="n">plugin_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Removed plugin: </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Removal cancelled.&quot;</span><span class="p">)</span></div>
+
+
 
 </pre></div>
 
@@ -328,7 +790,7 @@
       &#169;2025, Jayden Rasband.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
     </div>

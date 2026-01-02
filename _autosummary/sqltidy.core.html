@@ -50,8 +50,15 @@
 <p>Main SQL formatting engine.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="sqltidy.core.SQLFormatter.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/core.html#SQLFormatter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.core.SQLFormatter.__init__" title="Link to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/core.html#SQLFormatter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.core.SQLFormatter.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize formatter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="../api.html#sqltidy.config.SQLTidyConfig" title="sqltidy.config.SQLTidyConfig"><em>SQLTidyConfig</em></a>) – Configuration for formatting.</p></li>
+<li><p><strong>rule_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Filter rules by type (‘tidy’ or ‘rewrite’). None loads all.</p></li>
+</ul>
+</dd>
 </dl>
 </dd></dl>
 
@@ -154,7 +161,7 @@
       &#169;2025, Jayden Rasband.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |

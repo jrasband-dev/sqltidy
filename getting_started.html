@@ -54,11 +54,11 @@
 <span class="nb">print</span><span class="p">(</span><span class="n">formatted</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>You can customize formatting behavior using a <code class="docutils literal notranslate"><span class="pre">TidyConfig</span></code> object:</p>
+<p>You can customize formatting behavior using a <code class="docutils literal notranslate"><span class="pre">SQLTidyConfig</span></code> object:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_sql</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TidyConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLTidyConfig</span>
 
-<span class="n">config</span> <span class="o">=</span> <span class="n">TidyConfig</span><span class="p">()</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="p">()</span>
 <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT * FROM users&quot;</span>
 <span class="n">formatted</span> <span class="o">=</span> <span class="n">format_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
@@ -107,10 +107,10 @@
 </section>
 <section id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
-<p>Configuration options can be set using the <code class="docutils literal notranslate"><span class="pre">TidyConfig</span></code> class:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TidyConfig</span>
+<p>Configuration options can be set using the <code class="docutils literal notranslate"><span class="pre">SQLTidyConfig</span></code> class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLTidyConfig</span>
 
-<span class="n">config</span> <span class="o">=</span> <span class="n">TidyConfig</span><span class="p">(</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="p">(</span>
     <span class="c1"># Add your configuration options here</span>
 <span class="p">)</span>
 </pre></div>
@@ -188,7 +188,7 @@
       &#169;2025, Jayden Rasband.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |
