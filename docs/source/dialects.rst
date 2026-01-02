@@ -93,9 +93,9 @@ Specify a dialect when formatting SQL:
 .. code-block:: python
 
    from sqltidy import format_sql
-   from sqltidy.config import TidyConfig
+   from sqltidy.config import SQLTidyConfig
    
-   config = TidyConfig(dialect='postgresql')
+   config = SQLTidyConfig(dialect='postgresql')
    sql = "SELECT * FROM users WHERE id = 1"
    formatted = format_sql(sql, config=config)
 
