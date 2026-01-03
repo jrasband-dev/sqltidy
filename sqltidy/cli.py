@@ -330,15 +330,18 @@ def main():
     print_logo()
     
     parser = argparse.ArgumentParser()
-    
-    parser.add_argument(
-        "-v", "--version",
-        action="version",
-        version=f"%(prog)s {__version__}"
-    )
 
     # create subparsers for subcommands
     subparsers = parser.add_subparsers(title='Commands', dest="command", required=True)
+
+    # -------------------
+    # version Command
+    # -------------------
+    version_parser = subparsers.add_parser(
+        "version",
+        help="Show version information",
+        description="Display the sqltidy version number"
+    )
 
     # -------------------
     # tidy Command
@@ -550,6 +553,11 @@ def main():
     # parse arguments
     # -------------------
     args = parser.parse_args()
+
+    # version command
+    if args.command == "version":
+        print(f"sqltidy {__version__}")
+        return
 
     # rulebooks command
     if args.command == "rulebooks":
