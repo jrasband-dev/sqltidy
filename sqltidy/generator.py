@@ -567,41 +567,90 @@ def add_rule(rule_file: str) -> None:
 
 
 def list_rules() -> None:
-    """List all installed rules in the user's rule directory."""
+    """List all built-in and plugin rules."""
+    from .rules.loader import load_rules
+    
+    # Load all built-in rules
+    print("\n" + "=" * 70)
+    print("BUILT-IN RULES")
+    print("=" * 70)
+    
+    built_in_rules = load_rules()
+    
+    # Group by rule type
+    tidy_rules = [r for r in built_in_rules if getattr(r, 'rule_type', None) == 'tidy']
+    rewrite_rules = [r for r in built_in_rules if getattr(r, 'rule_type', None) == 'rewrite']
+    other_rules = [r for r in built_in_rules if getattr(r, 'rule_type', None) not in ['tidy', 'rewrite']]
+    
+    if tidy_rules:
+        print("\nTidy Rules (formatting):")
+        for rule in sorted(tidy_rules, key=lambda r: getattr(r, 'order', 100)):
+            rule_name = rule.__class__.__name__
+            order = getattr(rule, 'order', '?')
+            dialects = getattr(rule, 'supported_dialects', None)
+            dialect_info = f" [dialects: {', '.join(sorted(dialects))}]" if dialects else " [all dialects]"
+            print(f"  • {rule_name} (order={order}){dialect_info}")
+    
+    if rewrite_rules:
+        print("\nRewrite Rules (transformations):")
+        for rule in sorted(rewrite_rules, key=lambda r: getattr(r, 'order', 100)):
+            rule_name = rule.__class__.__name__
+            order = getattr(rule, 'order', '?')
+            dialects = getattr(rule, 'supported_dialects', None)
+            dialect_info = f" [dialects: {', '.join(sorted(dialects))}]" if dialects else " [all dialects]"
+            print(f"  • {rule_name} (order={order}){dialect_info}")
+    
+    if other_rules:
+        print("\nOther Rules:")
+        for rule in sorted(other_rules, key=lambda r: getattr(r, 'order', 100)):
+            rule_name = rule.__class__.__name__
+            order = getattr(rule, 'order', '?')
+            print(f"  • {rule_name} (order={order})")
+    
+    # Load plugin rules
+    print("\n" + "=" * 70)
+    print("PLUGIN RULES")
+    print("=" * 70)
+    
     rules_dir = get_user_rules_dir()
     
     if not rules_dir.exists():
-        print("No rules installed.")
-        print(f"rule directory: {rules_dir}")
-        return
-    
-    rule_files = list(rules_dir.glob("*.py"))
-    
-    if not rule_files:
-        print("No rules installed.")
-        print(f"rule directory: {rules_dir}")
-        return
-    
-    print(f"\nInstalled rules ({len(rule_files)}):")
-    print(f"Location: {rules_dir}\n")
-    
-    for rule_file in sorted(rule_files):
-        print(f"  • {rule_file.name}")
+        print("\nNo plugin rules installed.")
+        print(f"Plugin directory: {rules_dir}")
+    else:
+        rule_files = list(rules_dir.glob("*.py"))
         
-        # Try to load and show rules from the rule
-        try:
-            from .plugins import load_rule_file
-            rules = load_rule_file(str(rule_file))
-            if rules:
-                for rule_cls in rules:
-                    rule = rule_cls()
-                    rule_type = getattr(rule, 'rule_type', 'unknown')
-                    order = getattr(rule, 'order', '?')
-                    print(f"    - {rule_cls.__name__} (type={rule_type}, order={order})")
-        except Exception as e:
-            print(f"    Error loading: {e}")
+        if not rule_files:
+            print("\nNo plugin rules installed.")
+            print(f"Plugin directory: {rules_dir}")
+        else:
+            print(f"\nInstalled plugin rules ({len(rule_files)}):")
+            print(f"Location: {rules_dir}\n")
+            
+            for rule_file in sorted(rule_files):
+                print(f"  • {rule_file.name}")
+                
+                # Try to load and show rules from the file
+                try:
+                    from .plugins import load_rule_file
+                    rules = load_rule_file(str(rule_file))
+                    if rules:
+                        for rule_cls in rules:
+                            rule = rule_cls()
+                            rule_type = getattr(rule, 'rule_type', 'unknown')
+                            order = getattr(rule, 'order', '?')
+                            dialects = getattr(rule, 'supported_dialects', None)
+                            dialect_info = f" [dialects: {', '.join(sorted(dialects))}]" if dialects else " [all dialects]"
+                            print(f"    - {rule_cls.__name__} (type={rule_type}, order={order}){dialect_info}")
+                except Exception as e:
+                    print(f"    Error loading: {e}")
     
-    print()
+    print("\n" + "=" * 70)
+    print(f"Total: {len(built_in_rules)} built-in rules")
+    if rules_dir.exists():
+        plugin_count = len(list(rules_dir.glob("*.py")))
+        print(f"       {plugin_count} plugin file(s)")
+    print("=" * 70 + "\n")
 
 
 def remove_rule(rule_name: str) -> None:
