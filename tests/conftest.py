@@ -2,7 +2,7 @@
 Pytest configuration and shared fixtures.
 """
 import pytest
-from sqltidy.config import SQLTidyConfig
+from sqltidy.rulebook import SQLTidyConfig
 
 
 @pytest.fixture

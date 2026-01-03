@@ -4,8 +4,8 @@ import json
 from pathlib import Path
 from . import __version__
 from .api import format_sql, format_sql_file, format_sql_folder
-from .config import SQLTidyConfig, SUPPORTED_DIALECTS
-from .generator import create_config, list_configs, edit_config, reset_config, load_config_file, get_bundled_config_path, get_user_configs_dir, add_rule, list_rules, remove_rule
+from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
+from .generator import create_rulebook, list_rulebooks, edit_rulebook, reset_rulebook, load_rulebook_file, get_bundled_rulebook_path, get_user_rulebooks_dir, add_rule, list_rules, remove_rule
 from .tokenizer import tokenize_with_types, TokenType, is_keyword
 from .plugins import load_rule_file, load_rules_from_directory, load_rules_module
 
@@ -37,74 +37,74 @@ def print_logo():
     console.print("[#328a32]SQL Formatting & Rewriting Tool[/#328a32]\n")
 
 
-def resolve_config_path(config_ref: str) -> str:
+def resolve_rulebook_path(rulebook_ref: str) -> str:
     """
-    Resolve a config reference to an actual file path.
+    Resolve a rulebook reference to an actual file path.
     
     Tries in order:
     1. Exact path/filename (if exists)
-    2. Dialect name -> user config if exists, otherwise bundled
-    3. Filename in user configs, then bundled configs
+    2. Dialect name -> user rulebook if exists, otherwise bundled
+    3. Filename in user rulebooks, then bundled rulebooks
     
     Args:
-        config_ref: Config file reference (path, dialect name, or filename)
+        rulebook_ref: Rulebook file reference (path, dialect name, or filename)
     
     Returns:
-        str: Resolved path to config file
+        str: Resolved path to rulebook file
         
     Raises:
-        FileNotFoundError: If config cannot be found
+        FileNotFoundError: If rulebook cannot be found
     """
     # Try as direct path first
-    config_path = Path(config_ref)
-    if config_path.exists():
-        return str(config_path)
+    rulebook_path = Path(rulebook_ref)
+    if rulebook_path.exists():
+        return str(rulebook_path)
     
-    # Try as dialect name (check user config first, then bundled)
-    if config_ref in SUPPORTED_DIALECTS:
-        user_path = get_user_configs_dir() / f"sqltidy_{config_ref}.json"
+    # Try as dialect name (check user rulebook first, then bundled)
+    if rulebook_ref in SUPPORTED_DIALECTS:
+        user_path = get_user_rulebooks_dir() / f"sqltidy_{rulebook_ref}.json"
         if user_path.exists():
             return str(user_path)
-        bundled_path = get_bundled_config_path(config_ref)
+        bundled_path = get_bundled_rulebook_path(rulebook_ref)
         if bundled_path.exists():
             return str(bundled_path)
     
-    # Try as filename in user configs first, then bundled
-    if config_ref.endswith('.json'):
-        user_path = get_user_configs_dir() / config_ref
+    # Try as filename in user rulebooks first, then bundled
+    if rulebook_ref.endswith('.json'):
+        user_path = get_user_rulebooks_dir() / rulebook_ref
         if user_path.exists():
             return str(user_path)
-        bundled_path = get_bundled_config_path('').parent / config_ref
+        bundled_path = get_bundled_rulebook_path('').parent / rulebook_ref
         if bundled_path.exists():
             return str(bundled_path)
     
     # Not found anywhere
     raise FileNotFoundError(
-        f"Config not found: '{config_ref}'\n"
-        f"  Tried: current directory, user configs (~/.sqltidy/configs/), bundled configs\n"
-        f"  Hint: Use dialect name (e.g., 'postgresql') or path to config file"
+        f"Rulebook not found: '{rulebook_ref}'\n"
+        f"  Tried: current directory, user rulebooks (~/.sqltidy/rulebooks/), bundled rulebooks\n"
+        f"  Hint: Use dialect name (e.g., 'postgresql') or path to rulebook file"
     )
 
 
-def create_config_from_file(config_file: str) -> SQLTidyConfig:
+def create_rulebook_from_file(rulebook_file: str) -> SQLTidyConfig:
     """
-    Load SQLTidyConfig from a JSON configuration file.
-    Also resolves bundled config references.
+    Load SQLTidyConfig from a JSON rulebook file.
+    Also resolves bundled rulebook references.
     
     Args:
-        config_file: Path, dialect name, or filename of the configuration
+        rulebook_file: Path, dialect name, or filename of the rulebook
     
     Returns:
         SQLTidyConfig: Configuration object with loaded values
     """
     try:
-        resolved_path = resolve_config_path(config_file)
-        config_data = load_config_file(resolved_path)
+        resolved_path = resolve_rulebook_path(rulebook_file)
+        rulebook_data = load_rulebook_file(resolved_path)
         
         # Create SQLTidyConfig with loaded values
-        return SQLTidyConfig.from_dict(config_data)
+        return SQLTidyConfig.from_dict(rulebook_data)
     except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Error loading config file: {e}", file=sys.stderr)
+        print(f"Error loading rulebook file: {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -150,7 +150,7 @@ def load_rule_rules(args):
 def handle_tidy_command(args):
     """Handle the tidy command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else 'sqlserver'
-    config = create_config_from_file(dialect)
+    config = create_rulebook_from_file(dialect)
     rule_rules = load_rule_rules(args)
     
     if args.input:
@@ -222,7 +222,7 @@ def handle_tidy_command(args):
 def handle_rewrite_command(args):
     """Handle the rewrite command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else 'sqlserver'
-    config = create_config_from_file(dialect)
+    config = create_rulebook_from_file(dialect)
     rule_rules = load_rule_rules(args)
     
     if args.input:
@@ -416,66 +416,66 @@ def main():
 
 
     # -------------------
-    # config Command
+    # rulebook Command
     # -------------------
-    config_parser = subparsers.add_parser(
-        "config",
-        help="Manage configuration files",
-        description="Create, edit, or list configuration files for sqltidy"
+    rulebook_parser = subparsers.add_parser(
+        "rulebooks",
+        help="Manage rulebooks",
+        description="Create, edit, or list rulebook files for sqltidy"
     )
     
-    config_subparsers = config_parser.add_subparsers(title='Config Commands', dest="config_command", required=True)
+    rulebook_subparsers = rulebook_parser.add_subparsers(title='Rulebook Commands', dest="rulebook_command", required=True)
     
-    # config create
-    create_parser = config_subparsers.add_parser(
+    # rulebook create
+    create_parser = rulebook_subparsers.add_parser(
         "create",
-        help="Create a new configuration file",
-        description="Interactively create a new dialect-specific configuration file"
+        help="Create a new rulebook file",
+        description="Interactively create a new dialect-specific rulebook file"
     )
     create_parser.add_argument(
         "-d", "--dialect",
         choices=['sqlserver', 'postgresql', 'mysql', 'oracle', 'sqlite'],
-        help="SQL dialect for the configuration"
+        help="SQL dialect for the rulebook"
     )
     create_parser.add_argument(
         "-t", "--template",
-        help="Use existing config file as template"
+        help="Use existing rulebook file as template"
     )
     
-    # config list
-    list_parser = config_subparsers.add_parser(
+    # rulebook list
+    list_parser = rulebook_subparsers.add_parser(
         "list",
-        help="List configuration files",
-        description="List all sqltidy configuration files in a directory"
+        help="List rulebook files",
+        description="List all sqltidy rulebook files in a directory"
     )
     list_parser.add_argument(
         "-d", "--directory",
         default=".",
-        help="Directory to search for config files (default: current directory)"
+        help="Directory to search for rulebook files (default: current directory)"
     )
     
-    # config edit
-    edit_parser = config_subparsers.add_parser(
+    # rulebook edit
+    edit_parser = rulebook_subparsers.add_parser(
         "edit",
-        help="Edit a configuration file",
-        description="Edit a config in user directory (~/.sqltidy/configs/). Creates from bundled template if needed."
+        help="Edit a rulebook file",
+        description="Edit a rulebook in user directory (~/.sqltidy/rulebooks/). Creates from bundled template if needed."
     )
     edit_parser.add_argument(
-        "config",
+        "rulebook",
         nargs="?",
-        help="Dialect name (e.g., 'postgresql') or config filename to edit"
+        help="Dialect name (e.g., 'postgresql') or rulebook filename to edit"
     )
     
-    # config reset
-    reset_parser = config_subparsers.add_parser(
+    # rulebook reset
+    reset_parser = rulebook_subparsers.add_parser(
         "reset",
-        help="Reset a configuration to default",
+        help="Reset a rulebook to default",
         description="Remove user customization and revert to bundled default"
     )
     reset_parser.add_argument(
-        "config",
+        "rulebook",
         nargs="?",
-        help="Dialect name (e.g., 'postgresql') or config filename to reset"
+        help="Dialect name (e.g., 'postgresql'), rulebook filename to reset, or 'all' to reset all rulebooks"
     )
 
 
@@ -554,16 +554,16 @@ def main():
     # -------------------
     args = parser.parse_args()
 
-    # config command
-    if args.command == "config":
-        if args.config_command == "create":
-            create_config(dialect=args.dialect, template_file=args.template)
-        elif args.config_command == "list":
-            list_configs(directory=args.directory)
-        elif args.config_command == "edit":
-            edit_config(config_name=args.config)
-        elif args.config_command == "reset":
-            reset_config(config_name=args.config)
+    # rulebooks command
+    if args.command == "rulebooks":
+        if args.rulebook_command == "create":
+            create_rulebook(dialect=args.dialect, template_file=args.template)
+        elif args.rulebook_command == "list":
+            list_rulebooks(directory=args.directory)
+        elif args.rulebook_command == "edit":
+            edit_rulebook(rulebook_name=args.rulebook)
+        elif args.rulebook_command == "reset":
+            reset_rulebook(rulebook_name=args.rulebook)
         return
 
     # rules command

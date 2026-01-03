@@ -1,9 +1,9 @@
 from typing import List, Optional, Union
-from .config import SQLTidyConfig, SUPPORTED_DIALECTS
+from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 from .rules.base import BaseRule
 from .core import SQLFormatter
 from .plugins import load_rule_file, load_rules_from_directory
-from .generator import get_user_rules_dir, get_bundled_config_path, load_config_file, get_user_configs_dir
+from .generator import get_user_rules_dir, get_bundled_rulebook_path, load_rulebook_file, get_user_rulebooks_dir
 from pathlib import Path
 
 # In-memory list to hold extra rule rules registered at runtime
@@ -13,7 +13,7 @@ _extra_rules = []
 def _load_config_for_dialect(dialect: str) -> SQLTidyConfig:
     """
     Load configuration for a specific dialect.
-    Checks user config first, then falls back to bundled config.
+    Checks user rulebook first, then falls back to bundled rulebook.
     
     Args:
         dialect: SQL dialect name
@@ -21,13 +21,13 @@ def _load_config_for_dialect(dialect: str) -> SQLTidyConfig:
     Returns:
         SQLTidyConfig: Loaded configuration
     """
-    user_config_path = get_user_configs_dir() / f"sqltidy_{dialect}.json"
-    if user_config_path.exists():
-        config_data = load_config_file(str(user_config_path))
+    user_rulebook_path = get_user_rulebooks_dir() / f"sqltidy_{dialect}.json"
+    if user_rulebook_path.exists():
+        rulebook_data = load_rulebook_file(str(user_rulebook_path))
     else:
-        config_path = get_bundled_config_path(dialect)
-        config_data = load_config_file(str(config_path))
-    return SQLTidyConfig.from_dict(config_data)
+        rulebook_path = get_bundled_rulebook_path(dialect)
+        rulebook_data = load_rulebook_file(str(rulebook_path))
+    return SQLTidyConfig.from_dict(rulebook_data)
 
 def register_rule(rule: BaseRule):
     """

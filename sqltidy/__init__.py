@@ -9,7 +9,7 @@ from .api import (
     load_rule,
     load_user_rules,
 )
-from .config import SQLTidyConfig, SUPPORTED_DIALECTS
+from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 
 
 __all__ = [

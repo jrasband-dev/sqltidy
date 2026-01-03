@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 packages = ["sqltidy", "sqltidy.dialects", "sqltidy.rules", "sqltidy.rules.rewrite", "sqltidy.rules.tidy"]
 
 [tool.setuptools.package-data]
-sqltidy = ["configs/*.json", "configs/*.md"]
+sqltidy = ["rulebooks/*.json", "rulebooks/*.md"]
 
 [tool.setuptools.dynamic]
 version = {attr = "sqltidy.__version__"}

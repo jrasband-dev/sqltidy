@@ -295,7 +295,7 @@ def create_rule_formatter(
     
     Example:
         from sqltidy.rules import create_rule_formatter
-        from sqltidy.config import SQLTidyConfig
+        from sqltidy.rulebook import SQLTidyConfig
         
         formatter = create_rule_formatter(
             config=SQLTidyConfig(dialect='postgresql'),
@@ -306,7 +306,7 @@ def create_rule_formatter(
         result = formatter.format(sql)
     """
     from sqltidy.core import SQLFormatter
-    from sqltidy.config import SQLTidyConfig
+    from sqltidy.rulebook import SQLTidyConfig
     
     formatter = SQLFormatter(config or SQLTidyConfig())
     

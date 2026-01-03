@@ -1,7 +1,7 @@
 """Tests for the newline_on_join rule."""
 import pytest
 from sqltidy import format_sql
-from sqltidy.config import SQLTidyConfig
+from sqltidy.rulebook import SQLTidyConfig
 
 
 class TestNewlineOnJoinRule:

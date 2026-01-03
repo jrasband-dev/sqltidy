@@ -1,5 +1,5 @@
 from typing import List, Optional, Set
-from ..config import SQLTidyConfig
+from ..rulebook import SQLTidyConfig
 
 
 class FormatterContext:

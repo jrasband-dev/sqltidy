@@ -84,7 +84,7 @@ Import the main API:
 .. code-block:: python
 
    from sqltidy import format_sql, register_plugin, clear_plugins
-   from sqltidy.config import SQLTidyConfig, SQLTidyConfig
+   from sqltidy.rulebook import SQLTidyConfig, SQLTidyConfig
 
 Format SQL with defaults:
 
