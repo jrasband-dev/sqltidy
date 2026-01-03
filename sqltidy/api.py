@@ -2,12 +2,12 @@ from typing import List, Optional, Union
 from .config import SQLTidyConfig, SUPPORTED_DIALECTS
 from .rules.base import BaseRule
 from .core import SQLFormatter
-from .plugins import load_plugin_file, load_plugins_from_directory
-from .generator import get_user_plugins_dir, get_bundled_config_path, load_config_file, get_user_configs_dir
+from .plugins import load_rule_file, load_rules_from_directory
+from .generator import get_user_rules_dir, get_bundled_config_path, load_config_file, get_user_configs_dir
 from pathlib import Path
 
-# In-memory list to hold extra plugin rules registered at runtime
-_extra_plugins = []
+# In-memory list to hold extra rule rules registered at runtime
+_extra_rules = []
 
 
 def _load_config_for_dialect(dialect: str) -> SQLTidyConfig:
@@ -29,22 +29,22 @@ def _load_config_for_dialect(dialect: str) -> SQLTidyConfig:
         config_data = load_config_file(str(config_path))
     return SQLTidyConfig.from_dict(config_data)
 
-def register_plugin(rule: BaseRule):
+def register_rule(rule: BaseRule):
     """
-    Register a plugin rule at runtime.
+    Register a rule rule at runtime.
 
     Args:
         rule (BaseRule): An instance of a rule to apply.
     """
     if not isinstance(rule, BaseRule):
-        raise TypeError("Plugin must be an instance of BaseRule")
-    _extra_plugins.append(rule)
+        raise TypeError("rule must be an instance of BaseRule")
+    _extra_rules.append(rule)
 
-def clear_plugins():
+def clear_rules():
     """
-    Clear all runtime-registered plugin rules.
+    Clear all runtime-registered rule rules.
     """
-    _extra_plugins.clear()
+    _extra_rules.clear()
 
 def format_sql(
     sql: str,
@@ -54,7 +54,7 @@ def format_sql(
     rule_type: Optional[str] = None
 ) -> str:
     """
-    Format a SQL string using all registered rules, including runtime plugins.
+    Format a SQL string using all registered rules, including runtime rules.
 
     Args:
         sql (str): The SQL string to format.
@@ -86,8 +86,8 @@ def format_sql(
     
     formatter = SQLFormatter(config=config, rule_type=rule_type)
 
-    # Inject runtime plugins into the formatter
-    formatter.rules.extend(_extra_plugins)
+    # Inject runtime rules into the formatter
+    formatter.rules.extend(_extra_rules)
     
     # Inject custom rules if provided
     if custom_rules:
@@ -177,42 +177,42 @@ def tidy_and_rewrite_sql(
     return sql
 
 
-def load_user_plugins() -> List[type]:
+def load_user_rules() -> List[type]:
     """
-    Load all plugins from the user's plugin directory (~/.sqltidy/plugins/).
+    Load all rules from the user's rule directory (~/.sqltidy/rules/).
     
     Returns:
-        List[type]: List of rule classes found in user plugins.
+        List[type]: List of rule classes found in user rules.
         
     Example:
-        >>> rules = load_user_plugins()
+        >>> rules = load_user_rules()
         >>> for rule_cls in rules:
-        ...     register_plugin(rule_cls())
+        ...     register_rule(rule_cls())
     """
-    plugins_dir = get_user_plugins_dir()
+    rules_dir = get_user_rules_dir()
     
-    if not plugins_dir.exists():
+    if not rules_dir.exists():
         return []
     
-    return load_plugins_from_directory(str(plugins_dir))
+    return load_rules_from_directory(str(rules_dir))
 
 
-def load_plugin(filepath: str) -> List[type]:
+def load_rule(filepath: str) -> List[type]:
     """
-    Load plugin rules from a Python file.
+    Load rule rules from a Python file.
     
     Args:
-        filepath (str): Path to the plugin Python file.
+        filepath (str): Path to the rule Python file.
         
     Returns:
-        List[type]: List of rule classes found in the plugin file.
+        List[type]: List of rule classes found in the rule file.
         
     Example:
-        >>> rules = load_plugin('my_custom_rules.py')
+        >>> rules = load_rule('my_custom_rules.py')
         >>> for rule_cls in rules:
-        ...     register_plugin(rule_cls())
+        ...     register_rule(rule_cls())
     """
-    return load_plugin_file(filepath)
+    return load_rule_file(filepath)
 
 
 def format_sql_file(

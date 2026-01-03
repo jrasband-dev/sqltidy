@@ -5,9 +5,9 @@ from pathlib import Path
 from . import __version__
 from .api import format_sql, format_sql_file, format_sql_folder
 from .config import SQLTidyConfig, SUPPORTED_DIALECTS
-from .generator import create_config, list_configs, edit_config, reset_config, load_config_file, get_bundled_config_path, get_user_configs_dir, add_plugin, list_plugins, remove_plugin
+from .generator import create_config, list_configs, edit_config, reset_config, load_config_file, get_bundled_config_path, get_user_configs_dir, add_rule, list_rules, remove_rule
 from .tokenizer import tokenize_with_types, TokenType, is_keyword
-from .plugins import load_plugin_file, load_plugins_from_directory, load_plugin_module
+from .plugins import load_rule_file, load_rules_from_directory, load_rules_module
 
 try:
     from rich.console import Console
@@ -108,50 +108,50 @@ def create_config_from_file(config_file: str) -> SQLTidyConfig:
         sys.exit(1)
 
 
-def load_plugin_rules(args):
+def load_rule_rules(args):
     """
-    Load plugin rules from command line arguments.
+    Load rule rules from command line arguments.
     
     Args:
-        args: Parsed command line arguments with plugin_files, plugin_dirs, plugin_modules
+        args: Parsed command line arguments with rule_files, rule_dirs, rule_modules
         
     Returns:
-        list: List of instantiated plugin rule objects
+        list: List of instantiated rule rule objects
     """
-    plugin_rules = []
+    rule_rules = []
     
-    if hasattr(args, 'plugin_files') and args.plugin_files:
-        for plugin_file in args.plugin_files:
+    if hasattr(args, 'rule_files') and args.rule_files:
+        for rule_file in args.rule_files:
             try:
-                rules = load_plugin_file(plugin_file)
-                plugin_rules.extend([r() for r in rules])
+                rules = load_rule_file(rule_file)
+                rule_rules.extend([r() for r in rules])
             except Exception as e:
-                print(f"Warning: Could not load plugin {plugin_file}: {e}", file=sys.stderr)
+                print(f"Warning: Could not load rule {rule_file}: {e}", file=sys.stderr)
     
-    if hasattr(args, 'plugin_dirs') and args.plugin_dirs:
-        for plugin_dir in args.plugin_dirs:
+    if hasattr(args, 'rule_dirs') and args.rule_dirs:
+        for rule_dir in args.rule_dirs:
             try:
-                rules = load_plugins_from_directory(plugin_dir)
-                plugin_rules.extend([r() for r in rules])
+                rules = load_rules_from_directory(rule_dir)
+                rule_rules.extend([r() for r in rules])
             except Exception as e:
-                print(f"Warning: Could not load plugins from {plugin_dir}: {e}", file=sys.stderr)
+                print(f"Warning: Could not load rules from {rule_dir}: {e}", file=sys.stderr)
     
-    if hasattr(args, 'plugin_modules') and args.plugin_modules:
-        for plugin_module in args.plugin_modules:
+    if hasattr(args, 'rule_modules') and args.rule_modules:
+        for rule_module in args.rule_modules:
             try:
-                rules = load_plugin_module(plugin_module)
-                plugin_rules.extend([r() for r in rules])
+                rules = load_rule_module(rule_module)
+                rule_rules.extend([r() for r in rules])
             except Exception as e:
-                print(f"Warning: Could not load plugin module {plugin_module}: {e}", file=sys.stderr)
+                print(f"Warning: Could not load rule module {rule_module}: {e}", file=sys.stderr)
     
-    return plugin_rules
+    return rule_rules
 
 
 def handle_tidy_command(args):
     """Handle the tidy command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else 'sqlserver'
     config = create_config_from_file(dialect)
-    plugin_rules = load_plugin_rules(args)
+    rule_rules = load_rule_rules(args)
     
     if args.input:
         input_path = Path(args.input)
@@ -161,7 +161,7 @@ def handle_tidy_command(args):
             with open(args.input, "r", encoding="utf-8") as f:
                 sql = f.read()
             
-            formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
+            formatted_sql = format_sql(sql, config=config, custom_rules=rule_rules, rule_type='tidy')
             
             if args.output:
                 with open(args.output, "w", encoding="utf-8") as f:
@@ -184,7 +184,7 @@ def handle_tidy_command(args):
                 folder_path=input_path,
                 output_folder=args.output,
                 config=config,
-                custom_rules=plugin_rules,
+                custom_rules=rule_rules,
                 rule_type='tidy',
                 pattern=args.pattern,
                 recursive=args.recursive,
@@ -215,7 +215,7 @@ def handle_tidy_command(args):
             sys.exit(1)
         
         sql = sys.stdin.read()
-        formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
+        formatted_sql = format_sql(sql, config=config, custom_rules=rule_rules, rule_type='tidy')
         print(formatted_sql)
 
 
@@ -223,7 +223,7 @@ def handle_rewrite_command(args):
     """Handle the rewrite command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else 'sqlserver'
     config = create_config_from_file(dialect)
-    plugin_rules = load_plugin_rules(args)
+    rule_rules = load_rule_rules(args)
     
     if args.input:
         input_path = Path(args.input)
@@ -233,7 +233,7 @@ def handle_rewrite_command(args):
             with open(args.input, "r", encoding="utf-8") as f:
                 sql = f.read()
             
-            formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
+            formatted_sql = format_sql(sql, config=config, custom_rules=rule_rules, rule_type='rewrite')
             
             if args.tidy:
                 formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
@@ -261,7 +261,7 @@ def handle_rewrite_command(args):
                     folder_path=input_path,
                     output_folder=args.output,
                     config=config,
-                    custom_rules=plugin_rules,
+                    custom_rules=rule_rules,
                     rule_type='rewrite',
                     pattern=args.pattern,
                     recursive=args.recursive,
@@ -287,7 +287,7 @@ def handle_rewrite_command(args):
                     folder_path=input_path,
                     output_folder=args.output,
                     config=config,
-                    custom_rules=plugin_rules,
+                    custom_rules=rule_rules,
                     rule_type='rewrite',
                     pattern=args.pattern,
                     recursive=args.recursive,
@@ -318,7 +318,7 @@ def handle_rewrite_command(args):
             sys.exit(1)
         
         sql = sys.stdin.read()
-        formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
+        formatted_sql = format_sql(sql, config=config, custom_rules=rule_rules, rule_type='rewrite')
         
         if args.tidy:
             formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
@@ -367,13 +367,13 @@ def main():
     tidy_parameter_group.add_argument("--summary", action="store_true",
                                      help="Show summary of processed files")
     
-    tidy_plugin_group = tidy_parser.add_argument_group('Plugins')
-    tidy_plugin_group.add_argument("--plugin", action="append", dest="plugin_files",
-                                   help="Load plugin from Python file (can be used multiple times)")
-    tidy_plugin_group.add_argument("--plugin-dir", action="append", dest="plugin_dirs",
-                                   help="Load all plugins from directory (can be used multiple times)")
-    tidy_plugin_group.add_argument("--plugin-module", action="append", dest="plugin_modules",
-                                   help="Import plugin module (can be used multiple times)")
+    tidy_rule_group = tidy_parser.add_argument_group('rules')
+    tidy_rule_group.add_argument("--rule", action="append", dest="rule_files",
+                                   help="Load rule from Python file (can be used multiple times)")
+    tidy_rule_group.add_argument("--rule-dir", action="append", dest="rule_dirs",
+                                   help="Load all rules from directory (can be used multiple times)")
+    tidy_rule_group.add_argument("--rule-module", action="append", dest="rule_modules",
+                                   help="Import rule module (can be used multiple times)")
 
 
 
@@ -388,13 +388,13 @@ def main():
     )
     
     
-    rewrite_plugin_group = rewrite_parser.add_argument_group('Plugins')
-    rewrite_plugin_group.add_argument("--plugin", action="append", dest="plugin_files",
-                                      help="Load plugin from Python file (can be used multiple times)")
-    rewrite_plugin_group.add_argument("--plugin-dir", action="append", dest="plugin_dirs",
-                                      help="Load all plugins from directory (can be used multiple times)")
-    rewrite_plugin_group.add_argument("--plugin-module", action="append", dest="plugin_modules",
-                                      help="Import plugin module (can be used multiple times)")
+    rewrite_rule_group = rewrite_parser.add_argument_group('rules')
+    rewrite_rule_group.add_argument("--rule", action="append", dest="rule_files",
+                                      help="Load rule from Python file (can be used multiple times)")
+    rewrite_rule_group.add_argument("--rule-dir", action="append", dest="rule_dirs",
+                                      help="Load all rules from directory (can be used multiple times)")
+    rewrite_rule_group.add_argument("--rule-module", action="append", dest="rule_modules",
+                                      help="Import rule module (can be used multiple times)")
     rewrite_input_group = rewrite_parser.add_argument_group(title='Input')
     rewrite_input_group.add_argument("input", nargs="?", help="SQL file or folder to rewrite")
     
@@ -480,43 +480,43 @@ def main():
 
 
     # -------------------
-    # plugin Command
+    # rules Command
     # -------------------
-    plugin_parser = subparsers.add_parser(
-        "plugin",
-        help="Manage custom plugins",
-        description="Add, list, or remove custom rule plugins"
+    rules_parser = subparsers.add_parser(
+        "rules",
+        help="Manage custom rules",
+        description="Add, list, or remove custom rule rules"
     )
     
-    plugin_subparsers = plugin_parser.add_subparsers(title='Plugin Commands', dest="plugin_command", required=True)
+    rules_subparsers = rules_parser.add_subparsers(title='Rules Commands', dest="rules_command", required=True)
     
-    # plugin add
-    add_plugin_parser = plugin_subparsers.add_parser(
+    # rules add
+    add_rules_parser = rules_subparsers.add_parser(
         "add",
-        help="Add a custom plugin",
-        description="Add a Python file containing custom rules to the plugin directory"
+        help="Add a custom rule",
+        description="Add a Python file containing custom rules to the rule directory"
     )
-    add_plugin_parser.add_argument(
-        "plugin_file",
-        help="Path to the Python plugin file to add"
+    add_rules_parser.add_argument(
+        "rule_file",
+        help="Path to the Python rule file to add"
     )
     
-    # plugin list
-    list_plugin_parser = plugin_subparsers.add_parser(
+    # rules list
+    list_rules_parser = rules_subparsers.add_parser(
         "list",
-        help="List installed plugins",
-        description="List all custom plugins in the user plugin directory"
+        help="List installed rules",
+        description="List all custom rules in the user rule directory"
     )
     
-    # plugin remove
-    remove_plugin_parser = plugin_subparsers.add_parser(
+    # rules remove
+    remove_rules_parser = rules_subparsers.add_parser(
         "remove",
-        help="Remove a plugin",
-        description="Remove a custom plugin from the plugin directory"
+        help="Remove a rule",
+        description="Remove a custom rule from the rule directory"
     )
-    remove_plugin_parser.add_argument(
-        "plugin_name",
-        help="Name of the plugin file to remove (e.g., my_plugin.py)"
+    remove_rules_parser.add_argument(
+        "rule_name",
+        help="Name of the rule file to remove (e.g., my_rule.py)"
     )
 
 
@@ -566,14 +566,14 @@ def main():
             reset_config(config_name=args.config)
         return
 
-    # plugin command
-    if args.command == "plugin":
-        if args.plugin_command == "add":
-            add_plugin(args.plugin_file)
-        elif args.plugin_command == "list":
-            list_plugins()
-        elif args.plugin_command == "remove":
-            remove_plugin(args.plugin_name)
+    # rules command
+    if args.command == "rules":
+        if args.rules_command == "add":
+            add_rule(args.rule_file)
+        elif args.rules_command == "list":
+            list_rules()
+        elif args.rules_command == "remove":
+            remove_rule(args.rule_name)
         return
 
     # parse command

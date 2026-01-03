@@ -506,92 +506,92 @@ def load_config_file(filepath: str) -> Dict[str, Any]:
         return json.load(f)
 
 
-# Plugin Management
+# rule Management
 
-def get_user_plugins_dir() -> Path:
-    """Get the path to user's plugin directory."""
-    return Path.home() / ".sqltidy" / "plugins"
+def get_user_rules_dir() -> Path:
+    """Get the path to user's rule directory."""
+    return Path.home() / ".sqltidy" / "rules"
 
 
-def add_plugin(plugin_file: str) -> None:
+def add_rule(rule_file: str) -> None:
     """
-    Add a plugin file to the user's plugin directory.
+    Add a rule file to the user's rule directory.
     
     Args:
-        plugin_file: Path to the plugin Python file to add
+        rule_file: Path to the rule Python file to add
     """
-    source_path = Path(plugin_file)
+    source_path = Path(rule_file)
     
     if not source_path.exists():
-        print(f"Error: Plugin file not found: {plugin_file}")
+        print(f"Error: rule file not found: {rule_file}")
         return
     
     if not source_path.suffix == '.py':
-        print(f"Error: Plugin file must be a Python file (.py): {plugin_file}")
+        print(f"Error: rule file must be a Python file (.py): {rule_file}")
         return
     
-    # Validate the plugin file by attempting to load it
+    # Validate the rule file by attempting to load it
     try:
-        from .plugins import load_plugin_file
-        rules = load_plugin_file(str(source_path))
+        from .plugins import load_rule_file
+        rules = load_rule_file(str(source_path))
         if not rules:
-            print(f"Warning: No rules found in {plugin_file}")
-            print("Make sure your file uses @sqltidy_plugin decorator or defines BaseRule classes.")
+            print(f"Warning: No rules found in {rule_file}")
+            print("Make sure your file uses @sqltidy_rule decorator or defines BaseRule classes.")
             confirm = input("Add anyway? [y/N]: ").strip().lower()
             if confirm not in ('y', 'yes'):
-                print("Plugin not added.")
+                print("rule not added.")
                 return
     except Exception as e:
-        print(f"Error validating plugin: {e}")
+        print(f"Error validating rule: {e}")
         confirm = input("Add anyway? [y/N]: ").strip().lower()
         if confirm not in ('y', 'yes'):
-            print("Plugin not added.")
+            print("rule not added.")
             return
     
-    # Create user plugins directory if it doesn't exist
-    plugins_dir = get_user_plugins_dir()
-    plugins_dir.mkdir(parents=True, exist_ok=True)
+    # Create user rules directory if it doesn't exist
+    rules_dir = get_user_rules_dir()
+    rules_dir.mkdir(parents=True, exist_ok=True)
     
-    # Copy plugin file to user directory
-    dest_path = plugins_dir / source_path.name
+    # Copy rule file to user directory
+    dest_path = rules_dir / source_path.name
     
     if dest_path.exists():
-        confirm = input(f"Plugin '{source_path.name}' already exists. Overwrite? [y/N]: ").strip().lower()
+        confirm = input(f"rule '{source_path.name}' already exists. Overwrite? [y/N]: ").strip().lower()
         if confirm not in ('y', 'yes'):
-            print("Plugin not added.")
+            print("rule not added.")
             return
     
     shutil.copy2(source_path, dest_path)
-    print(f"\n✓ Added plugin: {source_path.name}")
+    print(f"\n✓ Added rule: {source_path.name}")
     print(f"  Location: {dest_path}")
 
 
-def list_plugins() -> None:
-    """List all installed plugins in the user's plugin directory."""
-    plugins_dir = get_user_plugins_dir()
+def list_rules() -> None:
+    """List all installed rules in the user's rule directory."""
+    rules_dir = get_user_rules_dir()
     
-    if not plugins_dir.exists():
-        print("No plugins installed.")
-        print(f"Plugin directory: {plugins_dir}")
+    if not rules_dir.exists():
+        print("No rules installed.")
+        print(f"rule directory: {rules_dir}")
         return
     
-    plugin_files = list(plugins_dir.glob("*.py"))
+    rule_files = list(rules_dir.glob("*.py"))
     
-    if not plugin_files:
-        print("No plugins installed.")
-        print(f"Plugin directory: {plugins_dir}")
+    if not rule_files:
+        print("No rules installed.")
+        print(f"rule directory: {rules_dir}")
         return
     
-    print(f"\nInstalled Plugins ({len(plugin_files)}):")
-    print(f"Location: {plugins_dir}\n")
+    print(f"\nInstalled rules ({len(rule_files)}):")
+    print(f"Location: {rules_dir}\n")
     
-    for plugin_file in sorted(plugin_files):
-        print(f"  • {plugin_file.name}")
+    for rule_file in sorted(rule_files):
+        print(f"  • {rule_file.name}")
         
-        # Try to load and show rules from the plugin
+        # Try to load and show rules from the rule
         try:
-            from .plugins import load_plugin_file
-            rules = load_plugin_file(str(plugin_file))
+            from .plugins import load_rule_file
+            rules = load_rule_file(str(rule_file))
             if rules:
                 for rule_cls in rules:
                     rule = rule_cls()
@@ -604,35 +604,35 @@ def list_plugins() -> None:
     print()
 
 
-def remove_plugin(plugin_name: str) -> None:
+def remove_rule(rule_name: str) -> None:
     """
-    Remove a plugin from the user's plugin directory.
+    Remove a rule from the user's rule directory.
     
     Args:
-        plugin_name: Name of the plugin file to remove
+        rule_name: Name of the rule file to remove
     """
-    plugins_dir = get_user_plugins_dir()
+    rules_dir = get_user_rules_dir()
     
-    if not plugins_dir.exists():
-        print("No plugins installed.")
+    if not rules_dir.exists():
+        print("No Rules installed.")
         return
     
     # Add .py extension if not provided
-    if not plugin_name.endswith('.py'):
-        plugin_name += '.py'
+    if not rule_name.endswith('.py'):
+        rule_name += '.py'
     
-    plugin_file = plugins_dir / plugin_name
+    rule_file = rules_dir / rule_name
     
-    if not plugin_file.exists():
-        print(f"Plugin not found: {plugin_name}")
-        print(f"\nUse 'sqltidy plugin list' to see installed plugins.")
+    if not rule_file.exists():
+        print(f"Rule not found: {rule_name}")
+        print(f"\nUse 'sqltidy rules list' to see installed rules.")
         return
     
     # Confirm deletion
-    confirm = input(f"Remove plugin '{plugin_name}'? [y/N]: ").strip().lower()
+    confirm = input(f"Remove rule '{rule_name}'? [y/N]: ").strip().lower()
     if confirm in ('y', 'yes'):
-        plugin_file.unlink()
-        print(f"\n✓ Removed plugin: {plugin_name}")
+        rule_file.unlink()
+        print(f"\n✓ Removed rule: {rule_name}")
     else:
         print("\nRemoval cancelled.")
 
