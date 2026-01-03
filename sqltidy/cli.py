@@ -9,6 +9,33 @@ from .generator import create_config, list_configs, edit_config, reset_config, l
 from .tokenizer import tokenize_with_types, TokenType, is_keyword
 from .plugins import load_plugin_file, load_plugins_from_directory, load_plugin_module
 
+try:
+    from rich.console import Console
+    from rich.text import Text
+    HAS_RICH = True
+except ImportError:
+    HAS_RICH = False
+
+
+def print_logo():
+    """Print the sqltidy ASCII art logo."""
+    if not HAS_RICH:
+        return
+        
+    console = Console()
+    
+    logo = Text("""
+███████╗ ██████╗ ██╗  ████████╗██╗██████╗ ██╗   ██╗
+██╔════╝██╔═══██╗██║  ╚══██╔══╝██║██╔══██╗╚██╗ ██╔╝
+███████╗██║   ██║██║     ██║   ██║██║  ██║ ╚████╔╝ 
+╚════██║██║▄▄ ██║██║     ██║   ██║██║  ██║  ╚██╔╝  
+███████║╚██████╔╝███████╗██║   ██║██████╔╝   ██║   
+╚══════╝ ╚══▀▀═╝ ╚══════╝╚═╝   ╚═╝╚═════╝    ╚═╝   
+""", style="bold #328a32")
+    
+    console.print(logo)
+    console.print("[#328a32]SQL Formatting & Rewriting Tool[/#328a32]\n")
+
 
 def resolve_config_path(config_ref: str) -> str:
     """
@@ -82,9 +109,10 @@ def create_config_from_file(config_file: str) -> SQLTidyConfig:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="A SQL formatting tool"
-    )
+    # Print logo
+    print_logo()
+    
+    parser = argparse.ArgumentParser()
     
     parser.add_argument(
         "-v", "--version",
