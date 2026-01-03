@@ -8,6 +8,7 @@ from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 from .generator import create_rulebook, list_rulebooks, edit_rulebook, reset_rulebook, load_rulebook_file, get_bundled_rulebook_path, get_user_rulebooks_dir, add_rule, list_rules, remove_rule
 from .tokenizer import tokenize_with_types, TokenType, is_keyword
 from .plugins import load_rule_file, load_rules_from_directory
+from .dialects.registry import list_dialects, get_dialect, is_dialect_available
 
 try:
     from rich.console import Console
@@ -325,6 +326,125 @@ def handle_rewrite_command(args):
         print(formatted_sql)
 
 
+def handle_dialects_command(args):
+    """Handle the dialects command to show information about SQL dialects."""
+    
+    # List subcommand
+    if args.dialects_command == "list":
+        dialects = list_dialects()
+        
+        if args.format == "json":
+            import json
+            dialect_info = []
+            for dialect_name in dialects:
+                dialect = get_dialect(dialect_name)
+                dialect_info.append({
+                    "name": dialect_name,
+                    "keywords_count": len(dialect.keywords),
+                    "data_types_count": len(dialect.data_types),
+                    "functions_count": len(dialect.functions)
+                })
+            print(json.dumps(dialect_info, indent=2))
+        else:
+            print(f"\n{'='*60}")
+            print(f"Available SQL Dialects")
+            print(f"{'='*60}\n")
+            
+            for dialect_name in dialects:
+                dialect = get_dialect(dialect_name)
+                print(f"  {dialect_name:<15} - {len(dialect.keywords):>3} keywords, "
+                      f"{len(dialect.data_types):>2} types, {len(dialect.functions):>2} functions")
+            
+            print(f"\n{'='*60}")
+            print(f"Total: {len(dialects)} dialects\n")
+    
+    # Keywords subcommand
+    elif args.dialects_command == "keywords":
+        try:
+            dialect = get_dialect(args.dialect)
+            keywords = sorted(list(dialect.keywords))
+            
+            if args.format == "json":
+                import json
+                print(json.dumps(keywords, indent=2))
+            else:
+                print(f"\n{'='*60}")
+                print(f"Keywords for {dialect.name.upper()} ({len(keywords)} total)")
+                print(f"{'='*60}\n")
+                
+                # Display keywords in columns
+                cols = 5
+                max_len = max(len(k) for k in keywords) + 2 if keywords else 10
+                for i in range(0, len(keywords), cols):
+                    row = keywords[i:i+cols]
+                    print("  " + "".join(f"{k:<{max_len}}" for k in row))
+                
+                print(f"\n{'='*60}\n")
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+    
+    # Datatypes subcommand
+    elif args.dialects_command == "datatypes":
+        try:
+            dialect = get_dialect(args.dialect)
+            types = sorted(list(dialect.data_types))
+            
+            if args.format == "json":
+                import json
+                print(json.dumps(types, indent=2))
+            else:
+                print(f"\n{'='*60}")
+                print(f"Data Types for {dialect.name.upper()} ({len(types)} total)")
+                print(f"{'='*60}\n")
+                
+                if types:
+                    # Display types in columns
+                    cols = 5
+                    max_len = max(len(t) for t in types) + 2
+                    for i in range(0, len(types), cols):
+                        row = types[i:i+cols]
+                        print("  " + "".join(f"{t:<{max_len}}" for t in row))
+                else:
+                    print("  No data types categorized separately for this dialect.")
+                    print("  Data types may be included in the general keywords list.")
+                
+                print(f"\n{'='*60}\n")
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+    
+    # Functions subcommand
+    elif args.dialects_command == "functions":
+        try:
+            dialect = get_dialect(args.dialect)
+            functions = sorted(list(dialect.functions))
+            
+            if args.format == "json":
+                import json
+                print(json.dumps(functions, indent=2))
+            else:
+                print(f"\n{'='*60}")
+                print(f"Built-in Functions for {dialect.name.upper()} ({len(functions)} total)")
+                print(f"{'='*60}\n")
+                
+                if functions:
+                    # Display functions in columns
+                    cols = 5
+                    max_len = max(len(f) for f in functions) + 2
+                    for i in range(0, len(functions), cols):
+                        row = functions[i:i+cols]
+                        print("  " + "".join(f"{f:<{max_len}}" for f in row))
+                else:
+                    print("  No functions categorized separately for this dialect.")
+                    print("  Functions may be included in the general keywords list.")
+                
+                print(f"\n{'='*60}\n")
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+
+
 def main():
     # Print logo
     print_logo()
@@ -544,6 +664,89 @@ def main():
                                       help="Show token statistics")
 
 
+    # -------------------
+    # dialects Command
+    # -------------------
+    dialects_parser = subparsers.add_parser(
+        "dialects",
+        help="Show SQL dialect information",
+        description="Display information about supported SQL dialects"
+    )
+    
+    dialects_subparsers = dialects_parser.add_subparsers(
+        title='Dialects Commands',
+        dest="dialects_command",
+        required=True
+    )
+    
+    # dialects list
+    dialects_list_parser = dialects_subparsers.add_parser(
+        "list",
+        help="List all available dialects",
+        description="Display a list of all supported SQL dialects"
+    )
+    dialects_list_parser.add_argument(
+        "--format",
+        choices=["table", "json"],
+        default="table",
+        help="Output format (default: table)"
+    )
+    
+    # dialects keywords
+    dialects_keywords_parser = dialects_subparsers.add_parser(
+        "keywords",
+        help="Show keywords for a dialect",
+        description="Display all SQL keywords for a specific dialect"
+    )
+    dialects_keywords_parser.add_argument(
+        "dialect",
+        choices=SUPPORTED_DIALECTS,
+        help="SQL dialect name"
+    )
+    dialects_keywords_parser.add_argument(
+        "--format",
+        choices=["table", "json"],
+        default="table",
+        help="Output format (default: table)"
+    )
+    
+    # dialects datatypes
+    dialects_datatypes_parser = dialects_subparsers.add_parser(
+        "datatypes",
+        help="Show data types for a dialect",
+        description="Display all data types for a specific dialect"
+    )
+    dialects_datatypes_parser.add_argument(
+        "dialect",
+        choices=SUPPORTED_DIALECTS,
+        help="SQL dialect name"
+    )
+    dialects_datatypes_parser.add_argument(
+        "--format",
+        choices=["table", "json"],
+        default="table",
+        help="Output format (default: table)"
+    )
+    
+    # dialects functions
+    dialects_functions_parser = dialects_subparsers.add_parser(
+        "functions",
+        help="Show built-in functions for a dialect",
+        description="Display all built-in functions for a specific dialect"
+    )
+    dialects_functions_parser.add_argument(
+        "dialect",
+        choices=SUPPORTED_DIALECTS,
+        help="SQL dialect name"
+    )
+    dialects_functions_parser.add_argument(
+        "--format",
+        choices=["table", "json"],
+        default="table",
+        help="Output format (default: table)"
+    )
+
+
 
 
 
@@ -684,6 +887,11 @@ def main():
         else:
             print(result)
         
+        return
+
+    # dialects command
+    if args.command == "dialects":
+        handle_dialects_command(args)
         return
 
     # tidy command
