@@ -59,9 +59,31 @@ def format_sql(
                     f"Unsupported dialect: '{dialect}'. "
                     f"Must be one of: {', '.join(SUPPORTED_DIALECTS)}"
                 )
-            config = SQLTidyConfig.get_dialect_defaults(dialect)
+            # Load config file for the specified dialect (user config if exists, otherwise bundled)
+            from .generator import get_bundled_config_path, load_config_file, get_user_configs_dir
+            from pathlib import Path
+            
+            # Check user config first, then bundled
+            user_config_path = get_user_configs_dir() / f"sqltidy_{dialect}.json"
+            if user_config_path.exists():
+                config_data = load_config_file(str(user_config_path))
+            else:
+                config_path = get_bundled_config_path(dialect)
+                config_data = load_config_file(str(config_path))
+            config = SQLTidyConfig.from_dict(config_data)
         else:
-            config = SQLTidyConfig()
+            # Default to sqlserver config file (user config if exists, otherwise bundled)
+            from .generator import get_bundled_config_path, load_config_file, get_user_configs_dir
+            from pathlib import Path
+            
+            # Check user config first, then bundled
+            user_config_path = get_user_configs_dir() / "sqltidy_sqlserver.json"
+            if user_config_path.exists():
+                config_data = load_config_file(str(user_config_path))
+            else:
+                config_path = get_bundled_config_path('sqlserver')
+                config_data = load_config_file(str(config_path))
+            config = SQLTidyConfig.from_dict(config_data)
     
     formatter = SQLFormatter(config=config, rule_type=rule_type)
 

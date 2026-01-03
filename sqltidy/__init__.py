@@ -1,7 +1,6 @@
 __version__ = "0.4.0"
 
 from .api import (
-    format_sql,
     tidy_sql,
     rewrite_sql,
     tidy_and_rewrite_sql,
@@ -15,7 +14,6 @@ from .config import SQLTidyConfig, SUPPORTED_DIALECTS
 
 __all__ = [
     # Main formatting functions
-    "format_sql",
     "tidy_sql",
     "rewrite_sql",
     "tidy_and_rewrite_sql",
