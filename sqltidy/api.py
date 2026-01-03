@@ -3,11 +3,31 @@ from .config import SQLTidyConfig, SUPPORTED_DIALECTS
 from .rules.base import BaseRule
 from .core import SQLFormatter
 from .plugins import load_plugin_file, load_plugins_from_directory
-from .generator import get_user_plugins_dir
+from .generator import get_user_plugins_dir, get_bundled_config_path, load_config_file, get_user_configs_dir
 from pathlib import Path
 
 # In-memory list to hold extra plugin rules registered at runtime
 _extra_plugins = []
+
+
+def _load_config_for_dialect(dialect: str) -> SQLTidyConfig:
+    """
+    Load configuration for a specific dialect.
+    Checks user config first, then falls back to bundled config.
+    
+    Args:
+        dialect: SQL dialect name
+        
+    Returns:
+        SQLTidyConfig: Loaded configuration
+    """
+    user_config_path = get_user_configs_dir() / f"sqltidy_{dialect}.json"
+    if user_config_path.exists():
+        config_data = load_config_file(str(user_config_path))
+    else:
+        config_path = get_bundled_config_path(dialect)
+        config_data = load_config_file(str(config_path))
+    return SQLTidyConfig.from_dict(config_data)
 
 def register_plugin(rule: BaseRule):
     """
@@ -59,31 +79,10 @@ def format_sql(
                     f"Unsupported dialect: '{dialect}'. "
                     f"Must be one of: {', '.join(SUPPORTED_DIALECTS)}"
                 )
-            # Load config file for the specified dialect (user config if exists, otherwise bundled)
-            from .generator import get_bundled_config_path, load_config_file, get_user_configs_dir
-            from pathlib import Path
-            
-            # Check user config first, then bundled
-            user_config_path = get_user_configs_dir() / f"sqltidy_{dialect}.json"
-            if user_config_path.exists():
-                config_data = load_config_file(str(user_config_path))
-            else:
-                config_path = get_bundled_config_path(dialect)
-                config_data = load_config_file(str(config_path))
-            config = SQLTidyConfig.from_dict(config_data)
+            config = _load_config_for_dialect(dialect)
         else:
-            # Default to sqlserver config file (user config if exists, otherwise bundled)
-            from .generator import get_bundled_config_path, load_config_file, get_user_configs_dir
-            from pathlib import Path
-            
-            # Check user config first, then bundled
-            user_config_path = get_user_configs_dir() / "sqltidy_sqlserver.json"
-            if user_config_path.exists():
-                config_data = load_config_file(str(user_config_path))
-            else:
-                config_path = get_bundled_config_path('sqlserver')
-                config_data = load_config_file(str(config_path))
-            config = SQLTidyConfig.from_dict(config_data)
+            # Default to sqlserver
+            config = _load_config_for_dialect('sqlserver')
     
     formatter = SQLFormatter(config=config, rule_type=rule_type)
 
