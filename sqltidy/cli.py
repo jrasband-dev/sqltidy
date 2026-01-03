@@ -1,9 +1,11 @@
+from typing import List, Optional, Union
+from pathlib import Path
 import argparse
 import sys
 import json
 from pathlib import Path
 from . import __version__
-from .api import format_sql
+from .api import format_sql, format_sql_file, format_sql_folder
 from .config import SQLTidyConfig, SUPPORTED_DIALECTS
 from .generator import create_config, list_configs, edit_config, reset_config, load_config_file, get_bundled_config_path, get_user_configs_dir, add_plugin, list_plugins, remove_plugin
 from .tokenizer import tokenize_with_types, TokenType, is_keyword
@@ -133,13 +135,21 @@ def main():
     )
 
     tidy_input_group = tidy_parser.add_argument_group(title='Input')
-    tidy_input_group.add_argument("input", nargs="?", help="SQL file to format")
+    tidy_input_group.add_argument("input", nargs="?", help="SQL file or folder to format")
     
     tidy_parameter_group = tidy_parser.add_argument_group('Parameters')
-    tidy_parameter_group.add_argument("-o", "--output", help="Output file")
+    tidy_parameter_group.add_argument("-o", "--output", help="Output file or folder")
     tidy_parameter_group.add_argument("-d", "--dialect",
                                      choices=SUPPORTED_DIALECTS,
                                      help="SQL dialect (sqlserver, postgresql, mysql, oracle, sqlite). Default: sqlserver")
+    tidy_parameter_group.add_argument("-r", "--recursive", action="store_true",
+                                     help="Process folders recursively")
+    tidy_parameter_group.add_argument("--pattern", default="*.sql",
+                                     help="File pattern for folder processing (default: *.sql)")
+    tidy_parameter_group.add_argument("--no-in-place", action="store_true",
+                                     help="Don't modify files in place (requires --output)")
+    tidy_parameter_group.add_argument("--summary", action="store_true",
+                                     help="Show summary of processed files")
     
     tidy_plugin_group = tidy_parser.add_argument_group('Plugins')
     tidy_plugin_group.add_argument("--plugin", action="append", dest="plugin_files",
@@ -170,13 +180,21 @@ def main():
     rewrite_plugin_group.add_argument("--plugin-module", action="append", dest="plugin_modules",
                                       help="Import plugin module (can be used multiple times)")
     rewrite_input_group = rewrite_parser.add_argument_group(title='Input')
-    rewrite_input_group.add_argument("input", nargs="?", help="SQL file to rewrite")
+    rewrite_input_group.add_argument("input", nargs="?", help="SQL file or folder to rewrite")
     
     rewrite_parameter_group = rewrite_parser.add_argument_group('Parameters')
-    rewrite_parameter_group.add_argument("-o", "--output", help="Output file")
+    rewrite_parameter_group.add_argument("-o", "--output", help="Output file or folder")
     rewrite_parameter_group.add_argument("-d", "--dialect",
                                         choices=SUPPORTED_DIALECTS,
                                         help="SQL dialect (sqlserver, postgresql, mysql, oracle, sqlite). Default: sqlserver")
+    rewrite_parameter_group.add_argument("-r", "--recursive", action="store_true",
+                                        help="Process folders recursively")
+    rewrite_parameter_group.add_argument("--pattern", default="*.sql",
+                                        help="File pattern for folder processing (default: *.sql)")
+    rewrite_parameter_group.add_argument("--no-in-place", action="store_true",
+                                        help="Don't modify files in place (requires --output)")
+    rewrite_parameter_group.add_argument("--summary", action="store_true",
+                                        help="Show summary of processed files")
     # Use config.py defaults for rewrite behavior. No CLI enable/disable flags are provided.
     rewrite_parameter_group.add_argument("--tidy", action="store_true", help="Apply tidy rules after rewriting")
 
@@ -449,9 +467,123 @@ def main():
 
     # tidy command
     if args.command == "tidy":
+        # Determine if input is provided
         if args.input:
-            with open(args.input, "r", encoding="utf-8") as f:
-                sql = f.read()
+            input_path = Path(args.input)
+            
+            # Check if input is a file or folder
+            if input_path.is_file():
+                # Single file processing
+                with open(args.input, "r", encoding="utf-8") as f:
+                    sql = f.read()
+
+                # Load config file based on dialect (default: sqlserver)
+                dialect = args.dialect if args.dialect else 'sqlserver'
+                config = create_config_from_file(dialect)
+
+                # Load plugins if specified
+                plugin_rules = []
+                if args.plugin_files:
+                    for plugin_file in args.plugin_files:
+                        try:
+                            rules = load_plugin_file(plugin_file)
+                            plugin_rules.extend([r() for r in rules])
+                        except Exception as e:
+                            print(f"Warning: Could not load plugin {plugin_file}: {e}", file=sys.stderr)
+                
+                if args.plugin_dirs:
+                    for plugin_dir in args.plugin_dirs:
+                        try:
+                            rules = load_plugins_from_directory(plugin_dir)
+                            plugin_rules.extend([r() for r in rules])
+                        except Exception as e:
+                            print(f"Warning: Could not load plugins from {plugin_dir}: {e}", file=sys.stderr)
+                
+                if args.plugin_modules:
+                    for plugin_module in args.plugin_modules:
+                        try:
+                            rules = load_plugin_module(plugin_module)
+                            plugin_rules.extend([r() for r in rules])
+                        except Exception as e:
+                            print(f"Warning: Could not load plugin module {plugin_module}: {e}", file=sys.stderr)
+
+                formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
+
+                if args.output:
+                    with open(args.output, "w", encoding="utf-8") as f:
+                        f.write(formatted_sql)
+                elif not args.no_in_place:
+                    # overwrite input file if no output specified
+                    with open(args.input, "w", encoding="utf-8") as f:
+                        f.write(formatted_sql)
+                else:
+                    print(formatted_sql)
+                    
+            elif input_path.is_dir():
+                # Folder processing
+                dialect = args.dialect if args.dialect else 'sqlserver'
+                config = create_config_from_file(dialect)
+
+                # Load plugins if specified
+                plugin_rules = []
+                if args.plugin_files:
+                    for plugin_file in args.plugin_files:
+                        try:
+                            rules = load_plugin_file(plugin_file)
+                            plugin_rules.extend([r() for r in rules])
+                        except Exception as e:
+                            print(f"Warning: Could not load plugin {plugin_file}: {e}", file=sys.stderr)
+                
+                if args.plugin_dirs:
+                    for plugin_dir in args.plugin_dirs:
+                        try:
+                            rules = load_plugins_from_directory(plugin_dir)
+                            plugin_rules.extend([r() for r in rules])
+                        except Exception as e:
+                            print(f"Warning: Could not load plugins from {plugin_dir}: {e}", file=sys.stderr)
+                
+                if args.plugin_modules:
+                    for plugin_module in args.plugin_modules:
+                        try:
+                            rules = load_plugin_module(plugin_module)
+                            plugin_rules.extend([r() for r in rules])
+                        except Exception as e:
+                            print(f"Warning: Could not load plugin module {plugin_module}: {e}", file=sys.stderr)
+
+                # Process the folder
+                print(f"Processing SQL files in: {input_path}")
+                if args.recursive:
+                    print(f"  Mode: Recursive")
+                print(f"  Pattern: {args.pattern}")
+                print(f"  Dialect: {dialect}")
+                
+                results = format_sql_folder(
+                    folder_path=input_path,
+                    output_folder=args.output,
+                    config=config,
+                    custom_rules=plugin_rules,
+                    rule_type='tidy',
+                    pattern=args.pattern,
+                    recursive=args.recursive,
+                    in_place=not args.no_in_place
+                )
+                
+                # Display results
+                print(f"\nResults:")
+                print(f"  Total files: {results['total']}")
+                print(f"  Successful: {results['success']}")
+                print(f"  Failed: {results['failed']}")
+                
+                if results['errors']:
+                    print(f"\nErrors:")
+                    for error in results['errors']:
+                        print(f"  {error['file']}: {error['error']}")
+                
+                if results['failed'] > 0:
+                    sys.exit(1)
+            else:
+                print(f"Error: Input path does not exist: {args.input}", file=sys.stderr)
+                sys.exit(1)
         else:
             # Check if stdin is a TTY (interactive terminal)
             if sys.stdin.isatty():
@@ -461,53 +593,197 @@ def main():
                 sys.exit(1)
             sql = sys.stdin.read()
 
-        # Load config file based on dialect (default: sqlserver)
-        dialect = args.dialect if args.dialect else 'sqlserver'
-        config = create_config_from_file(dialect)
+            # Load config file based on dialect (default: sqlserver)
+            dialect = args.dialect if args.dialect else 'sqlserver'
+            config = create_config_from_file(dialect)
 
-        # Load plugins if specified
-        plugin_rules = []
-        if args.plugin_files:
-            for plugin_file in args.plugin_files:
-                try:
-                    rules = load_plugin_file(plugin_file)
-                    plugin_rules.extend([r() for r in rules])
-                except Exception as e:
-                    print(f"Warning: Could not load plugin {plugin_file}: {e}", file=sys.stderr)
-        
-        if args.plugin_dirs:
-            for plugin_dir in args.plugin_dirs:
-                try:
-                    rules = load_plugins_from_directory(plugin_dir)
-                    plugin_rules.extend([r() for r in rules])
-                except Exception as e:
-                    print(f"Warning: Could not load plugins from {plugin_dir}: {e}", file=sys.stderr)
-        
-        if args.plugin_modules:
-            for plugin_module in args.plugin_modules:
-                try:
-                    rules = load_plugin_module(plugin_module)
-                    plugin_rules.extend([r() for r in rules])
-                except Exception as e:
-                    print(f"Warning: Could not load plugin module {plugin_module}: {e}", file=sys.stderr)
+            # Load plugins if specified
+            plugin_rules = []
+            if args.plugin_files:
+                for plugin_file in args.plugin_files:
+                    try:
+                        rules = load_plugin_file(plugin_file)
+                        plugin_rules.extend([r() for r in rules])
+                    except Exception as e:
+                        print(f"Warning: Could not load plugin {plugin_file}: {e}", file=sys.stderr)
+            
+            if args.plugin_dirs:
+                for plugin_dir in args.plugin_dirs:
+                    try:
+                        rules = load_plugins_from_directory(plugin_dir)
+                        plugin_rules.extend([r() for r in rules])
+                    except Exception as e:
+                        print(f"Warning: Could not load plugins from {plugin_dir}: {e}", file=sys.stderr)
+            
+            if args.plugin_modules:
+                for plugin_module in args.plugin_modules:
+                    try:
+                        rules = load_plugin_module(plugin_module)
+                        plugin_rules.extend([r() for r in rules])
+                    except Exception as e:
+                        print(f"Warning: Could not load plugin module {plugin_module}: {e}", file=sys.stderr)
 
-        formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
-
-        if args.output:
-            with open(args.output, "w", encoding="utf-8") as f:
-                f.write(formatted_sql)
-        elif args.input:
-            # overwrite input file if no output specified
-            with open(args.input, "w", encoding="utf-8") as f:
-                f.write(formatted_sql)
-        else:
+            formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
             print(formatted_sql)
 
     # rewrite command
     if args.command == "rewrite":
+        # Determine if input is provided
         if args.input:
-            with open(args.input, "r", encoding="utf-8") as f:
-                sql = f.read()
+            input_path = Path(args.input)
+            
+            # Check if input is a file or folder
+            if input_path.is_file():
+                # Single file processing
+                with open(args.input, "r", encoding="utf-8") as f:
+                    sql = f.read()
+
+                # Load config file based on dialect (default: sqlserver)
+                dialect = args.dialect if args.dialect else 'sqlserver'
+                config = create_config_from_file(dialect)
+
+                # Load plugins if specified
+                plugin_rules = []
+                if args.plugin_files:
+                    for plugin_file in args.plugin_files:
+                        try:
+                            rules = load_plugin_file(plugin_file)
+                            plugin_rules.extend([r() for r in rules])
+                        except Exception as e:
+                            print(f"Warning: Could not load plugin {plugin_file}: {e}", file=sys.stderr)
+                
+                if args.plugin_dirs:
+                    for plugin_dir in args.plugin_dirs:
+                        try:
+                            rules = load_plugins_from_directory(plugin_dir)
+                            plugin_rules.extend([r() for r in rules])
+                        except Exception as e:
+                            print(f"Warning: Could not load plugins from {plugin_dir}: {e}", file=sys.stderr)
+                
+                if args.plugin_modules:
+                    for plugin_module in args.plugin_modules:
+                        try:
+                            rules = load_plugin_module(plugin_module)
+                            plugin_rules.extend([r() for r in rules])
+                        except Exception as e:
+                            print(f"Warning: Could not load plugin module {plugin_module}: {e}", file=sys.stderr)
+
+                formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
+
+                # Apply tidy rules if requested
+                if args.tidy:
+                    tidy_config = SQLTidyConfig()
+                    formatted_sql = format_sql(formatted_sql, config=tidy_config, rule_type='tidy')
+
+                if args.output:
+                    with open(args.output, "w", encoding="utf-8") as f:
+                        f.write(formatted_sql)
+                elif not args.no_in_place:
+                    # overwrite input file if no output specified
+                    with open(args.input, "w", encoding="utf-8") as f:
+                        f.write(formatted_sql)
+                else:
+                    print(formatted_sql)
+                    
+            elif input_path.is_dir():
+                # Folder processing
+                dialect = args.dialect if args.dialect else 'sqlserver'
+                config = create_config_from_file(dialect)
+
+                # Load plugins if specified
+                plugin_rules = []
+                if args.plugin_files:
+                    for plugin_file in args.plugin_files:
+                        try:
+                            rules = load_plugin_file(plugin_file)
+                            plugin_rules.extend([r() for r in rules])
+                        except Exception as e:
+                            print(f"Warning: Could not load plugin {plugin_file}: {e}", file=sys.stderr)
+                
+                if args.plugin_dirs:
+                    for plugin_dir in args.plugin_dirs:
+                        try:
+                            rules = load_plugins_from_directory(plugin_dir)
+                            plugin_rules.extend([r() for r in rules])
+                        except Exception as e:
+                            print(f"Warning: Could not load plugins from {plugin_dir}: {e}", file=sys.stderr)
+                
+                if args.plugin_modules:
+                    for plugin_module in args.plugin_modules:
+                        try:
+                            rules = load_plugin_module(plugin_module)
+                            plugin_rules.extend([r() for r in rules])
+                        except Exception as e:
+                            print(f"Warning: Could not load plugin module {plugin_module}: {e}", file=sys.stderr)
+
+                # Process the folder
+                print(f"Processing SQL files in: {input_path}")
+                if args.recursive:
+                    print(f"  Mode: Recursive")
+                print(f"  Pattern: {args.pattern}")
+                print(f"  Dialect: {dialect}")
+                
+                # Note: If --tidy is specified, we need to apply both rewrite and tidy rules
+                # For folder processing, we'll need to call format_sql_folder twice or use None for rule_type
+                if args.tidy:
+                    print("  Mode: Rewrite + Tidy")
+                    # First pass: rewrite
+                    results = format_sql_folder(
+                        folder_path=input_path,
+                        output_folder=args.output,
+                        config=config,
+                        custom_rules=plugin_rules,
+                        rule_type='rewrite',
+                        pattern=args.pattern,
+                        recursive=args.recursive,
+                        in_place=not args.no_in_place
+                    )
+                    
+                    # Second pass: tidy (on the same files)
+                    if results['success'] > 0:
+                        tidy_config = SQLTidyConfig()
+                        target_folder = Path(args.output) if args.output else input_path
+                        tidy_results = format_sql_folder(
+                            folder_path=target_folder,
+                            output_folder=None,
+                            config=tidy_config,
+                            custom_rules=[],
+                            rule_type='tidy',
+                            pattern=args.pattern,
+                            recursive=args.recursive,
+                            in_place=True
+                        )
+                        # Merge results
+                        results['failed'] += tidy_results['failed']
+                        results['errors'].extend(tidy_results['errors'])
+                else:
+                    results = format_sql_folder(
+                        folder_path=input_path,
+                        output_folder=args.output,
+                        config=config,
+                        custom_rules=plugin_rules,
+                        rule_type='rewrite',
+                        pattern=args.pattern,
+                        recursive=args.recursive,
+                        in_place=not args.no_in_place
+                    )
+                
+                # Display results
+                print(f"\nResults:")
+                print(f"  Total files: {results['total']}")
+                print(f"  Successful: {results['success']}")
+                print(f"  Failed: {results['failed']}")
+                
+                if results['errors']:
+                    print(f"\nErrors:")
+                    for error in results['errors']:
+                        print(f"  {error['file']}: {error['error']}")
+                
+                if results['failed'] > 0:
+                    sys.exit(1)
+            else:
+                print(f"Error: Input path does not exist: {args.input}", file=sys.stderr)
+                sys.exit(1)
         else:
             # Check if stdin is a TTY (interactive terminal)
             if sys.stdin.isatty():
@@ -517,51 +793,43 @@ def main():
                 sys.exit(1)
             sql = sys.stdin.read()
 
-        # Load config file based on dialect (default: sqlserver)
-        dialect = args.dialect if args.dialect else 'sqlserver'
-        config = create_config_from_file(dialect)
+            # Load config file based on dialect (default: sqlserver)
+            dialect = args.dialect if args.dialect else 'sqlserver'
+            config = create_config_from_file(dialect)
 
-        # Load plugins if specified
-        plugin_rules = []
-        if args.plugin_files:
-            for plugin_file in args.plugin_files:
-                try:
-                    rules = load_plugin_file(plugin_file)
-                    plugin_rules.extend([r() for r in rules])
-                except Exception as e:
-                    print(f"Warning: Could not load plugin {plugin_file}: {e}", file=sys.stderr)
-        
-        if args.plugin_dirs:
-            for plugin_dir in args.plugin_dirs:
-                try:
-                    rules = load_plugins_from_directory(plugin_dir)
-                    plugin_rules.extend([r() for r in rules])
-                except Exception as e:
-                    print(f"Warning: Could not load plugins from {plugin_dir}: {e}", file=sys.stderr)
-        
-        if args.plugin_modules:
-            for plugin_module in args.plugin_modules:
-                try:
-                    rules = load_plugin_module(plugin_module)
-                    plugin_rules.extend([r() for r in rules])
-                except Exception as e:
-                    print(f"Warning: Could not load plugin module {plugin_module}: {e}", file=sys.stderr)
+            # Load plugins if specified
+            plugin_rules = []
+            if args.plugin_files:
+                for plugin_file in args.plugin_files:
+                    try:
+                        rules = load_plugin_file(plugin_file)
+                        plugin_rules.extend([r() for r in rules])
+                    except Exception as e:
+                        print(f"Warning: Could not load plugin {plugin_file}: {e}", file=sys.stderr)
+            
+            if args.plugin_dirs:
+                for plugin_dir in args.plugin_dirs:
+                    try:
+                        rules = load_plugins_from_directory(plugin_dir)
+                        plugin_rules.extend([r() for r in rules])
+                    except Exception as e:
+                        print(f"Warning: Could not load plugins from {plugin_dir}: {e}", file=sys.stderr)
+            
+            if args.plugin_modules:
+                for plugin_module in args.plugin_modules:
+                    try:
+                        rules = load_plugin_module(plugin_module)
+                        plugin_rules.extend([r() for r in rules])
+                    except Exception as e:
+                        print(f"Warning: Could not load plugin module {plugin_module}: {e}", file=sys.stderr)
 
-        formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
+            formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
 
-        # Apply tidy rules if requested
-        if args.tidy:
-            tidy_config = SQLTidyConfig()
-            formatted_sql = format_sql(formatted_sql, config=tidy_config, rule_type='tidy')
+            # Apply tidy rules if requested
+            if args.tidy:
+                tidy_config = SQLTidyConfig()
+                formatted_sql = format_sql(formatted_sql, config=tidy_config, rule_type='tidy')
 
-        if args.output:
-            with open(args.output, "w", encoding="utf-8") as f:
-                f.write(formatted_sql)
-        elif args.input:
-            # overwrite input file if no output specified
-            with open(args.input, "w", encoding="utf-8") as f:
-                f.write(formatted_sql)
-        else:
             print(formatted_sql)
 
 if __name__ == "__main__":

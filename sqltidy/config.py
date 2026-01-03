@@ -34,6 +34,9 @@ class SQLTidyConfig:
     indent_select_columns: bool = True
     newline_on_join: bool = True  # Move ON keyword to newline after JOIN
     
+    # JOIN pattern formatting - adds blank line before JOIN keywords
+    newline_join_pattern: bool = False
+    
     # Identifier quoting (disabled by default)
     quote_identifiers: bool = False
     
