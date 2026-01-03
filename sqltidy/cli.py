@@ -139,7 +139,7 @@ def main():
     tidy_parameter_group.add_argument("-o", "--output", help="Output file")
     tidy_parameter_group.add_argument("-d", "--dialect",
                                      choices=SUPPORTED_DIALECTS,
-                                     help="SQL dialect (sqlserver, postgresql, mysql, oracle, sqlite)")
+                                     help="SQL dialect (sqlserver, postgresql, mysql, oracle, sqlite). Default: sqlserver")
     
     tidy_plugin_group = tidy_parser.add_argument_group('Plugins')
     tidy_plugin_group.add_argument("--plugin", action="append", dest="plugin_files",
@@ -176,7 +176,7 @@ def main():
     rewrite_parameter_group.add_argument("-o", "--output", help="Output file")
     rewrite_parameter_group.add_argument("-d", "--dialect",
                                         choices=SUPPORTED_DIALECTS,
-                                        help="SQL dialect (sqlserver, postgresql, mysql, oracle, sqlite)")
+                                        help="SQL dialect (sqlserver, postgresql, mysql, oracle, sqlite). Default: sqlserver")
     # Use config.py defaults for rewrite behavior. No CLI enable/disable flags are provided.
     rewrite_parameter_group.add_argument("--tidy", action="store_true", help="Apply tidy rules after rewriting")
 
@@ -449,11 +449,9 @@ def main():
         else:
             sql = sys.stdin.read()
 
-        # Load config based on dialect if provided, otherwise use defaults
-        if args.dialect:
-            config = SQLTidyConfig.get_dialect_defaults(args.dialect)
-        else:
-            config = SQLTidyConfig()
+        # Load config file based on dialect (default: sqlserver)
+        dialect = args.dialect if args.dialect else 'sqlserver'
+        config = create_config_from_file(dialect)
 
         # Load plugins if specified
         plugin_rules = []
@@ -501,11 +499,9 @@ def main():
         else:
             sql = sys.stdin.read()
 
-        # Load config based on dialect if provided, otherwise use defaults
-        if args.dialect:
-            config = SQLTidyConfig.get_dialect_defaults(args.dialect)
-        else:
-            config = SQLTidyConfig()
+        # Load config file based on dialect (default: sqlserver)
+        dialect = args.dialect if args.dialect else 'sqlserver'
+        config = create_config_from_file(dialect)
 
         # Load plugins if specified
         plugin_rules = []
