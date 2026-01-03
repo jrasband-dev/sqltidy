@@ -363,8 +363,6 @@ def main():
                                      help="File pattern for folder processing (default: *.sql)")
     tidy_parameter_group.add_argument("--no-in-place", action="store_true",
                                      help="Don't modify files in place (requires --output)")
-    tidy_parameter_group.add_argument("--summary", action="store_true",
-                                     help="Show summary of processed files")
     
     tidy_rule_group = tidy_parser.add_argument_group('rules')
     tidy_rule_group.add_argument("--rule", action="append", dest="rule_files",
