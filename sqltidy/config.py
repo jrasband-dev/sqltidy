@@ -32,6 +32,7 @@ class SQLTidyConfig:
     compact: bool = True
     leading_commas: bool = True
     indent_select_columns: bool = True
+    newline_on_join: bool = True  # Move ON keyword to newline after JOIN
     
     # Identifier quoting (disabled by default)
     quote_identifiers: bool = False

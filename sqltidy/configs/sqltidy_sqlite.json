@@ -5,6 +5,7 @@
   "compact": true,
   "leading_commas": true,
   "indent_select_columns": true,
+  "newline_on_join": true,
   "quote_identifiers": false,
   "enable_subquery_to_cte": true,
   "enable_alias_style_abc": false,
