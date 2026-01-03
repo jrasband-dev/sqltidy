@@ -12,10 +12,10 @@
 
    api
    cli
-   config
    core
    dialects
    generator
    plugins
+   rulebook
    rules
    tokenizer

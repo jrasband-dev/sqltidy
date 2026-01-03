@@ -8,11 +8,13 @@ sqltidy.api
 
    .. autosummary::
    
-      clear_plugins
+      clear_rules
       format_sql
-      load_plugin
-      load_user_plugins
-      register_plugin
+      format_sql_file
+      format_sql_folder
+      load_rule
+      load_user_rules
+      register_rule
       rewrite_sql
       tidy_and_rewrite_sql
       tidy_sql

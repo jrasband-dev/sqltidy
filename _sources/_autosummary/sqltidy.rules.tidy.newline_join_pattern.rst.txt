@@ -1,0 +1,12 @@
+sqltidy.rules.tidy.newline\_join\_pattern
+=========================================
+
+.. automodule:: sqltidy.rules.tidy.newline_join_pattern
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      NewlineJoinPatternRule
+   

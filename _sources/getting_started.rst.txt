@@ -32,7 +32,7 @@ You can customize formatting behavior using a ``SQLTidyConfig`` object:
 .. code-block:: python
 
    from sqltidy import format_sql
-   from sqltidy.config import SQLTidyConfig
+   from sqltidy.rulebook import SQLTidyConfig
    
    config = SQLTidyConfig()
    sql = "SELECT * FROM users"

@@ -8,7 +8,11 @@ sqltidy.cli
 
    .. autosummary::
    
-      create_config_from_file
+      create_rulebook_from_file
+      handle_rewrite_command
+      handle_tidy_command
+      load_plugin_rules
       main
-      resolve_config_path
+      print_logo
+      resolve_rulebook_path
    

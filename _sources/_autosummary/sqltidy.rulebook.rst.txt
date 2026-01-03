@@ -1,7 +1,7 @@
-sqltidy.config
-==============
+sqltidy.rulebook
+================
 
-.. automodule:: sqltidy.config
+.. automodule:: sqltidy.rulebook
 
    
    .. rubric:: Classes

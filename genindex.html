@@ -4,11 +4,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; SQLTidy 0.3.0 documentation</title>
+    <title>Index &#8212; SQLTidy 0.4.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
-    <script src="_static/documentation_options.js?v=e259d695"></script>
+    <script src="_static/documentation_options.js?v=6c02275b"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="#" />
@@ -42,6 +42,7 @@
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#J"><strong>J</strong></a>
  | <a href="#K"><strong>K</strong></a>
@@ -62,14 +63,14 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.__init__">__init__() (sqltidy.config.SQLTidyConfig method)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.__init__">[1]</a>
+      <li><a href="_autosummary/sqltidy.core.html#sqltidy.core.SQLFormatter.__init__">__init__() (sqltidy.core.SQLFormatter method)</a>, <a href="api.html#sqltidy.core.SQLFormatter.__init__">[1]</a>
 
       <ul>
-        <li><a href="_autosummary/sqltidy.core.html#sqltidy.core.SQLFormatter.__init__">(sqltidy.core.SQLFormatter method)</a>, <a href="api.html#sqltidy.core.SQLFormatter.__init__">[1]</a>
-</li>
         <li><a href="_autosummary/sqltidy.dialects.base.html#sqltidy.dialects.base.SQLDialect.__init__">(sqltidy.dialects.base.SQLDialect method)</a>, <a href="dialects.html#sqltidy.dialects.base.SQLDialect.__init__">[1]</a>
 </li>
         <li><a href="_autosummary/sqltidy.dialects.html#sqltidy.dialects.SQLDialect.__init__">(sqltidy.dialects.SQLDialect method)</a>
+</li>
+        <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.__init__">(sqltidy.rulebook.SQLTidyConfig method)</a>
 </li>
         <li><a href="_autosummary/sqltidy.rules.base.html#sqltidy.rules.base.FormatterContext.__init__">(sqltidy.rules.base.FormatterContext method)</a>, <a href="plugins.html#sqltidy.rules.base.FormatterContext.__init__">[1]</a>, <a href="rules.html#sqltidy.rules.base.FormatterContext.__init__">[2]</a>
 </li>
@@ -88,7 +89,7 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.add_plugin">add_plugin() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.add_plugin">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.add_rule">add_rule() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.add_rule">[1]</a>
 </li>
       <li><a href="_autosummary/sqltidy.rules.rewrite.alias_style_abc.html#sqltidy.rules.rewrite.alias_style_abc.AliasStyleABCRule">AliasStyleABCRule (class in sqltidy.rules.rewrite.alias_style_abc)</a>, <a href="rules.html#sqltidy.rules.rewrite.alias_style_abc.AliasStyleABCRule">[1]</a>
 </li>
@@ -123,6 +124,10 @@
 </li>
         <li><a href="_autosummary/sqltidy.rules.tidy.newline_after_select.html#sqltidy.rules.tidy.newline_after_select.NewlineAfterSelectRule.apply">(sqltidy.rules.tidy.newline_after_select.NewlineAfterSelectRule method)</a>, <a href="rules.html#sqltidy.rules.tidy.newline_after_select.NewlineAfterSelectRule.apply">[1]</a>
 </li>
+        <li><a href="_autosummary/sqltidy.rules.tidy.newline_join_pattern.html#sqltidy.rules.tidy.newline_join_pattern.NewlineJoinPatternRule.apply">(sqltidy.rules.tidy.newline_join_pattern.NewlineJoinPatternRule method)</a>
+</li>
+        <li><a href="_autosummary/sqltidy.rules.tidy.newline_on_join.html#sqltidy.rules.tidy.newline_on_join.NewlineOnJoinRule.apply">(sqltidy.rules.tidy.newline_on_join.NewlineOnJoinRule method)</a>
+</li>
         <li><a href="_autosummary/sqltidy.rules.tidy.oracle_connect_by.html#sqltidy.rules.tidy.oracle_connect_by.OracleConnectByFormattingRule.apply">(sqltidy.rules.tidy.oracle_connect_by.OracleConnectByFormattingRule method)</a>, <a href="rules.html#sqltidy.rules.tidy.oracle_connect_by.OracleConnectByFormattingRule.apply">[1]</a>
 </li>
         <li><a href="_autosummary/sqltidy.rules.tidy.quote_identifiers.html#sqltidy.rules.tidy.quote_identifiers.QuoteIdentifiersRule.apply">(sqltidy.rules.tidy.quote_identifiers.QuoteIdentifiersRule method)</a>, <a href="rules.html#sqltidy.rules.tidy.quote_identifiers.QuoteIdentifiersRule.apply">[1]</a>
@@ -148,12 +153,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.GroupType.CLAUSE">CLAUSE (sqltidy.tokenizer.GroupType attribute)</a>, <a href="api.html#sqltidy.tokenizer.GroupType.CLAUSE">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.html#sqltidy.clear_plugins">clear_plugins() (in module sqltidy)</a>
+      <li><a href="_autosummary/sqltidy.html#sqltidy.clear_rules">clear_rules() (in module sqltidy)</a>
 
       <ul>
-        <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.clear_plugins">(in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.clear_plugins">[1]</a>
+        <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.clear_rules">(in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.clear_rules">[1]</a>
 </li>
-        <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.clear_plugins">(in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.clear_plugins">[1]</a>, <a href="plugins.html#sqltidy.plugins.clear_plugins">[2]</a>
+        <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.clear_rules">(in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.clear_rules">[1]</a>, <a href="plugins.html#sqltidy.plugins.clear_rules">[2]</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.TokenType.COMMENT">COMMENT (sqltidy.tokenizer.TokenType attribute)</a>, <a href="api.html#sqltidy.tokenizer.TokenType.COMMENT">[1]</a>
@@ -178,7 +183,7 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.compact">compact (sqltidy.config.SQLTidyConfig attribute)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.compact">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.compact">compact (sqltidy.rulebook.SQLTidyConfig attribute)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.compact">(sqltidy.SQLTidyConfig attribute)</a>
@@ -192,11 +197,11 @@
       </ul></li>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.GroupType.CONDITION">CONDITION (sqltidy.tokenizer.GroupType attribute)</a>, <a href="api.html#sqltidy.tokenizer.GroupType.CONDITION">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.create_config">create_config() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.create_config">[1]</a>
+      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.create_rule_formatter">create_rule_formatter() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.create_rule_formatter">[1]</a>, <a href="plugins.html#sqltidy.plugins.create_rule_formatter">[2]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.cli.html#sqltidy.cli.create_config_from_file">create_config_from_file() (in module sqltidy.cli)</a>, <a href="api.html#sqltidy.cli.create_config_from_file">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.create_rulebook">create_rulebook() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.create_rulebook">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.create_plugin_formatter">create_plugin_formatter() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.create_plugin_formatter">[1]</a>, <a href="plugins.html#sqltidy.plugins.create_plugin_formatter">[2]</a>
+      <li><a href="_autosummary/sqltidy.cli.html#sqltidy.cli.create_rulebook_from_file">create_rulebook_from_file() (in module sqltidy.cli)</a>, <a href="api.html#sqltidy.cli.create_rulebook_from_file">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -222,7 +227,7 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.dialect">dialect (sqltidy.config.SQLTidyConfig attribute)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.dialect">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.dialect">dialect (sqltidy.rulebook.SQLTidyConfig attribute)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.dialect">(sqltidy.SQLTidyConfig attribute)</a>
@@ -236,15 +241,15 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.edit_config">edit_config() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.edit_config">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.edit_rulebook">edit_rulebook() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.edit_rulebook">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.enable_alias_style_abc">enable_alias_style_abc (sqltidy.config.SQLTidyConfig attribute)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.enable_alias_style_abc">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.enable_alias_style_abc">enable_alias_style_abc (sqltidy.rulebook.SQLTidyConfig attribute)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.enable_alias_style_abc">(sqltidy.SQLTidyConfig attribute)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.enable_alias_style_t_numeric">enable_alias_style_t_numeric (sqltidy.config.SQLTidyConfig attribute)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.enable_alias_style_t_numeric">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.enable_alias_style_t_numeric">enable_alias_style_t_numeric (sqltidy.rulebook.SQLTidyConfig attribute)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.enable_alias_style_t_numeric">(sqltidy.SQLTidyConfig attribute)</a>
@@ -252,7 +257,7 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.enable_subquery_to_cte">enable_subquery_to_cte (sqltidy.config.SQLTidyConfig attribute)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.enable_subquery_to_cte">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.enable_subquery_to_cte">enable_subquery_to_cte (sqltidy.rulebook.SQLTidyConfig attribute)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.enable_subquery_to_cte">(sqltidy.SQLTidyConfig attribute)</a>
@@ -272,28 +277,28 @@
 </li>
       <li><a href="_autosummary/sqltidy.core.html#sqltidy.core.SQLFormatter.format">format() (sqltidy.core.SQLFormatter method)</a>, <a href="api.html#sqltidy.core.SQLFormatter.format">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.html#sqltidy.format_sql">format_sql() (in module sqltidy)</a>
-
-      <ul>
-        <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.format_sql">(in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.format_sql">[1]</a>
+      <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.format_sql">format_sql() (in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.format_sql">[1]</a>
 </li>
-      </ul></li>
+      <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.format_sql_file">format_sql_file() (in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.format_sql_file">[1]</a>
+</li>
+      <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.format_sql_folder">format_sql_folder() (in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.format_sql_folder">[1]</a>
+</li>
       <li><a href="_autosummary/sqltidy.rules.base.html#sqltidy.rules.base.FormatterContext">FormatterContext (class in sqltidy.rules.base)</a>, <a href="plugins.html#sqltidy.rules.base.FormatterContext">[1]</a>, <a href="rules.html#sqltidy.rules.base.FormatterContext">[2]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.from_dict">from_dict() (sqltidy.config.SQLTidyConfig class method)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.from_dict">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.from_dict">from_dict() (sqltidy.rulebook.SQLTidyConfig class method)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.from_dict">(sqltidy.SQLTidyConfig class method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.from_file">from_file() (sqltidy.config.SQLTidyConfig class method)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.from_file">[1]</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.from_file">from_file() (sqltidy.rulebook.SQLTidyConfig class method)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.from_file">(sqltidy.SQLTidyConfig class method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.GroupType.FUNCTION">FUNCTION (sqltidy.tokenizer.GroupType attribute)</a>, <a href="api.html#sqltidy.tokenizer.GroupType.FUNCTION">[1]</a>
 </li>
       <li><a href="_autosummary/sqltidy.dialects.base.html#sqltidy.dialects.base.SQLDialect.functions">functions (sqltidy.dialects.base.SQLDialect property)</a>, <a href="dialects.html#sqltidy.dialects.base.SQLDialect.functions">[1]</a>
@@ -318,13 +323,11 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.generate_config_interactive">generate_config_interactive() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.generate_config_interactive">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.generate_rulebook_interactive">generate_rulebook_interactive() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.generate_rulebook_interactive">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.get_bundled_config_path">get_bundled_config_path() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.get_bundled_config_path">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.get_bundled_rulebook_path">get_bundled_rulebook_path() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.get_bundled_rulebook_path">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.get_bundled_configs_dir">get_bundled_configs_dir() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.get_bundled_configs_dir">[1]</a>
-</li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.get_config_path">get_config_path() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.get_config_path">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.get_bundled_rulebooks_dir">get_bundled_rulebooks_dir() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.get_bundled_rulebooks_dir">[1]</a>
 </li>
       <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.get_default_filename">get_default_filename() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.get_default_filename">[1]</a>
 </li>
@@ -334,7 +337,7 @@
         <li><a href="_autosummary/sqltidy.dialects.registry.html#sqltidy.dialects.registry.get_dialect">(in module sqltidy.dialects.registry)</a>, <a href="dialects.html#sqltidy.dialects.registry.get_dialect">[1]</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.get_dialect_defaults">get_dialect_defaults() (sqltidy.config.SQLTidyConfig class method)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.get_dialect_defaults">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.get_dialect_defaults">get_dialect_defaults() (sqltidy.rulebook.SQLTidyConfig class method)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.get_dialect_defaults">(sqltidy.SQLTidyConfig class method)</a>
@@ -342,19 +345,21 @@
       </ul></li>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.TokenGroup.get_identifiers">get_identifiers() (sqltidy.tokenizer.TokenGroup method)</a>, <a href="api.html#sqltidy.tokenizer.TokenGroup.get_identifiers">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.TokenGroup.get_keywords">get_keywords() (sqltidy.tokenizer.TokenGroup method)</a>, <a href="api.html#sqltidy.tokenizer.TokenGroup.get_keywords">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.get_registered_plugins">get_registered_plugins() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.get_registered_plugins">[1]</a>, <a href="plugins.html#sqltidy.plugins.get_registered_plugins">[2]</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.get_registered_rules">get_registered_rules() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.get_registered_rules">[1]</a>, <a href="plugins.html#sqltidy.plugins.get_registered_rules">[2]</a>
+</li>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.get_rulebook_path">get_rulebook_path() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.get_rulebook_path">[1]</a>
 </li>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.TokenGroup.get_text">get_text() (sqltidy.tokenizer.TokenGroup method)</a>, <a href="api.html#sqltidy.tokenizer.TokenGroup.get_text">[1]</a>
 </li>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.get_token_type">get_token_type() (in module sqltidy.tokenizer)</a>, <a href="api.html#sqltidy.tokenizer.get_token_type">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.get_user_configs_dir">get_user_configs_dir() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.get_user_configs_dir">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.get_user_rulebooks_dir">get_user_rulebooks_dir() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.get_user_rulebooks_dir">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.get_user_plugins_dir">get_user_plugins_dir() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.get_user_plugins_dir">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.get_user_rules_dir">get_user_rules_dir() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.get_user_rules_dir">[1]</a>
 </li>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.group_by_clauses">group_by_clauses() (in module sqltidy.tokenizer)</a>, <a href="api.html#sqltidy.tokenizer.group_by_clauses">[1]</a>
 </li>
@@ -365,6 +370,18 @@
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.group_tokens">group_tokens() (in module sqltidy.tokenizer)</a>, <a href="api.html#sqltidy.tokenizer.group_tokens">[1]</a>
 </li>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.GroupType">GroupType (class in sqltidy.tokenizer)</a>, <a href="api.html#sqltidy.tokenizer.GroupType">[1]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/sqltidy.cli.html#sqltidy.cli.handle_rewrite_command">handle_rewrite_command() (in module sqltidy.cli)</a>, <a href="api.html#sqltidy.cli.handle_rewrite_command">[1]</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/sqltidy.cli.html#sqltidy.cli.handle_tidy_command">handle_tidy_command() (in module sqltidy.cli)</a>, <a href="api.html#sqltidy.cli.handle_tidy_command">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -392,7 +409,7 @@
       </ul></li>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.GroupType.IDENTIFIER_LIST">IDENTIFIER_LIST (sqltidy.tokenizer.GroupType attribute)</a>, <a href="api.html#sqltidy.tokenizer.GroupType.IDENTIFIER_LIST">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.indent_select_columns">indent_select_columns (sqltidy.config.SQLTidyConfig attribute)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.indent_select_columns">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.indent_select_columns">indent_select_columns (sqltidy.rulebook.SQLTidyConfig attribute)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.indent_select_columns">(sqltidy.SQLTidyConfig attribute)</a>
@@ -406,7 +423,7 @@
         <li><a href="_autosummary/sqltidy.rules.tidy.indent_select_columns.html#sqltidy.rules.tidy.indent_select_columns.IndentSelectColumnsRule">(class in sqltidy.rules.tidy.indent_select_columns)</a>, <a href="rules.html#sqltidy.rules.tidy.indent_select_columns.IndentSelectColumnsRule">[1]</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.initialize_user_configs">initialize_user_configs() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.initialize_user_configs">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.initialize_user_rulebooks">initialize_user_rulebooks() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.initialize_user_rulebooks">[1]</a>
 </li>
       <li><a href="_autosummary/sqltidy.rules.base.html#sqltidy.rules.base.BaseRule.is_applicable">is_applicable() (sqltidy.rules.base.BaseRule method)</a>, <a href="plugins.html#sqltidy.rules.base.BaseRule.is_applicable">[1]</a>, <a href="rules.html#sqltidy.rules.base.BaseRule.is_applicable">[2]</a>
 </li>
@@ -438,6 +455,12 @@
 <h2 id="J">J</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/sqltidy.rules.tidy.newline_join_pattern.html#sqltidy.rules.tidy.newline_join_pattern.NewlineJoinPatternRule.JOIN_KEYWORDS">JOIN_KEYWORDS (sqltidy.rules.tidy.newline_join_pattern.NewlineJoinPatternRule attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/sqltidy.rules.tidy.newline_on_join.html#sqltidy.rules.tidy.newline_on_join.NewlineOnJoinRule.JOIN_PATTERNS">JOIN_PATTERNS (sqltidy.rules.tidy.newline_on_join.NewlineOnJoinRule attribute)</a>
+</li>
       <li><a href="_autosummary/sqltidy.core.html#sqltidy.core.SQLFormatter.join_tokens">join_tokens() (sqltidy.core.SQLFormatter method)</a>, <a href="api.html#sqltidy.core.SQLFormatter.join_tokens">[1]</a>
 </li>
   </ul></td>
@@ -470,7 +493,7 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.leading_commas">leading_commas (sqltidy.config.SQLTidyConfig attribute)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.leading_commas">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.leading_commas">leading_commas (sqltidy.rulebook.SQLTidyConfig attribute)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.leading_commas">(sqltidy.SQLTidyConfig attribute)</a>
@@ -482,31 +505,29 @@
         <li><a href="_autosummary/sqltidy.rules.tidy.leading_commas.html#sqltidy.rules.tidy.leading_commas.LeadingCommasRule">(class in sqltidy.rules.tidy.leading_commas)</a>, <a href="rules.html#sqltidy.rules.tidy.leading_commas.LeadingCommasRule">[1]</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.list_configs">list_configs() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.list_configs">[1]</a>
-</li>
       <li><a href="_autosummary/sqltidy.dialects.html#sqltidy.dialects.list_dialects">list_dialects() (in module sqltidy.dialects)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.dialects.registry.html#sqltidy.dialects.registry.list_dialects">(in module sqltidy.dialects.registry)</a>, <a href="dialects.html#sqltidy.dialects.registry.list_dialects">[1]</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.list_plugins">list_plugins() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.list_plugins">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.list_rulebooks">list_rulebooks() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.list_rulebooks">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.load_config_file">load_config_file() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.load_config_file">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.list_rules">list_rules() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.list_rules">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/sqltidy.html#sqltidy.load_plugin">load_plugin() (in module sqltidy)</a>
+      <li><a href="_autosummary/sqltidy.cli.html#sqltidy.cli.load_plugin_rules">load_plugin_rules() (in module sqltidy.cli)</a>, <a href="api.html#sqltidy.cli.load_plugin_rules">[1]</a>
+</li>
+      <li><a href="_autosummary/sqltidy.html#sqltidy.load_rule">load_rule() (in module sqltidy)</a>
 
       <ul>
-        <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.load_plugin">(in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.load_plugin">[1]</a>
+        <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.load_rule">(in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.load_rule">[1]</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.load_plugin_file">load_plugin_file() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.load_plugin_file">[1]</a>, <a href="plugins.html#sqltidy.plugins.load_plugin_file">[2]</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.load_rule_file">load_rule_file() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.load_rule_file">[1]</a>, <a href="plugins.html#sqltidy.plugins.load_rule_file">[2]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.load_plugin_module">load_plugin_module() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.load_plugin_module">[1]</a>, <a href="plugins.html#sqltidy.plugins.load_plugin_module">[2]</a>
-</li>
-      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.load_plugins_from_directory">load_plugins_from_directory() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.load_plugins_from_directory">[1]</a>, <a href="plugins.html#sqltidy.plugins.load_plugins_from_directory">[2]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.load_rulebook_file">load_rulebook_file() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.load_rulebook_file">[1]</a>
 </li>
       <li><a href="_autosummary/sqltidy.rules.html#sqltidy.rules.load_rules">load_rules() (in module sqltidy.rules)</a>
 
@@ -516,10 +537,14 @@
         <li><a href="_autosummary/sqltidy.rules.rules.html#sqltidy.rules.rules.load_rules">(in module sqltidy.rules.rules)</a>, <a href="rules.html#sqltidy.rules.rules.load_rules">[1]</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/sqltidy.html#sqltidy.load_user_plugins">load_user_plugins() (in module sqltidy)</a>
+      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.load_rules_from_directory">load_rules_from_directory() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.load_rules_from_directory">[1]</a>, <a href="plugins.html#sqltidy.plugins.load_rules_from_directory">[2]</a>
+</li>
+      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.load_rules_module">load_rules_module() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.load_rules_module">[1]</a>, <a href="plugins.html#sqltidy.plugins.load_rules_module">[2]</a>
+</li>
+      <li><a href="_autosummary/sqltidy.html#sqltidy.load_user_rules">load_user_rules() (in module sqltidy)</a>
 
       <ul>
-        <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.load_user_plugins">(in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.load_user_plugins">[1]</a>
+        <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.load_user_rules">(in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.load_user_rules">[1]</a>
 </li>
       </ul></li>
   </ul></td>
@@ -539,8 +564,6 @@
         <li><a href="_autosummary/sqltidy.api.html#module-sqltidy.api">sqltidy.api</a>, <a href="api.html#module-sqltidy.api">[1]</a>
 </li>
         <li><a href="_autosummary/sqltidy.cli.html#module-sqltidy.cli">sqltidy.cli</a>, <a href="api.html#module-sqltidy.cli">[1]</a>
-</li>
-        <li><a href="_autosummary/sqltidy.config.html#module-sqltidy.config">sqltidy.config</a>, <a href="api.html#module-sqltidy.config">[1]</a>
 </li>
         <li><a href="_autosummary/sqltidy.core.html#module-sqltidy.core">sqltidy.core</a>, <a href="api.html#module-sqltidy.core">[1]</a>
 </li>
@@ -563,6 +586,8 @@
         <li><a href="_autosummary/sqltidy.generator.html#module-sqltidy.generator">sqltidy.generator</a>, <a href="api.html#module-sqltidy.generator">[1]</a>
 </li>
         <li><a href="_autosummary/sqltidy.plugins.html#module-sqltidy.plugins">sqltidy.plugins</a>, <a href="api.html#module-sqltidy.plugins">[1]</a>, <a href="plugins.html#module-sqltidy.plugins">[2]</a>
+</li>
+        <li><a href="_autosummary/sqltidy.rulebook.html#module-sqltidy.rulebook">sqltidy.rulebook</a>
 </li>
         <li><a href="_autosummary/sqltidy.rules.html#module-sqltidy.rules">sqltidy.rules</a>
 </li>
@@ -589,6 +614,10 @@
         <li><a href="_autosummary/sqltidy.rules.tidy.leading_commas.html#module-sqltidy.rules.tidy.leading_commas">sqltidy.rules.tidy.leading_commas</a>, <a href="rules.html#module-sqltidy.rules.tidy.leading_commas">[1]</a>
 </li>
         <li><a href="_autosummary/sqltidy.rules.tidy.newline_after_select.html#module-sqltidy.rules.tidy.newline_after_select">sqltidy.rules.tidy.newline_after_select</a>, <a href="rules.html#module-sqltidy.rules.tidy.newline_after_select">[1]</a>
+</li>
+        <li><a href="_autosummary/sqltidy.rules.tidy.newline_join_pattern.html#module-sqltidy.rules.tidy.newline_join_pattern">sqltidy.rules.tidy.newline_join_pattern</a>
+</li>
+        <li><a href="_autosummary/sqltidy.rules.tidy.newline_on_join.html#module-sqltidy.rules.tidy.newline_on_join">sqltidy.rules.tidy.newline_on_join</a>
 </li>
         <li><a href="_autosummary/sqltidy.rules.tidy.oracle_connect_by.html#module-sqltidy.rules.tidy.oracle_connect_by">sqltidy.rules.tidy.oracle_connect_by</a>, <a href="rules.html#module-sqltidy.rules.tidy.oracle_connect_by">[1]</a>
 </li>
@@ -629,12 +658,24 @@
       </ul></li>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.TokenType.NEWLINE">NEWLINE (sqltidy.tokenizer.TokenType attribute)</a>, <a href="api.html#sqltidy.tokenizer.TokenType.NEWLINE">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.newline_after_select">newline_after_select (sqltidy.config.SQLTidyConfig attribute)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.newline_after_select">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.newline_after_select">newline_after_select (sqltidy.rulebook.SQLTidyConfig attribute)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.newline_after_select">(sqltidy.SQLTidyConfig attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.newline_join_pattern">newline_join_pattern (sqltidy.rulebook.SQLTidyConfig attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.newline_join_pattern">(sqltidy.SQLTidyConfig attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.newline_on_join">newline_on_join (sqltidy.rulebook.SQLTidyConfig attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.newline_on_join">(sqltidy.SQLTidyConfig attribute)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/sqltidy.rules.rules.html#sqltidy.rules.rules.NewlineAfterSelectRule">NewlineAfterSelectRule (class in sqltidy.rules.rules)</a>, <a href="rules.html#sqltidy.rules.rules.NewlineAfterSelectRule">[1]</a>
@@ -643,6 +684,10 @@
         <li><a href="_autosummary/sqltidy.rules.tidy.newline_after_select.html#sqltidy.rules.tidy.newline_after_select.NewlineAfterSelectRule">(class in sqltidy.rules.tidy.newline_after_select)</a>, <a href="rules.html#sqltidy.rules.tidy.newline_after_select.NewlineAfterSelectRule">[1]</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/sqltidy.rules.tidy.newline_join_pattern.html#sqltidy.rules.tidy.newline_join_pattern.NewlineJoinPatternRule">NewlineJoinPatternRule (class in sqltidy.rules.tidy.newline_join_pattern)</a>
+</li>
+      <li><a href="_autosummary/sqltidy.rules.tidy.newline_on_join.html#sqltidy.rules.tidy.newline_on_join.NewlineOnJoinRule">NewlineOnJoinRule (class in sqltidy.rules.tidy.newline_on_join)</a>
+</li>
       <li><a href="_autosummary/sqltidy.dialects.base.html#sqltidy.dialects.base.SQLDialect.normalize_identifier">normalize_identifier() (sqltidy.dialects.base.SQLDialect method)</a>, <a href="dialects.html#sqltidy.dialects.base.SQLDialect.normalize_identifier">[1]</a>
 
       <ul>
@@ -696,6 +741,10 @@
 </li>
         <li><a href="_autosummary/sqltidy.rules.tidy.newline_after_select.html#sqltidy.rules.tidy.newline_after_select.NewlineAfterSelectRule.order">(sqltidy.rules.tidy.newline_after_select.NewlineAfterSelectRule attribute)</a>, <a href="rules.html#sqltidy.rules.tidy.newline_after_select.NewlineAfterSelectRule.order">[1]</a>
 </li>
+        <li><a href="_autosummary/sqltidy.rules.tidy.newline_join_pattern.html#sqltidy.rules.tidy.newline_join_pattern.NewlineJoinPatternRule.order">(sqltidy.rules.tidy.newline_join_pattern.NewlineJoinPatternRule attribute)</a>
+</li>
+        <li><a href="_autosummary/sqltidy.rules.tidy.newline_on_join.html#sqltidy.rules.tidy.newline_on_join.NewlineOnJoinRule.order">(sqltidy.rules.tidy.newline_on_join.NewlineOnJoinRule attribute)</a>
+</li>
         <li><a href="_autosummary/sqltidy.rules.tidy.oracle_connect_by.html#sqltidy.rules.tidy.oracle_connect_by.OracleConnectByFormattingRule.order">(sqltidy.rules.tidy.oracle_connect_by.OracleConnectByFormattingRule attribute)</a>, <a href="rules.html#sqltidy.rules.tidy.oracle_connect_by.OracleConnectByFormattingRule.order">[1]</a>
 </li>
         <li><a href="_autosummary/sqltidy.rules.tidy.quote_identifiers.html#sqltidy.rules.tidy.quote_identifiers.QuoteIdentifiersRule.order">(sqltidy.rules.tidy.quote_identifiers.QuoteIdentifiersRule attribute)</a>, <a href="rules.html#sqltidy.rules.tidy.quote_identifiers.QuoteIdentifiersRule.order">[1]</a>
@@ -713,9 +762,9 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.GroupType.PARENTHESIS">PARENTHESIS (sqltidy.tokenizer.GroupType attribute)</a>, <a href="api.html#sqltidy.tokenizer.GroupType.PARENTHESIS">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.plugin">plugin() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.plugin">[1]</a>, <a href="plugins.html#sqltidy.plugins.plugin">[2]</a>
-</li>
       <li><a href="_autosummary/sqltidy.dialects.postgresql.html#sqltidy.dialects.postgresql.PostgreSQLDialect">PostgreSQLDialect (class in sqltidy.dialects.postgresql)</a>, <a href="dialects.html#sqltidy.dialects.postgresql.PostgreSQLDialect">[1]</a>
+</li>
+      <li><a href="_autosummary/sqltidy.cli.html#sqltidy.cli.print_logo">print_logo() (in module sqltidy.cli)</a>, <a href="api.html#sqltidy.cli.print_logo">[1]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -751,7 +800,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/sqltidy.rules.tidy.quote_identifiers.html#sqltidy.rules.tidy.quote_identifiers.QuoteIdentifiersRule.QUOTE_CHARS">QUOTE_CHARS (sqltidy.rules.tidy.quote_identifiers.QuoteIdentifiersRule attribute)</a>, <a href="rules.html#sqltidy.rules.tidy.quote_identifiers.QuoteIdentifiersRule.QUOTE_CHARS">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.quote_identifiers">quote_identifiers (sqltidy.config.SQLTidyConfig attribute)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.quote_identifiers">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.quote_identifiers">quote_identifiers (sqltidy.rulebook.SQLTidyConfig attribute)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.quote_identifiers">(sqltidy.SQLTidyConfig attribute)</a>
@@ -773,19 +822,19 @@
         <li><a href="_autosummary/sqltidy.dialects.registry.html#sqltidy.dialects.registry.register_dialect">(in module sqltidy.dialects.registry)</a>, <a href="dialects.html#sqltidy.dialects.registry.register_dialect">[1]</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/sqltidy.html#sqltidy.register_plugin">register_plugin() (in module sqltidy)</a>
+      <li><a href="_autosummary/sqltidy.html#sqltidy.register_rule">register_rule() (in module sqltidy)</a>
 
       <ul>
-        <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.register_plugin">(in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.register_plugin">[1]</a>
+        <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.register_rule">(in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.register_rule">[1]</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.register_rule_class">register_rule_class() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.register_rule_class">[1]</a>, <a href="plugins.html#sqltidy.plugins.register_rule_class">[2]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.remove_plugin">remove_plugin() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.remove_plugin">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.remove_rule">remove_rule() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.remove_rule">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.reset_config">reset_config() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.reset_config">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.reset_rulebook">reset_rulebook() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.reset_rulebook">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.cli.html#sqltidy.cli.resolve_config_path">resolve_config_path() (in module sqltidy.cli)</a>, <a href="api.html#sqltidy.cli.resolve_config_path">[1]</a>
+      <li><a href="_autosummary/sqltidy.cli.html#sqltidy.cli.resolve_rulebook_path">resolve_rulebook_path() (in module sqltidy.cli)</a>, <a href="api.html#sqltidy.cli.resolve_rulebook_path">[1]</a>
 </li>
       <li><a href="_autosummary/sqltidy.html#sqltidy.rewrite_sql">rewrite_sql() (in module sqltidy)</a>
 
@@ -793,6 +842,8 @@
         <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.rewrite_sql">(in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.rewrite_sql">[1]</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.rule">rule() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.rule">[1]</a>, <a href="plugins.html#sqltidy.plugins.rule">[2]</a>
+</li>
       <li><a href="_autosummary/sqltidy.rules.base.html#id1">rule_type (sqltidy.rules.base.BaseRule attribute)</a>, <a href="_autosummary/sqltidy.rules.base.html#sqltidy.rules.base.BaseRule.rule_type">[1]</a>, <a href="plugins.html#id1">[2]</a>, <a href="plugins.html#sqltidy.rules.base.BaseRule.rule_type">[3]</a>, <a href="rules.html#id1">[4]</a>, <a href="rules.html#sqltidy.rules.base.BaseRule.rule_type">[5]</a>
 
       <ul>
@@ -822,6 +873,10 @@
 </li>
         <li><a href="_autosummary/sqltidy.rules.tidy.newline_after_select.html#sqltidy.rules.tidy.newline_after_select.NewlineAfterSelectRule.rule_type">(sqltidy.rules.tidy.newline_after_select.NewlineAfterSelectRule attribute)</a>, <a href="rules.html#sqltidy.rules.tidy.newline_after_select.NewlineAfterSelectRule.rule_type">[1]</a>
 </li>
+        <li><a href="_autosummary/sqltidy.rules.tidy.newline_join_pattern.html#sqltidy.rules.tidy.newline_join_pattern.NewlineJoinPatternRule.rule_type">(sqltidy.rules.tidy.newline_join_pattern.NewlineJoinPatternRule attribute)</a>
+</li>
+        <li><a href="_autosummary/sqltidy.rules.tidy.newline_on_join.html#sqltidy.rules.tidy.newline_on_join.NewlineOnJoinRule.rule_type">(sqltidy.rules.tidy.newline_on_join.NewlineOnJoinRule attribute)</a>
+</li>
         <li><a href="_autosummary/sqltidy.rules.tidy.oracle_connect_by.html#sqltidy.rules.tidy.oracle_connect_by.OracleConnectByFormattingRule.rule_type">(sqltidy.rules.tidy.oracle_connect_by.OracleConnectByFormattingRule attribute)</a>, <a href="rules.html#sqltidy.rules.tidy.oracle_connect_by.OracleConnectByFormattingRule.rule_type">[1]</a>
 </li>
         <li><a href="_autosummary/sqltidy.rules.tidy.quote_identifiers.html#sqltidy.rules.tidy.quote_identifiers.QuoteIdentifiersRule.rule_type">(sqltidy.rules.tidy.quote_identifiers.QuoteIdentifiersRule attribute)</a>, <a href="rules.html#sqltidy.rules.tidy.quote_identifiers.QuoteIdentifiersRule.rule_type">[1]</a>
@@ -837,7 +892,7 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.save">save() (sqltidy.config.SQLTidyConfig method)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.save">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.save">save() (sqltidy.rulebook.SQLTidyConfig method)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.save">(sqltidy.SQLTidyConfig method)</a>
@@ -878,13 +933,6 @@
 
       <ul>
         <li><a href="_autosummary/sqltidy.cli.html#module-sqltidy.cli">module</a>, <a href="api.html#module-sqltidy.cli">[1]</a>
-</li>
-      </ul></li>
-      <li>
-    sqltidy.config
-
-      <ul>
-        <li><a href="_autosummary/sqltidy.config.html#module-sqltidy.config">module</a>, <a href="api.html#module-sqltidy.config">[1]</a>
 </li>
       </ul></li>
       <li>
@@ -965,6 +1013,13 @@
 </li>
       </ul></li>
       <li>
+    sqltidy.rulebook
+
+      <ul>
+        <li><a href="_autosummary/sqltidy.rulebook.html#module-sqltidy.rulebook">module</a>
+</li>
+      </ul></li>
+      <li>
     sqltidy.rules
 
       <ul>
@@ -978,8 +1033,6 @@
         <li><a href="_autosummary/sqltidy.rules.base.html#module-sqltidy.rules.base">module</a>, <a href="plugins.html#module-sqltidy.rules.base">[1]</a>, <a href="rules.html#module-sqltidy.rules.base">[2]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     sqltidy.rules.loader
 
@@ -987,6 +1040,8 @@
         <li><a href="_autosummary/sqltidy.rules.loader.html#module-sqltidy.rules.loader">module</a>, <a href="rules.html#module-sqltidy.rules.loader">[1]</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     sqltidy.rules.rewrite
 
@@ -1058,6 +1113,20 @@
 </li>
       </ul></li>
       <li>
+    sqltidy.rules.tidy.newline_join_pattern
+
+      <ul>
+        <li><a href="_autosummary/sqltidy.rules.tidy.newline_join_pattern.html#module-sqltidy.rules.tidy.newline_join_pattern">module</a>
+</li>
+      </ul></li>
+      <li>
+    sqltidy.rules.tidy.newline_on_join
+
+      <ul>
+        <li><a href="_autosummary/sqltidy.rules.tidy.newline_on_join.html#module-sqltidy.rules.tidy.newline_on_join">module</a>
+</li>
+      </ul></li>
+      <li>
     sqltidy.rules.tidy.oracle_connect_by
 
       <ul>
@@ -1092,12 +1161,12 @@
         <li><a href="_autosummary/sqltidy.tokenizer.html#module-sqltidy.tokenizer">module</a>, <a href="api.html#module-sqltidy.tokenizer">[1]</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.sqltidy_plugin">sqltidy_plugin() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.sqltidy_plugin">[1]</a>, <a href="plugins.html#sqltidy.plugins.sqltidy_plugin">[2]</a>
+      <li><a href="_autosummary/sqltidy.plugins.html#sqltidy.plugins.sqltidy_rule">sqltidy_rule() (in module sqltidy.plugins)</a>, <a href="api.html#sqltidy.plugins.sqltidy_rule">[1]</a>, <a href="plugins.html#sqltidy.plugins.sqltidy_rule">[2]</a>
 </li>
       <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig">SQLTidyConfig (class in sqltidy)</a>
 
       <ul>
-        <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig">(class in sqltidy.config)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig">[1]</a>
+        <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig">(class in sqltidy.rulebook)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/sqltidy.tokenizer.html#sqltidy.tokenizer.GroupType.STATEMENT">STATEMENT (sqltidy.tokenizer.GroupType attribute)</a>, <a href="api.html#sqltidy.tokenizer.GroupType.STATEMENT">[1]</a>
@@ -1136,7 +1205,7 @@
         <li><a href="_autosummary/sqltidy.api.html#sqltidy.api.tidy_sql">(in module sqltidy.api)</a>, <a href="api.html#sqltidy.api.tidy_sql">[1]</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.to_dict">to_dict() (sqltidy.config.SQLTidyConfig method)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.to_dict">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.to_dict">to_dict() (sqltidy.rulebook.SQLTidyConfig method)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.to_dict">(sqltidy.SQLTidyConfig method)</a>
@@ -1170,11 +1239,11 @@
 </li>
       <li><a href="_autosummary/sqltidy.dialects.registry.html#sqltidy.dialects.registry.unregister_dialect">unregister_dialect() (in module sqltidy.dialects.registry)</a>, <a href="dialects.html#sqltidy.dialects.registry.unregister_dialect">[1]</a>
 </li>
-      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.update_config">update_config() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.update_config">[1]</a>
+      <li><a href="_autosummary/sqltidy.generator.html#sqltidy.generator.update_rulebook">update_rulebook() (in module sqltidy.generator)</a>, <a href="api.html#sqltidy.generator.update_rulebook">[1]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/sqltidy.config.html#sqltidy.config.SQLTidyConfig.uppercase_keywords">uppercase_keywords (sqltidy.config.SQLTidyConfig attribute)</a>, <a href="api.html#sqltidy.config.SQLTidyConfig.uppercase_keywords">[1]</a>
+      <li><a href="_autosummary/sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig.uppercase_keywords">uppercase_keywords (sqltidy.rulebook.SQLTidyConfig attribute)</a>
 
       <ul>
         <li><a href="_autosummary/sqltidy.html#sqltidy.SQLTidyConfig.uppercase_keywords">(sqltidy.SQLTidyConfig attribute)</a>

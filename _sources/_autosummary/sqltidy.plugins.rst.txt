@@ -8,14 +8,14 @@ sqltidy.plugins
 
    .. autosummary::
    
-      clear_plugins
-      create_plugin_formatter
-      get_registered_plugins
-      load_plugin_file
-      load_plugin_module
-      load_plugins_from_directory
-      plugin
+      clear_rules
+      create_rule_formatter
+      get_registered_rules
+      load_rule_file
+      load_rules_from_directory
+      load_rules_module
       register
       register_rule_class
-      sqltidy_plugin
+      rule
+      sqltidy_rule
    

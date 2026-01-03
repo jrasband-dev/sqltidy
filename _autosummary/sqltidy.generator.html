@@ -5,11 +5,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>sqltidy.generator &#8212; SQLTidy 0.3.0 documentation</title>
+    <title>sqltidy.generator &#8212; SQLTidy 0.4.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
-    <script src="../_static/documentation_options.js?v=e259d695"></script>
+    <script src="../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -40,100 +40,100 @@ Generates dialect-specific config files.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.add_plugin" title="sqltidy.generator.add_plugin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_plugin</span></code></a>(plugin_file)</p></td>
-<td><p>Add a plugin file to the user's plugin directory.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.add_rule" title="sqltidy.generator.add_rule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_rule</span></code></a>(rule_file)</p></td>
+<td><p>Add a rule file to the user's rule directory.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.create_config" title="sqltidy.generator.create_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_config</span></code></a>([dialect, template_file])</p></td>
-<td><p>Create a new configuration file.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.create_rulebook" title="sqltidy.generator.create_rulebook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_rulebook</span></code></a>([dialect, template_file])</p></td>
+<td><p>Create a new rulebook file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.edit_config" title="sqltidy.generator.edit_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edit_config</span></code></a>([config_name])</p></td>
-<td><p>Edit a config file in the user's config directory.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.edit_rulebook" title="sqltidy.generator.edit_rulebook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edit_rulebook</span></code></a>([rulebook_name])</p></td>
+<td><p>Edit a rulebook file in the user's rulebook directory.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.generate_config_interactive" title="sqltidy.generator.generate_config_interactive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_config_interactive</span></code></a>(dialect[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.generate_rulebook_interactive" title="sqltidy.generator.generate_rulebook_interactive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_rulebook_interactive</span></code></a>(dialect[, ...])</p></td>
 <td><p>Interactively generate or update a SQLTidyConfig.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.get_bundled_config_path" title="sqltidy.generator.get_bundled_config_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_bundled_config_path</span></code></a>(dialect)</p></td>
-<td><p>Get the path to a bundled config template for a specific dialect.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.get_bundled_rulebook_path" title="sqltidy.generator.get_bundled_rulebook_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_bundled_rulebook_path</span></code></a>(dialect)</p></td>
+<td><p>Get the path to a bundled rulebook template for a specific dialect.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.get_bundled_configs_dir" title="sqltidy.generator.get_bundled_configs_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_bundled_configs_dir</span></code></a>()</p></td>
-<td><p>Get the path to bundled config templates.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.get_bundled_rulebooks_dir" title="sqltidy.generator.get_bundled_rulebooks_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_bundled_rulebooks_dir</span></code></a>()</p></td>
+<td><p>Get the path to bundled rulebook templates.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.get_config_path" title="sqltidy.generator.get_config_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_config_path</span></code></a>(dialect)</p></td>
-<td><p>Get the path to a config file, checking user directory first, then bundled.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.get_default_filename" title="sqltidy.generator.get_default_filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_default_filename</span></code></a>(dialect)</p></td>
+<td><p>Get default rulebook filename for a dialect.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.get_default_filename" title="sqltidy.generator.get_default_filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_default_filename</span></code></a>(dialect)</p></td>
-<td><p>Get default config filename for a dialect.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.get_rulebook_path" title="sqltidy.generator.get_rulebook_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_rulebook_path</span></code></a>(dialect)</p></td>
+<td><p>Get the path to a rulebook file, checking user directory first, then bundled.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.get_user_configs_dir" title="sqltidy.generator.get_user_configs_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_user_configs_dir</span></code></a>()</p></td>
-<td><p>Get the path to user's config directory.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.get_user_rulebooks_dir" title="sqltidy.generator.get_user_rulebooks_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_user_rulebooks_dir</span></code></a>()</p></td>
+<td><p>Get the path to user's rulebook directory.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.get_user_plugins_dir" title="sqltidy.generator.get_user_plugins_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_user_plugins_dir</span></code></a>()</p></td>
-<td><p>Get the path to user's plugin directory.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.get_user_rules_dir" title="sqltidy.generator.get_user_rules_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_user_rules_dir</span></code></a>()</p></td>
+<td><p>Get the path to user's rule directory.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.initialize_user_configs" title="sqltidy.generator.initialize_user_configs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_user_configs</span></code></a>()</p></td>
-<td><p>Initialize user config directory with all bundled configs if not already present.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.initialize_user_rulebooks" title="sqltidy.generator.initialize_user_rulebooks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_user_rulebooks</span></code></a>()</p></td>
+<td><p>Initialize user rulebook directory with all bundled rulebooks if not already present.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.list_configs" title="sqltidy.generator.list_configs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_configs</span></code></a>([directory])</p></td>
-<td><p>List config files in user config directory.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.list_rulebooks" title="sqltidy.generator.list_rulebooks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_rulebooks</span></code></a>([directory])</p></td>
+<td><p>List rulebook files in user rulebook directory.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.list_plugins" title="sqltidy.generator.list_plugins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_plugins</span></code></a>()</p></td>
-<td><p>List all installed plugins in the user's plugin directory.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.list_rules" title="sqltidy.generator.list_rules"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_rules</span></code></a>()</p></td>
+<td><p>List all built-in and plugin rules.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.load_config_file" title="sqltidy.generator.load_config_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_config_file</span></code></a>(filepath)</p></td>
-<td><p>Load configuration from a JSON file.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.load_rulebook_file" title="sqltidy.generator.load_rulebook_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_rulebook_file</span></code></a>(filepath)</p></td>
+<td><p>Load rulebook from a JSON file.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.prompt_yes_no" title="sqltidy.generator.prompt_yes_no"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prompt_yes_no</span></code></a>(question[, default])</p></td>
 <td><p>Prompt user for a yes/no question.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.remove_plugin" title="sqltidy.generator.remove_plugin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_plugin</span></code></a>(plugin_name)</p></td>
-<td><p>Remove a plugin from the user's plugin directory.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.remove_rule" title="sqltidy.generator.remove_rule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_rule</span></code></a>(rule_name)</p></td>
+<td><p>Remove a rule from the user's rule directory.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.reset_config" title="sqltidy.generator.reset_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_config</span></code></a>([config_name])</p></td>
-<td><p>Reset a user config to bundled default by removing the user's customization.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.reset_rulebook" title="sqltidy.generator.reset_rulebook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_rulebook</span></code></a>([rulebook_name])</p></td>
+<td><p>Reset a user rulebook to bundled default by removing the user's customization.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.select_dialect" title="sqltidy.generator.select_dialect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_dialect</span></code></a>()</p></td>
 <td><p>Prompt user to select a SQL dialect.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.update_config" title="sqltidy.generator.update_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_config</span></code></a>(config_file)</p></td>
-<td><p>Update an existing configuration file interactively.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#sqltidy.generator.update_rulebook" title="sqltidy.generator.update_rulebook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_rulebook</span></code></a>(rulebook_file)</p></td>
+<td><p>Update an existing rulebook file interactively.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.get_user_configs_dir">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">get_user_configs_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#get_user_configs_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.get_user_configs_dir" title="Link to this definition">¶</a></dt>
-<dd><p>Get the path to user’s config directory.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.get_user_rulebooks_dir">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">get_user_rulebooks_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#get_user_rulebooks_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.get_user_rulebooks_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Get the path to user’s rulebook directory.</p>
 <dl class="field-list simple">
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.get_bundled_configs_dir">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">get_bundled_configs_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#get_bundled_configs_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.get_bundled_configs_dir" title="Link to this definition">¶</a></dt>
-<dd><p>Get the path to bundled config templates.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.get_bundled_rulebooks_dir">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">get_bundled_rulebooks_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#get_bundled_rulebooks_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.get_bundled_rulebooks_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Get the path to bundled rulebook templates.</p>
 <dl class="field-list simple">
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.initialize_user_configs">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">initialize_user_configs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#initialize_user_configs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.initialize_user_configs" title="Link to this definition">¶</a></dt>
-<dd><p>Initialize user config directory with all bundled configs if not already present.
-Copies all bundled configs to user directory.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.initialize_user_rulebooks">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">initialize_user_rulebooks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#initialize_user_rulebooks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.initialize_user_rulebooks" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize user rulebook directory with all bundled rulebooks if not already present.
+Copies all bundled rulebooks to user directory.</p>
 <dl class="field-list simple">
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.get_config_path">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">get_config_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#get_config_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.get_config_path" title="Link to this definition">¶</a></dt>
-<dd><p>Get the path to a config file, checking user directory first, then bundled.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.get_rulebook_path">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">get_rulebook_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#get_rulebook_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.get_rulebook_path" title="Link to this definition">¶</a></dt>
+<dd><p>Get the path to a rulebook file, checking user directory first, then bundled.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>dialect</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – SQL dialect name</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Path to the config file (user config if exists, otherwise bundled)</p>
+<dd class="field-even"><p>Path to the rulebook file (user rulebook if exists, otherwise bundled)</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>Path</em></a></p>
@@ -142,15 +142,15 @@ Copies all bundled configs to user directory.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.get_bundled_config_path">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">get_bundled_config_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#get_bundled_config_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.get_bundled_config_path" title="Link to this definition">¶</a></dt>
-<dd><p>Get the path to a bundled config template for a specific dialect.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.get_bundled_rulebook_path">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">get_bundled_rulebook_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#get_bundled_rulebook_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.get_bundled_rulebook_path" title="Link to this definition">¶</a></dt>
+<dd><p>Get the path to a bundled rulebook template for a specific dialect.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>dialect</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – SQL dialect name</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Path to the bundled config file</p>
+<dd class="field-even"><p>Path to the bundled rulebook file</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>Path</em></a></p>
@@ -193,14 +193,14 @@ Copies all bundled configs to user directory.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.generate_config_interactive">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">generate_config_interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">existing_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#generate_config_interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.generate_config_interactive" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="sqltidy.generator.generate_rulebook_interactive">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">generate_rulebook_interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">existing_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#generate_rulebook_interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.generate_rulebook_interactive" title="Link to this definition">¶</a></dt>
 <dd><p>Interactively generate or update a SQLTidyConfig.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dialect</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – SQL dialect for the configuration</p></li>
-<li><p><strong>existing_config</strong> (<a class="reference internal" href="../api.html#sqltidy.config.SQLTidyConfig" title="sqltidy.config.SQLTidyConfig"><em>SQLTidyConfig</em></a><em> | </em><em>None</em>) – Existing config to update (if None, creates new from defaults)</p></li>
+<li><p><strong>existing_config</strong> (<a class="reference internal" href="sqltidy.rulebook.html#sqltidy.rulebook.SQLTidyConfig" title="sqltidy.rulebook.SQLTidyConfig"><em>SQLTidyConfig</em></a><em> | </em><em>None</em>) – Existing config to update (if None, creates new from defaults)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -215,40 +215,40 @@ Copies all bundled configs to user directory.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="sqltidy.generator.get_default_filename">
 <span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">get_default_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#get_default_filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.get_default_filename" title="Link to this definition">¶</a></dt>
-<dd><p>Get default config filename for a dialect.</p>
+<dd><p>Get default rulebook filename for a dialect.</p>
 <dl class="field-list simple">
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.create_config">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">create_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#create_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.create_config" title="Link to this definition">¶</a></dt>
-<dd><p>Create a new configuration file.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.create_rulebook">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">create_rulebook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#create_rulebook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.create_rulebook" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new rulebook file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dialect</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – SQL dialect (if None, will prompt)</p></li>
-<li><p><strong>template_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – Optional template config file to copy from</p></li>
+<li><p><strong>template_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – Optional template rulebook file to copy from</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.update_config">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">update_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#update_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.update_config" title="Link to this definition">¶</a></dt>
-<dd><p>Update an existing configuration file interactively.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.update_rulebook">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">update_rulebook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rulebook_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#update_rulebook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.update_rulebook" title="Link to this definition">¶</a></dt>
+<dd><p>Update an existing rulebook file interactively.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>config_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to existing config file</p>
+<dd class="field-odd"><p><strong>rulebook_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to existing rulebook file</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.list_configs">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">list_configs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#list_configs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.list_configs" title="Link to this definition">¶</a></dt>
-<dd><p>List config files in user config directory.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.list_rulebooks">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">list_rulebooks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#list_rulebooks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.list_rulebooks" title="Link to this definition">¶</a></dt>
+<dd><p>List rulebook files in user rulebook directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Directory to search (default: current directory)</p>
@@ -257,39 +257,39 @@ Copies all bundled configs to user directory.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.edit_config">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">edit_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#edit_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.edit_config" title="Link to this definition">¶</a></dt>
-<dd><p>Edit a config file in the user’s config directory.
-Copies from bundled config if user config doesn’t exist yet.
+<dt class="sig sig-object py" id="sqltidy.generator.edit_rulebook">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">edit_rulebook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rulebook_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#edit_rulebook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.edit_rulebook" title="Link to this definition">¶</a></dt>
+<dd><p>Edit a rulebook file in the user’s rulebook directory.
+Copies from bundled rulebook if user rulebook doesn’t exist yet.
 Opens the file in the system’s default editor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>config_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – Name of the config file or dialect (e.g., ‘postgresql’ or ‘sqltidy_postgresql.json’)</p>
+<dd class="field-odd"><p><strong>rulebook_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – Name of the rulebook file or dialect (e.g., ‘postgresql’ or ‘sqltidy_postgresql.json’)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.reset_config">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">reset_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#reset_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.reset_config" title="Link to this definition">¶</a></dt>
-<dd><p>Reset a user config to bundled default by removing the user’s customization.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.reset_rulebook">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">reset_rulebook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rulebook_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#reset_rulebook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.reset_rulebook" title="Link to this definition">¶</a></dt>
+<dd><p>Reset a user rulebook to bundled default by removing the user’s customization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>config_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – Name of the config file or dialect to reset</p>
+<dd class="field-odd"><p><strong>rulebook_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – Name of the rulebook file or dialect to reset, or ‘all’ to reset all</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.load_config_file">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">load_config_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#load_config_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.load_config_file" title="Link to this definition">¶</a></dt>
-<dd><p>Load configuration from a JSON file.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.load_rulebook_file">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">load_rulebook_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#load_rulebook_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.load_rulebook_file" title="Link to this definition">¶</a></dt>
+<dd><p>Load rulebook from a JSON file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to the configuration file</p>
+<dd class="field-odd"><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to the rulebook file</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Configuration data</p>
+<dd class="field-even"><p>Rulebook data</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
@@ -298,39 +298,39 @@ Opens the file in the system’s default editor.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.get_user_plugins_dir">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">get_user_plugins_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#get_user_plugins_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.get_user_plugins_dir" title="Link to this definition">¶</a></dt>
-<dd><p>Get the path to user’s plugin directory.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.get_user_rules_dir">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">get_user_rules_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#get_user_rules_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.get_user_rules_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Get the path to user’s rule directory.</p>
 <dl class="field-list simple">
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.add_plugin">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">add_plugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#add_plugin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.add_plugin" title="Link to this definition">¶</a></dt>
-<dd><p>Add a plugin file to the user’s plugin directory.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.add_rule">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">add_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#add_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.add_rule" title="Link to this definition">¶</a></dt>
+<dd><p>Add a rule file to the user’s rule directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>plugin_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to the plugin Python file to add</p>
+<dd class="field-odd"><p><strong>rule_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to the rule Python file to add</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.list_plugins">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">list_plugins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#list_plugins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.list_plugins" title="Link to this definition">¶</a></dt>
-<dd><p>List all installed plugins in the user’s plugin directory.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.list_rules">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">list_rules</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#list_rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.list_rules" title="Link to this definition">¶</a></dt>
+<dd><p>List all built-in and plugin rules.</p>
 <dl class="field-list simple">
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sqltidy.generator.remove_plugin">
-<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">remove_plugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#remove_plugin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.remove_plugin" title="Link to this definition">¶</a></dt>
-<dd><p>Remove a plugin from the user’s plugin directory.</p>
+<dt class="sig sig-object py" id="sqltidy.generator.remove_rule">
+<span class="sig-prename descclassname"><span class="pre">sqltidy.generator.</span></span><span class="sig-name descname"><span class="pre">remove_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sqltidy/generator.html#remove_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sqltidy.generator.remove_rule" title="Link to this definition">¶</a></dt>
+<dd><p>Remove a rule from the user’s rule directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>plugin_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the plugin file to remove</p>
+<dd class="field-odd"><p><strong>rule_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the rule file to remove</p>
 </dd>
 </dl>
 </dd></dl>

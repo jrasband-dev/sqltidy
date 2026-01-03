@@ -4,11 +4,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>sqltidy.generator &#8212; SQLTidy 0.3.0 documentation</title>
+    <title>sqltidy.generator &#8212; SQLTidy 0.4.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
-    <script src="../../_static/documentation_options.js?v=e259d695"></script>
+    <script src="../../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -40,83 +40,82 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLTidyConfig</span><span class="p">,</span> <span class="n">SUPPORTED_DIALECTS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.rulebook</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLTidyConfig</span><span class="p">,</span> <span class="n">SUPPORTED_DIALECTS</span>
 
 
-<div class="viewcode-block" id="get_user_configs_dir">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_user_configs_dir">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_user_configs_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the path to user&#39;s config directory.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.sqltidy&quot;</span> <span class="o">/</span> <span class="s2">&quot;configs&quot;</span></div>
-
-
-
-<div class="viewcode-block" id="get_bundled_configs_dir">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_bundled_configs_dir">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_bundled_configs_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the path to bundled config templates.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;configs&quot;</span></div>
+<div class="viewcode-block" id="get_user_rulebooks_dir">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_user_rulebooks_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user_rulebooks_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the path to user&#39;s rulebook directory.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.sqltidy&quot;</span> <span class="o">/</span> <span class="s2">&quot;rulebooks&quot;</span></div>
 
 
 
-<div class="viewcode-block" id="initialize_user_configs">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.initialize_user_configs">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">initialize_user_configs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="get_bundled_rulebooks_dir">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_bundled_rulebooks_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_bundled_rulebooks_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the path to bundled rulebook templates.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;rulebooks&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="initialize_user_rulebooks">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.initialize_user_rulebooks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_user_rulebooks</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Initialize user config directory with all bundled configs if not already present.</span>
-<span class="sd">    Copies all bundled configs to user directory.</span>
+<span class="sd">    Initialize user rulebook directory with all bundled rulebooks if not already present.</span>
+<span class="sd">    Copies all bundled rulebooks to user directory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">get_user_configs_dir</span><span class="p">()</span>
-    <span class="n">bundled_dir</span> <span class="o">=</span> <span class="n">get_bundled_configs_dir</span><span class="p">()</span>
+    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">get_user_rulebooks_dir</span><span class="p">()</span>
+    <span class="n">bundled_dir</span> <span class="o">=</span> <span class="n">get_bundled_rulebooks_dir</span><span class="p">()</span>
     
-    <span class="c1"># Create user config directory if it doesn&#39;t exist</span>
+    <span class="c1"># Create user rulebook directory if it doesn&#39;t exist</span>
     <span class="n">user_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     
-    <span class="c1"># Copy all bundled configs if they don&#39;t exist in user directory</span>
+    <span class="c1"># Copy all bundled rulebooks if they don&#39;t exist in user directory</span>
     <span class="k">if</span> <span class="n">bundled_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="n">bundled_configs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bundled_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;sqltidy_*.json&quot;</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">bundled_config</span> <span class="ow">in</span> <span class="n">bundled_configs</span><span class="p">:</span>
-            <span class="n">user_config</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="n">bundled_config</span><span class="o">.</span><span class="n">name</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">user_config</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-                <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">bundled_config</span><span class="p">,</span> <span class="n">user_config</span><span class="p">)</span></div>
+        <span class="n">bundled_rulebooks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bundled_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;sqltidy_*.json&quot;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">bundled_rulebook</span> <span class="ow">in</span> <span class="n">bundled_rulebooks</span><span class="p">:</span>
+            <span class="n">user_rulebook</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="n">bundled_rulebook</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">user_rulebook</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">bundled_rulebook</span><span class="p">,</span> <span class="n">user_rulebook</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="get_config_path">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_config_path">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_config_path</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<div class="viewcode-block" id="get_rulebook_path">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_rulebook_path">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_rulebook_path</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get the path to a config file, checking user directory first, then bundled.</span>
+<span class="sd">    Get the path to a rulebook file, checking user directory first, then bundled.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        dialect: SQL dialect name</span>
 <span class="sd">        </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        Path to the config file (user config if exists, otherwise bundled)</span>
+<span class="sd">        Path to the rulebook file (user rulebook if exists, otherwise bundled)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">user_path</span> <span class="o">=</span> <span class="n">get_user_configs_dir</span><span class="p">()</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">dialect</span><span class="si">}</span><span class="s2">.json&quot;</span>
+    <span class="n">user_path</span> <span class="o">=</span> <span class="n">get_user_rulebooks_dir</span><span class="p">()</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">dialect</span><span class="si">}</span><span class="s2">.json&quot;</span>
     <span class="k">if</span> <span class="n">user_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">user_path</span>
-    <span class="k">return</span> <span class="n">get_bundled_config_path</span><span class="p">(</span><span class="n">dialect</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">get_bundled_rulebook_path</span><span class="p">(</span><span class="n">dialect</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="get_bundled_config_path">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_bundled_config_path">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_bundled_config_path</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<div class="viewcode-block" id="get_bundled_rulebook_path">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_bundled_rulebook_path">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_bundled_rulebook_path</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get the path to a bundled config template for a specific dialect.</span>
+<span class="sd">    Get the path to a bundled rulebook template for a specific dialect.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        dialect: SQL dialect name</span>
 <span class="sd">        </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        Path to the bundled config file</span>
+<span class="sd">        Path to the bundled rulebook file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">get_bundled_configs_dir</span><span class="p">()</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">dialect</span><span class="si">}</span><span class="s2">.json&quot;</span></div>
+    <span class="k">return</span> <span class="n">get_bundled_rulebooks_dir</span><span class="p">()</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">dialect</span><span class="si">}</span><span class="s2">.json&quot;</span></div>
 
 
 
@@ -192,9 +191,9 @@
 
 
 
-<div class="viewcode-block" id="generate_config_interactive">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.generate_config_interactive">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_config_interactive</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">existing_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SQLTidyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SQLTidyConfig</span><span class="p">:</span>
+<div class="viewcode-block" id="generate_rulebook_interactive">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.generate_rulebook_interactive">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_rulebook_interactive</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">existing_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SQLTidyConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SQLTidyConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interactively generate or update a SQLTidyConfig.</span>
 <span class="sd">    </span>
@@ -270,20 +269,20 @@
 <div class="viewcode-block" id="get_default_filename">
 <a class="viewcode-back" href="../../api.html#sqltidy.generator.get_default_filename">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_default_filename</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get default config filename for a dialect.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get default rulebook filename for a dialect.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">dialect</span><span class="si">}</span><span class="s2">.json&quot;</span></div>
 
 
 
-<div class="viewcode-block" id="create_config">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.create_config">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_config</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">template_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="create_rulebook">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.create_rulebook">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_rulebook</span><span class="p">(</span><span class="n">dialect</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">template_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a new configuration file.</span>
+<span class="sd">    Create a new rulebook file.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        dialect: SQL dialect (if None, will prompt)</span>
-<span class="sd">        template_file: Optional template config file to copy from</span>
+<span class="sd">        template_file: Optional template rulebook file to copy from</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Select dialect if not provided</span>
@@ -304,8 +303,8 @@
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Could not load template file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Proceeding with dialect defaults...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         
-        <span class="c1"># Generate config interactively</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="n">generate_config_interactive</span><span class="p">(</span><span class="n">dialect</span><span class="p">,</span> <span class="n">base_config</span><span class="p">)</span>
+        <span class="c1"># Generate rulebook interactively</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">generate_rulebook_interactive</span><span class="p">(</span><span class="n">dialect</span><span class="p">,</span> <span class="n">base_config</span><span class="p">)</span>
         
         <span class="c1"># Get output filename</span>
         <span class="n">default_filename</span> <span class="o">=</span> <span class="n">get_default_filename</span><span class="p">(</span><span class="n">dialect</span><span class="p">)</span>
@@ -313,11 +312,11 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">filename</span><span class="p">:</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="n">default_filename</span>
         
-        <span class="c1"># Save config</span>
+        <span class="c1"># Save rulebook</span>
         <span class="n">config</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✓ Configuration saved successfully!&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✓ Rulebook saved successfully!&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File: </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Usage:&quot;</span><span class="p">)</span>
@@ -326,84 +325,84 @@
         <span class="nb">print</span><span class="p">()</span>
         
     <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Configuration creation cancelled.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Rulebook creation cancelled.&quot;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">raise</span></div>
 
 
 
-<div class="viewcode-block" id="update_config">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.update_config">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">update_config</span><span class="p">(</span><span class="n">config_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="update_rulebook">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.update_rulebook">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_rulebook</span><span class="p">(</span><span class="n">rulebook_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Update an existing configuration file interactively.</span>
+<span class="sd">    Update an existing rulebook file interactively.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        config_file: Path to existing config file</span>
+<span class="sd">        rulebook_file: Path to existing rulebook file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># Load existing config</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading configuration from: </span><span class="si">{</span><span class="n">config_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">existing_config</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+        <span class="c1"># Load existing rulebook</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading rulebook from: </span><span class="si">{</span><span class="n">rulebook_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">existing_config</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">rulebook_file</span><span class="p">)</span>
         <span class="n">dialect</span> <span class="o">=</span> <span class="n">existing_config</span><span class="o">.</span><span class="n">dialect</span>
         
         <span class="c1"># Update interactively</span>
-        <span class="n">updated_config</span> <span class="o">=</span> <span class="n">generate_config_interactive</span><span class="p">(</span><span class="n">dialect</span><span class="p">,</span> <span class="n">existing_config</span><span class="p">)</span>
+        <span class="n">updated_config</span> <span class="o">=</span> <span class="n">generate_rulebook_interactive</span><span class="p">(</span><span class="n">dialect</span><span class="p">,</span> <span class="n">existing_config</span><span class="p">)</span>
         
         <span class="c1"># Save back to same file</span>
-        <span class="n">updated_config</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+        <span class="n">updated_config</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">rulebook_file</span><span class="p">)</span>
         
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✓ Configuration updated successfully!&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File: </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✓ Rulebook updated successfully!&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File: </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">rulebook_file</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
         
     <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error: Config file not found: </span><span class="si">{</span><span class="n">config_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error: Rulebook file not found: </span><span class="si">{</span><span class="n">rulebook_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Configuration update cancelled.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Rulebook update cancelled.&quot;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">raise</span></div>
 
 
 
-<div class="viewcode-block" id="list_configs">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.list_configs">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">list_configs</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="list_rulebooks">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.list_rulebooks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_rulebooks</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    List config files in user config directory.</span>
+<span class="sd">    List rulebook files in user rulebook directory.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        directory: Directory to search (default: current directory)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Initialize user configs with bundled defaults</span>
-    <span class="n">initialize_user_configs</span><span class="p">()</span>
+    <span class="c1"># Initialize user rulebooks with bundled defaults</span>
+    <span class="n">initialize_user_rulebooks</span><span class="p">()</span>
     
-    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">get_user_configs_dir</span><span class="p">()</span>
+    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">get_user_rulebooks_dir</span><span class="p">()</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">User config directory: </span><span class="si">{</span><span class="n">user_dir</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">User rulebook directory: </span><span class="si">{</span><span class="n">user_dir</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     
-    <span class="c1"># List all files in the user config directory</span>
+    <span class="c1"># List all files in the user rulebook directory</span>
     <span class="n">all_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">user_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">))</span>
     
     <span class="k">if</span> <span class="ow">not</span> <span class="n">all_files</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Directory is empty.&quot;</span><span class="p">)</span>
         <span class="k">return</span>
     
-    <span class="c1"># Separate config files from other files</span>
-    <span class="n">config_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">all_files</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sqltidy_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">)]</span>
-    <span class="n">other_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">all_files</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config_files</span><span class="p">]</span>
+    <span class="c1"># Separate rulebook files from other files</span>
+    <span class="n">rulebook_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">all_files</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sqltidy_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">)]</span>
+    <span class="n">other_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">all_files</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rulebook_files</span><span class="p">]</span>
     
-    <span class="k">if</span> <span class="n">config_files</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Config files:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">config_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">config_files</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">rulebook_files</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Rulebook files:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rulebook_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rulebook_files</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">cfg</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">config_file</span><span class="p">))</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (dialect: </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">dialect</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+                <span class="n">cfg</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rulebook_file</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">rulebook_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (dialect: </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">dialect</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (invalid/unreadable: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">rulebook_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (invalid/unreadable: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">other_files</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Other files:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -413,315 +412,385 @@
 
 
 
-<div class="viewcode-block" id="edit_config">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.edit_config">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">edit_config</span><span class="p">(</span><span class="n">config_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="edit_rulebook">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.edit_rulebook">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">edit_rulebook</span><span class="p">(</span><span class="n">rulebook_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Edit a config file in the user&#39;s config directory.</span>
-<span class="sd">    Copies from bundled config if user config doesn&#39;t exist yet.</span>
+<span class="sd">    Edit a rulebook file in the user&#39;s rulebook directory.</span>
+<span class="sd">    Copies from bundled rulebook if user rulebook doesn&#39;t exist yet.</span>
 <span class="sd">    Opens the file in the system&#39;s default editor.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        config_name: Name of the config file or dialect (e.g., &#39;postgresql&#39; or &#39;sqltidy_postgresql.json&#39;)</span>
+<span class="sd">        rulebook_name: Name of the rulebook file or dialect (e.g., &#39;postgresql&#39; or &#39;sqltidy_postgresql.json&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">bundled_dir</span> <span class="o">=</span> <span class="n">get_bundled_configs_dir</span><span class="p">()</span>
-    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">get_user_configs_dir</span><span class="p">()</span>
+    <span class="n">bundled_dir</span> <span class="o">=</span> <span class="n">get_bundled_rulebooks_dir</span><span class="p">()</span>
+    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">get_user_rulebooks_dir</span><span class="p">()</span>
     
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bundled_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: No bundled configs found.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: No bundled rulebooks found.&quot;</span><span class="p">)</span>
         <span class="k">return</span>
     
-    <span class="n">bundled_configs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bundled_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;sqltidy_*.json&quot;</span><span class="p">))</span>
+    <span class="n">bundled_rulebooks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bundled_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;sqltidy_*.json&quot;</span><span class="p">))</span>
     
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">bundled_configs</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: No bundled configs found.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">bundled_rulebooks</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: No bundled rulebooks found.&quot;</span><span class="p">)</span>
         <span class="k">return</span>
     
-    <span class="c1"># If no config specified, let user choose</span>
-    <span class="k">if</span> <span class="n">config_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Available configs to edit:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">config_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">bundled_configs</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="c1"># If no rulebook specified, let user choose</span>
+    <span class="k">if</span> <span class="n">rulebook_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Available rulebooks to edit:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">rulebook_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">bundled_rulebooks</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">cfg</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">config_file</span><span class="p">))</span>
+                <span class="n">cfg</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rulebook_file</span><span class="p">))</span>
                 <span class="n">dialect</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">dialect</span>
-                <span class="c1"># Check if user has customized this config</span>
-                <span class="n">user_config</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="n">config_file</span><span class="o">.</span><span class="n">name</span>
-                <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot; (customized)&quot;</span> <span class="k">if</span> <span class="n">user_config</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+                <span class="c1"># Check if user has customized this rulebook</span>
+                <span class="n">user_rulebook</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="n">rulebook_file</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot; (customized)&quot;</span> <span class="k">if</span> <span class="n">user_rulebook</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">dialect</span><span class="si">}{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">rulebook_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">choice</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Select config to edit (1-</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bundled_configs</span><span class="p">)</span><span class="si">}</span><span class="s2">): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">choice</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Select rulebook to edit (1-</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bundled_rulebooks</span><span class="p">)</span><span class="si">}</span><span class="s2">): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">bundled_configs</span><span class="p">):</span>
-                    <span class="n">source_file</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">bundled_configs</span><span class="p">)[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">bundled_rulebooks</span><span class="p">):</span>
+                    <span class="n">source_file</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">bundled_rulebooks</span><span class="p">)[</span><span class="n">idx</span><span class="p">]</span>
                     <span class="k">break</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="k">pass</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Please enter a number between 1 and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bundled_configs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Please enter a number between 1 and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bundled_rulebooks</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Try to find the config by name or dialect</span>
+        <span class="c1"># Try to find the rulebook by name or dialect</span>
         <span class="c1"># First try as dialect name</span>
-        <span class="k">if</span> <span class="n">config_name</span> <span class="ow">in</span> <span class="n">SUPPORTED_DIALECTS</span><span class="p">:</span>
-            <span class="n">source_file</span> <span class="o">=</span> <span class="n">bundled_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">.json&quot;</span>
+        <span class="k">if</span> <span class="n">rulebook_name</span> <span class="ow">in</span> <span class="n">SUPPORTED_DIALECTS</span><span class="p">:</span>
+            <span class="n">source_file</span> <span class="o">=</span> <span class="n">bundled_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">rulebook_name</span><span class="si">}</span><span class="s2">.json&quot;</span>
         <span class="c1"># Then try as filename</span>
-        <span class="k">elif</span> <span class="n">config_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sqltidy_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">config_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
-            <span class="n">source_file</span> <span class="o">=</span> <span class="n">bundled_dir</span> <span class="o">/</span> <span class="n">config_name</span>
+        <span class="k">elif</span> <span class="n">rulebook_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sqltidy_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">rulebook_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
+            <span class="n">source_file</span> <span class="o">=</span> <span class="n">bundled_dir</span> <span class="o">/</span> <span class="n">rulebook_name</span>
         <span class="c1"># Then try adding the prefix/suffix</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">source_file</span> <span class="o">=</span> <span class="n">bundled_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">.json&quot;</span>
+            <span class="n">source_file</span> <span class="o">=</span> <span class="n">bundled_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">rulebook_name</span><span class="si">}</span><span class="s2">.json&quot;</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="n">source_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Config &#39;</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">&#39; not found in bundled configs.&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Available configs: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">d</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">SUPPORTED_DIALECTS</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Rulebook &#39;</span><span class="si">{</span><span class="n">rulebook_name</span><span class="si">}</span><span class="s2">&#39; not found in bundled rulebooks.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Available rulebooks: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">d</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">SUPPORTED_DIALECTS</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">return</span>
     
-    <span class="c1"># Ensure user config directory exists and is initialized with defaults</span>
-    <span class="n">initialize_user_configs</span><span class="p">()</span>
+    <span class="c1"># Ensure user rulebook directory exists and is initialized with defaults</span>
+    <span class="n">initialize_user_rulebooks</span><span class="p">()</span>
     
-    <span class="c1"># Path to user&#39;s config file</span>
-    <span class="n">user_config_file</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="n">source_file</span><span class="o">.</span><span class="n">name</span>
+    <span class="c1"># Path to user&#39;s rulebook file</span>
+    <span class="n">user_rulebook_file</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="n">source_file</span><span class="o">.</span><span class="n">name</span>
     
     <span class="c1"># The file should already exist from initialization, just inform the user</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Opening user config: </span><span class="si">{</span><span class="n">user_config_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Opening user rulebook: </span><span class="si">{</span><span class="n">user_rulebook_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     
     <span class="c1"># Open in default editor</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;nt&#39;</span><span class="p">:</span>  <span class="c1"># Windows</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">startfile</span><span class="p">(</span><span class="n">user_config_file</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">startfile</span><span class="p">(</span><span class="n">user_rulebook_file</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;posix&#39;</span><span class="p">:</span>  <span class="c1"># macOS and Linux</span>
             <span class="n">opener</span> <span class="o">=</span> <span class="s2">&quot;open&quot;</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()</span><span class="o">.</span><span class="n">sysname</span> <span class="o">==</span> <span class="s2">&quot;Darwin&quot;</span> <span class="k">else</span> <span class="s2">&quot;xdg-open&quot;</span>
-            <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">opener</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_config_file</span><span class="p">)])</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">opener</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_rulebook_file</span><span class="p">)])</span>
         
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">This config will be used instead of the bundled default.&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;To reset to default, delete: </span><span class="si">{</span><span class="n">user_config_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">This rulebook will be used instead of the bundled default.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;To reset to default, delete: </span><span class="si">{</span><span class="n">user_rulebook_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Couldn&#39;t open editor automatically: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Please manually edit: </span><span class="si">{</span><span class="n">user_config_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Please manually edit: </span><span class="si">{</span><span class="n">user_rulebook_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="reset_config">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.reset_config">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">reset_config</span><span class="p">(</span><span class="n">config_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="reset_rulebook">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.reset_rulebook">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reset_rulebook</span><span class="p">(</span><span class="n">rulebook_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Reset a user config to bundled default by removing the user&#39;s customization.</span>
+<span class="sd">    Reset a user rulebook to bundled default by removing the user&#39;s customization.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        config_name: Name of the config file or dialect to reset</span>
+<span class="sd">        rulebook_name: Name of the rulebook file or dialect to reset, or &#39;all&#39; to reset all</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">get_user_configs_dir</span><span class="p">()</span>
+    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">get_user_rulebooks_dir</span><span class="p">()</span>
     
     <span class="k">if</span> <span class="ow">not</span> <span class="n">user_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No user configs to reset.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No user rulebooks to reset.&quot;</span><span class="p">)</span>
         <span class="k">return</span>
     
-    <span class="n">user_configs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">user_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;sqltidy_*.json&quot;</span><span class="p">))</span>
+    <span class="n">user_rulebooks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">user_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;sqltidy_*.json&quot;</span><span class="p">))</span>
     
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_configs</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No user configs to reset.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_rulebooks</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No user rulebooks to reset.&quot;</span><span class="p">)</span>
         <span class="k">return</span>
     
-    <span class="c1"># If no config specified, let user choose</span>
-    <span class="k">if</span> <span class="n">config_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Customized configs:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">config_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">user_configs</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="c1"># Handle &#39;all&#39; option to reset all rulebooks</span>
+    <span class="k">if</span> <span class="n">rulebook_name</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">user_rulebooks</span><span class="p">)</span><span class="si">}</span><span class="s2"> customized rulebook(s):</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rulebook_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">user_rulebooks</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">cfg</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">config_file</span><span class="p">))</span>
+                <span class="n">cfg</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rulebook_file</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">dialect</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">rulebook_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Reset all </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">user_rulebooks</span><span class="p">)</span><span class="si">}</span><span class="s2"> rulebook(s) to bundled defaults? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">confirm</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">):</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">rulebook_file</span> <span class="ow">in</span> <span class="n">user_rulebooks</span><span class="p">:</span>
+                <span class="n">rulebook_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Reset </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> rulebook(s) to bundled defaults.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Reset cancelled.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="c1"># If no rulebook specified, let user choose</span>
+    <span class="k">if</span> <span class="n">rulebook_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Customized rulebooks:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">rulebook_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">user_rulebooks</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cfg</span> <span class="o">=</span> <span class="n">SQLTidyConfig</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rulebook_file</span><span class="p">))</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">dialect</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">rulebook_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">choice</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Select config to reset (1-</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">user_configs</span><span class="p">)</span><span class="si">}</span><span class="s2">): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">choice</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Select rulebook to reset (1-</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">user_rulebooks</span><span class="p">)</span><span class="si">}</span><span class="s2">): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_configs</span><span class="p">):</span>
-                    <span class="n">config_file</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">user_configs</span><span class="p">)[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_rulebooks</span><span class="p">):</span>
+                    <span class="n">rulebook_file</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">user_rulebooks</span><span class="p">)[</span><span class="n">idx</span><span class="p">]</span>
                     <span class="k">break</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="k">pass</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Please enter a number between 1 and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">user_configs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Please enter a number between 1 and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">user_rulebooks</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Try to find the config by name or dialect</span>
-        <span class="k">if</span> <span class="n">config_name</span> <span class="ow">in</span> <span class="n">SUPPORTED_DIALECTS</span><span class="p">:</span>
-            <span class="n">config_file</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">.json&quot;</span>
-        <span class="k">elif</span> <span class="n">config_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sqltidy_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">config_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
-            <span class="n">config_file</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="n">config_name</span>
+        <span class="c1"># Try to find the rulebook by name or dialect</span>
+        <span class="k">if</span> <span class="n">rulebook_name</span> <span class="ow">in</span> <span class="n">SUPPORTED_DIALECTS</span><span class="p">:</span>
+            <span class="n">rulebook_file</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">rulebook_name</span><span class="si">}</span><span class="s2">.json&quot;</span>
+        <span class="k">elif</span> <span class="n">rulebook_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sqltidy_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">rulebook_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
+            <span class="n">rulebook_file</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="n">rulebook_name</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">config_file</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">.json&quot;</span>
+            <span class="n">rulebook_file</span> <span class="o">=</span> <span class="n">user_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;sqltidy_</span><span class="si">{</span><span class="n">rulebook_name</span><span class="si">}</span><span class="s2">.json&quot;</span>
         
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">config_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No user customization found for &#39;</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rulebook_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No user customization found for &#39;</span><span class="si">{</span><span class="n">rulebook_name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
     
     <span class="c1"># Confirm deletion</span>
-    <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Reset </span><span class="si">{</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> to bundled default? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Reset </span><span class="si">{</span><span class="n">rulebook_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> to bundled default? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">confirm</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">):</span>
-        <span class="n">config_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Reset </span><span class="si">{</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> to bundled default.&quot;</span><span class="p">)</span>
+        <span class="n">rulebook_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Reset </span><span class="si">{</span><span class="n">rulebook_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> to bundled default.&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Reset cancelled.&quot;</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="load_config_file">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.load_config_file">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_config_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<div class="viewcode-block" id="load_rulebook_file">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.load_rulebook_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_rulebook_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Load configuration from a JSON file.</span>
+<span class="sd">    Load rulebook from a JSON file.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        filepath: Path to the configuration file</span>
+<span class="sd">        filepath: Path to the rulebook file</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: Configuration data</span>
+<span class="sd">        dict: Rulebook data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
 
 
 
-<span class="c1"># Plugin Management</span>
+<span class="c1"># rule Management</span>
 
-<div class="viewcode-block" id="get_user_plugins_dir">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_user_plugins_dir">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_user_plugins_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the path to user&#39;s plugin directory.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.sqltidy&quot;</span> <span class="o">/</span> <span class="s2">&quot;plugins&quot;</span></div>
+<div class="viewcode-block" id="get_user_rules_dir">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.get_user_rules_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user_rules_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the path to user&#39;s rule directory.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.sqltidy&quot;</span> <span class="o">/</span> <span class="s2">&quot;rules&quot;</span></div>
 
 
 
-<div class="viewcode-block" id="add_plugin">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.add_plugin">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_plugin</span><span class="p">(</span><span class="n">plugin_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="add_rule">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.add_rule">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_rule</span><span class="p">(</span><span class="n">rule_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Add a plugin file to the user&#39;s plugin directory.</span>
+<span class="sd">    Add a rule file to the user&#39;s rule directory.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        plugin_file: Path to the plugin Python file to add</span>
+<span class="sd">        rule_file: Path to the rule Python file to add</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">source_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">plugin_file</span><span class="p">)</span>
+    <span class="n">source_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">rule_file</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="ow">not</span> <span class="n">source_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Plugin file not found: </span><span class="si">{</span><span class="n">plugin_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: rule file not found: </span><span class="si">{</span><span class="n">rule_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span>
     
     <span class="k">if</span> <span class="ow">not</span> <span class="n">source_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;.py&#39;</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Plugin file must be a Python file (.py): </span><span class="si">{</span><span class="n">plugin_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: rule file must be a Python file (.py): </span><span class="si">{</span><span class="n">rule_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span>
     
-    <span class="c1"># Validate the plugin file by attempting to load it</span>
+    <span class="c1"># Validate the rule file by attempting to load it</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_plugin_file</span>
-        <span class="n">rules</span> <span class="o">=</span> <span class="n">load_plugin_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source_path</span><span class="p">))</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_rule_file</span>
+        <span class="n">rules</span> <span class="o">=</span> <span class="n">load_rule_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source_path</span><span class="p">))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">rules</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: No rules found in </span><span class="si">{</span><span class="n">plugin_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Make sure your file uses @sqltidy_plugin decorator or defines BaseRule classes.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: No rules found in </span><span class="si">{</span><span class="n">rule_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Make sure your file uses @sqltidy_rule decorator or defines BaseRule classes.&quot;</span><span class="p">)</span>
             <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Add anyway? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">confirm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">):</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plugin not added.&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;rule not added.&quot;</span><span class="p">)</span>
                 <span class="k">return</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error validating plugin: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error validating rule: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Add anyway? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">confirm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plugin not added.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;rule not added.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
     
-    <span class="c1"># Create user plugins directory if it doesn&#39;t exist</span>
-    <span class="n">plugins_dir</span> <span class="o">=</span> <span class="n">get_user_plugins_dir</span><span class="p">()</span>
-    <span class="n">plugins_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Create user rules directory if it doesn&#39;t exist</span>
+    <span class="n">rules_dir</span> <span class="o">=</span> <span class="n">get_user_rules_dir</span><span class="p">()</span>
+    <span class="n">rules_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     
-    <span class="c1"># Copy plugin file to user directory</span>
-    <span class="n">dest_path</span> <span class="o">=</span> <span class="n">plugins_dir</span> <span class="o">/</span> <span class="n">source_path</span><span class="o">.</span><span class="n">name</span>
+    <span class="c1"># Copy rule file to user directory</span>
+    <span class="n">dest_path</span> <span class="o">=</span> <span class="n">rules_dir</span> <span class="o">/</span> <span class="n">source_path</span><span class="o">.</span><span class="n">name</span>
     
     <span class="k">if</span> <span class="n">dest_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin &#39;</span><span class="si">{</span><span class="n">source_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; already exists. Overwrite? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;rule &#39;</span><span class="si">{</span><span class="n">source_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; already exists. Overwrite? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">confirm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plugin not added.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;rule not added.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
     
     <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">source_path</span><span class="p">,</span> <span class="n">dest_path</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Added plugin: </span><span class="si">{</span><span class="n">source_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Added rule: </span><span class="si">{</span><span class="n">source_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Location: </span><span class="si">{</span><span class="n">dest_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="list_plugins">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.list_plugins">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">list_plugins</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;List all installed plugins in the user&#39;s plugin directory.&quot;&quot;&quot;</span>
-    <span class="n">plugins_dir</span> <span class="o">=</span> <span class="n">get_user_plugins_dir</span><span class="p">()</span>
+<div class="viewcode-block" id="list_rules">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.list_rules">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_rules</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List all built-in and plugin rules.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.rules.loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_rules</span>
     
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugins_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No plugins installed.&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin directory: </span><span class="si">{</span><span class="n">plugins_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">return</span>
+    <span class="c1"># Load all built-in rules</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BUILT-IN RULES&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
     
-    <span class="n">plugin_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">plugins_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.py&quot;</span><span class="p">))</span>
+    <span class="n">built_in_rules</span> <span class="o">=</span> <span class="n">load_rules</span><span class="p">()</span>
     
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_files</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No plugins installed.&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin directory: </span><span class="si">{</span><span class="n">plugins_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">return</span>
+    <span class="c1"># Group by rule type</span>
+    <span class="n">tidy_rules</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">built_in_rules</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="s1">&#39;rule_type&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;tidy&#39;</span><span class="p">]</span>
+    <span class="n">rewrite_rules</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">built_in_rules</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="s1">&#39;rule_type&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;rewrite&#39;</span><span class="p">]</span>
+    <span class="n">other_rules</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">built_in_rules</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="s1">&#39;rule_type&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;tidy&#39;</span><span class="p">,</span> <span class="s1">&#39;rewrite&#39;</span><span class="p">]]</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Installed Plugins (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">plugin_files</span><span class="p">)</span><span class="si">}</span><span class="s2">):&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Location: </span><span class="si">{</span><span class="n">plugins_dir</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tidy_rules</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Tidy Rules (formatting):&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tidy_rules</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)):</span>
+            <span class="n">rule_name</span> <span class="o">=</span> <span class="n">rule</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">)</span>
+            <span class="n">dialects</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s1">&#39;supported_dialects&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">dialect_info</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; [dialects: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">dialects</span><span class="p">))</span><span class="si">}</span><span class="s2">]&quot;</span> <span class="k">if</span> <span class="n">dialects</span> <span class="k">else</span> <span class="s2">&quot; [all dialects]&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">rule_name</span><span class="si">}</span><span class="s2"> (order=</span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s2">)</span><span class="si">{</span><span class="n">dialect_info</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     
-    <span class="k">for</span> <span class="n">plugin_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">plugin_files</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">plugin_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">rewrite_rules</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Rewrite Rules (transformations):&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rewrite_rules</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)):</span>
+            <span class="n">rule_name</span> <span class="o">=</span> <span class="n">rule</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">)</span>
+            <span class="n">dialects</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s1">&#39;supported_dialects&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">dialect_info</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; [dialects: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">dialects</span><span class="p">))</span><span class="si">}</span><span class="s2">]&quot;</span> <span class="k">if</span> <span class="n">dialects</span> <span class="k">else</span> <span class="s2">&quot; [all dialects]&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">rule_name</span><span class="si">}</span><span class="s2"> (order=</span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s2">)</span><span class="si">{</span><span class="n">dialect_info</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">other_rules</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Other Rules:&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">other_rules</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)):</span>
+            <span class="n">rule_name</span> <span class="o">=</span> <span class="n">rule</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">rule_name</span><span class="si">}</span><span class="s2"> (order=</span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Load plugin rules</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PLUGIN RULES&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    
+    <span class="n">rules_dir</span> <span class="o">=</span> <span class="n">get_user_rules_dir</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rules_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No plugin rules installed.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin directory: </span><span class="si">{</span><span class="n">rules_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rule_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rules_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.py&quot;</span><span class="p">))</span>
         
-        <span class="c1"># Try to load and show rules from the plugin</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_plugin_file</span>
-            <span class="n">rules</span> <span class="o">=</span> <span class="n">load_plugin_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">plugin_file</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">rules</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">rule_cls</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
-                    <span class="n">rule</span> <span class="o">=</span> <span class="n">rule_cls</span><span class="p">()</span>
-                    <span class="n">rule_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s1">&#39;rule_type&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
-                    <span class="n">order</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    - </span><span class="si">{</span><span class="n">rule_cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> (type=</span><span class="si">{</span><span class="n">rule_type</span><span class="si">}</span><span class="s2">, order=</span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Error loading: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rule_files</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No plugin rules installed.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin directory: </span><span class="si">{</span><span class="n">rules_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Installed plugin rules (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rule_files</span><span class="p">)</span><span class="si">}</span><span class="s2">):&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Location: </span><span class="si">{</span><span class="n">rules_dir</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">rule_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rule_files</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="n">rule_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># Try to load and show rules from the file</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_rule_file</span>
+                    <span class="n">rules</span> <span class="o">=</span> <span class="n">load_rule_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rule_file</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">rules</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">rule_cls</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
+                            <span class="n">rule</span> <span class="o">=</span> <span class="n">rule_cls</span><span class="p">()</span>
+                            <span class="n">rule_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s1">&#39;rule_type&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+                            <span class="n">order</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">)</span>
+                            <span class="n">dialects</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s1">&#39;supported_dialects&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                            <span class="n">dialect_info</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; [dialects: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">dialects</span><span class="p">))</span><span class="si">}</span><span class="s2">]&quot;</span> <span class="k">if</span> <span class="n">dialects</span> <span class="k">else</span> <span class="s2">&quot; [all dialects]&quot;</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    - </span><span class="si">{</span><span class="n">rule_cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> (type=</span><span class="si">{</span><span class="n">rule_type</span><span class="si">}</span><span class="s2">, order=</span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s2">)</span><span class="si">{</span><span class="n">dialect_info</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Error loading: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     
-    <span class="nb">print</span><span class="p">()</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">built_in_rules</span><span class="p">)</span><span class="si">}</span><span class="s2"> built-in rules&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">rules_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">plugin_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">rules_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.py&quot;</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;       </span><span class="si">{</span><span class="n">plugin_count</span><span class="si">}</span><span class="s2"> plugin file(s)&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="remove_plugin">
-<a class="viewcode-back" href="../../api.html#sqltidy.generator.remove_plugin">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">remove_plugin</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="remove_rule">
+<a class="viewcode-back" href="../../api.html#sqltidy.generator.remove_rule">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_rule</span><span class="p">(</span><span class="n">rule_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remove a plugin from the user&#39;s plugin directory.</span>
+<span class="sd">    Remove a rule from the user&#39;s rule directory.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        plugin_name: Name of the plugin file to remove</span>
+<span class="sd">        rule_name: Name of the rule file to remove</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">plugins_dir</span> <span class="o">=</span> <span class="n">get_user_plugins_dir</span><span class="p">()</span>
+    <span class="n">rules_dir</span> <span class="o">=</span> <span class="n">get_user_rules_dir</span><span class="p">()</span>
     
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugins_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No plugins installed.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rules_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No plugin rules installed.&quot;</span><span class="p">)</span>
         <span class="k">return</span>
     
     <span class="c1"># Add .py extension if not provided</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
-        <span class="n">plugin_name</span> <span class="o">+=</span> <span class="s1">&#39;.py&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rule_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
+        <span class="n">rule_name</span> <span class="o">+=</span> <span class="s1">&#39;.py&#39;</span>
     
-    <span class="n">plugin_file</span> <span class="o">=</span> <span class="n">plugins_dir</span> <span class="o">/</span> <span class="n">plugin_name</span>
+    <span class="n">rule_file</span> <span class="o">=</span> <span class="n">rules_dir</span> <span class="o">/</span> <span class="n">rule_name</span>
     
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin not found: </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Use &#39;sqltidy plugin list&#39; to see installed plugins.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rule_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rule not found: </span><span class="si">{</span><span class="n">rule_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Use &#39;sqltidy rules list&#39; to see installed rules.&quot;</span><span class="p">)</span>
         <span class="k">return</span>
     
     <span class="c1"># Confirm deletion</span>
-    <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Remove plugin &#39;</span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">&#39;? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">confirm</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Remove rule &#39;</span><span class="si">{</span><span class="n">rule_name</span><span class="si">}</span><span class="s2">&#39;? [y/N]: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">confirm</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">):</span>
-        <span class="n">plugin_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Removed plugin: </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">rule_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Removed rule: </span><span class="si">{</span><span class="n">rule_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Removal cancelled.&quot;</span><span class="p">)</span></div>
 

@@ -14,6 +14,8 @@ sqltidy.rules.tidy
    indent_select_columns
    leading_commas
    newline_after_select
+   newline_join_pattern
+   newline_on_join
    oracle_connect_by
    quote_identifiers
    sqlserver_top_formatting

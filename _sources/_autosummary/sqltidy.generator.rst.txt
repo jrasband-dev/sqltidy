@@ -8,23 +8,23 @@ sqltidy.generator
 
    .. autosummary::
    
-      add_plugin
-      create_config
-      edit_config
-      generate_config_interactive
-      get_bundled_config_path
-      get_bundled_configs_dir
-      get_config_path
+      add_rule
+      create_rulebook
+      edit_rulebook
+      generate_rulebook_interactive
+      get_bundled_rulebook_path
+      get_bundled_rulebooks_dir
       get_default_filename
-      get_user_configs_dir
-      get_user_plugins_dir
-      initialize_user_configs
-      list_configs
-      list_plugins
-      load_config_file
+      get_rulebook_path
+      get_user_rulebooks_dir
+      get_user_rules_dir
+      initialize_user_rulebooks
+      list_rulebooks
+      list_rules
+      load_rulebook_file
       prompt_yes_no
-      remove_plugin
-      reset_config
+      remove_rule
+      reset_rulebook
       select_dialect
-      update_config
+      update_rulebook
    

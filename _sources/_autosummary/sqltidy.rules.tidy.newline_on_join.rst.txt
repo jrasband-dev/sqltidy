@@ -1,0 +1,12 @@
+sqltidy.rules.tidy.newline\_on\_join
+====================================
+
+.. automodule:: sqltidy.rules.tidy.newline_on_join
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      NewlineOnJoinRule
+   
