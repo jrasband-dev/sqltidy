@@ -348,6 +348,12 @@ def main():
             with open(args.input, "r", encoding="utf-8") as f:
                 sql = f.read()
         else:
+            # Check if stdin is a TTY (interactive terminal)
+            if sys.stdin.isatty():
+                print("Error: No input file provided and no data piped to stdin.", file=sys.stderr)
+                print("Usage: sqltidy parse <file> or pipe data like: cat file.sql | sqltidy parse", file=sys.stderr)
+                print("Run 'sqltidy parse --help' for more information.", file=sys.stderr)
+                sys.exit(1)
             sql = sys.stdin.read()
 
         # Tokenize the SQL
@@ -447,6 +453,12 @@ def main():
             with open(args.input, "r", encoding="utf-8") as f:
                 sql = f.read()
         else:
+            # Check if stdin is a TTY (interactive terminal)
+            if sys.stdin.isatty():
+                print("Error: No input file provided and no data piped to stdin.", file=sys.stderr)
+                print("Usage: sqltidy tidy <file> or pipe data like: cat file.sql | sqltidy tidy", file=sys.stderr)
+                print("Run 'sqltidy tidy --help' for more information.", file=sys.stderr)
+                sys.exit(1)
             sql = sys.stdin.read()
 
         # Load config file based on dialect (default: sqlserver)
@@ -497,6 +509,12 @@ def main():
             with open(args.input, "r", encoding="utf-8") as f:
                 sql = f.read()
         else:
+            # Check if stdin is a TTY (interactive terminal)
+            if sys.stdin.isatty():
+                print("Error: No input file provided and no data piped to stdin.", file=sys.stderr)
+                print("Usage: sqltidy rewrite <file> or pipe data like: cat file.sql | sqltidy rewrite", file=sys.stderr)
+                print("Run 'sqltidy rewrite --help' for more information.", file=sys.stderr)
+                sys.exit(1)
             sql = sys.stdin.read()
 
         # Load config file based on dialect (default: sqlserver)
