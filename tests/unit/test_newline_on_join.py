@@ -97,7 +97,7 @@ ON T1.Id = T2.Id"""
         sql = "SELECT * FROM T1 LEFT JOIN T2 ON T1.Id = T2.Id"
         result = format_sql(sql, config)
         # ON should remain on same line as LEFT JOIN when rule is disabled
-        assert "LEFT JOIN T2 ON" in result or "left join T2 on" in result.lower()
+        assert "LEFT JOIN T2 ON" in result.upper()
     
     def test_case_insensitive(self, config):
         """Test that rule works with mixed case keywords."""
