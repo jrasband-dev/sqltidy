@@ -3,11 +3,11 @@ import sys
 import json
 from pathlib import Path
 from . import __version__
-from .api import format_sql, format_sql_file, format_sql_folder
+from .api import format_sql, format_sql_folder
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 from .generator import create_rulebook, list_rulebooks, edit_rulebook, reset_rulebook, load_rulebook_file, get_bundled_rulebook_path, get_user_rulebooks_dir, add_rule, list_rules, remove_rule
 from .tokenizer import tokenize_with_types, TokenType, is_keyword
-from .plugins import load_rule_file, load_rules_from_directory, load_rules_module
+from .plugins import load_rule_file, load_rules_from_directory
 
 try:
     from rich.console import Console

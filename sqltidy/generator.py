@@ -7,7 +7,6 @@ import json
 import os
 import shutil
 import subprocess
-from dataclasses import asdict
 from pathlib import Path
 from typing import Dict, Any, Optional
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS

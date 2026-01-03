@@ -1,7 +1,5 @@
 import re
 from ..base import BaseRule
-from sqltidy.tokenizer import is_keyword
-
 
 class NewlineJoinPatternRule(BaseRule):
     """
