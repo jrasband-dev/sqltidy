@@ -1,5 +1,5 @@
 """
-rule system for SQLTidy.
+Rule plugin system for SQLTidy.
 
 Provides a decorator-based rule registration system similar to Polars,
 allowing users to easily extend SQLTidy with custom formatting rules.
@@ -31,7 +31,7 @@ from sqltidy.rules.base import BaseRule
 
 
 # Global registry of rules
-_rule_REGISTRY = []
+_RULE_PLUGIN_REGISTRY = []
 
 
 def sqltidy_rule(
@@ -41,7 +41,7 @@ def sqltidy_rule(
     name: Optional[str] = None
 ):
     """
-    Decorator to register a function as a SQLTidy rule rule.
+    Decorator to register a function as a SQLTidy rule.
     
     This decorator allows you to turn any function into a formatting rule
     without having to create a class or understand the internals.
@@ -70,30 +70,30 @@ def sqltidy_rule(
         # Create a rule class from the function
         class_name = name or f"{func.__name__.title().replace('_', '')}Rule"
         
-        class ruleRule(BaseRule):
+        class PluginRule(BaseRule):
             pass
         
         # Set class attributes
-        ruleRule.__name__ = class_name
-        ruleRule.__qualname__ = class_name
-        ruleRule.rule_type = rule_type
-        ruleRule.order = order
-        ruleRule.__doc__ = func.__doc__
+        PluginRule.__name__ = class_name
+        PluginRule.__qualname__ = class_name
+        PluginRule.rule_type = rule_type
+        PluginRule.order = order
+        PluginRule.__doc__ = func.__doc__
         
         if supported_dialects:
-            ruleRule.supported_dialects = supported_dialects
+            PluginRule.supported_dialects = supported_dialects
         
         # Override apply method to call the function
         def apply(self, tokens, ctx):
             return func(tokens, ctx)
         
-        ruleRule.apply = apply
+        PluginRule.apply = apply
         
         # Register the rule class
-        _rule_REGISTRY.append(ruleRule)
+        _RULE_PLUGIN_REGISTRY.append(PluginRule)
         
         # Store reference on the function for introspection
-        func._sqltidy_rule_class = ruleRule
+        func._sqltidy_rule_class = PluginRule
         func._sqltidy_rule = True
         
         return func
@@ -125,22 +125,22 @@ def register_rule_class(rule_class: type):
     if not issubclass(rule_class, BaseRule):
         raise TypeError(f"{rule_class} must be a subclass of BaseRule")
     
-    _rule_REGISTRY.append(rule_class)
+    _RULE_PLUGIN_REGISTRY.append(rule_class)
 
 
 def get_registered_rules() -> List[type]:
     """
-    Get all registered rule rules.
+    Get all registered rules.
     
     Returns:
         List of rule classes
     """
-    return _rule_REGISTRY.copy()
+    return _RULE_PLUGIN_REGISTRY.copy()
 
 
 def clear_rules():
     """Clear all registered rules."""
-    _rule_REGISTRY.clear()
+    _RULE_PLUGIN_REGISTRY.clear()
 
 
 def load_rule_file(filepath: Union[str, Path]) -> List[type]:
@@ -175,7 +175,7 @@ def load_rule_file(filepath: Union[str, Path]) -> List[type]:
         raise FileNotFoundError(f"rule file not found: {filepath}")
     
     # Track rules before loading
-    before_count = len(_rule_REGISTRY)
+    before_count = len(_RULE_PLUGIN_REGISTRY)
     
     # Load the module
     spec = importlib.util.spec_from_file_location(
@@ -195,7 +195,7 @@ def load_rule_file(filepath: Union[str, Path]) -> List[type]:
         raise ImportError(f"Error loading rule file {filepath}: {e}") from e
     
     # Return newly registered rules
-    new_rules = _rule_REGISTRY[before_count:]
+    new_rules = _RULE_PLUGIN_REGISTRY[before_count:]
     
     return new_rules
 
@@ -260,7 +260,7 @@ def load_rules_module(module_name: str) -> List[type]:
         # Load from installed package
         rules = load_rule_module('my_company.sqltidy_rules')
     """
-    before_count = len(_rule_REGISTRY)
+    before_count = len(_RULE_PLUGIN_REGISTRY)
     
     try:
         importlib.import_module(module_name)
@@ -268,7 +268,7 @@ def load_rules_module(module_name: str) -> List[type]:
         raise ImportError(f"Could not import module {module_name}: {e}") from e
     
     # Return newly registered rules
-    new_rules = _rule_REGISTRY[before_count:]
+    new_rules = _RULE_PLUGIN_REGISTRY[before_count:]
     
     return new_rules
 

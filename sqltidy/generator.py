@@ -683,7 +683,7 @@ def remove_rule(rule_name: str) -> None:
     rules_dir = get_user_rules_dir()
     
     if not rules_dir.exists():
-        print("No Rules installed.")
+        print("No plugin rules installed.")
         return
     
     # Add .py extension if not provided

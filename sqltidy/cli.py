@@ -108,23 +108,23 @@ def create_rulebook_from_file(rulebook_file: str) -> SQLTidyConfig:
         sys.exit(1)
 
 
-def load_rule_rules(args):
+def load_plugin_rules(args):
     """
-    Load rule rules from command line arguments.
+    Load plugin rules from command line arguments.
     
     Args:
         args: Parsed command line arguments with rule_files, rule_dirs, rule_modules
         
     Returns:
-        list: List of instantiated rule rule objects
+        list: List of instantiated plugin rule objects
     """
-    rule_rules = []
+    plugin_rules = []
     
     if hasattr(args, 'rule_files') and args.rule_files:
         for rule_file in args.rule_files:
             try:
                 rules = load_rule_file(rule_file)
-                rule_rules.extend([r() for r in rules])
+                plugin_rules.extend([r() for r in rules])
             except Exception as e:
                 print(f"Warning: Could not load rule {rule_file}: {e}", file=sys.stderr)
     
@@ -132,7 +132,7 @@ def load_rule_rules(args):
         for rule_dir in args.rule_dirs:
             try:
                 rules = load_rules_from_directory(rule_dir)
-                rule_rules.extend([r() for r in rules])
+                plugin_rules.extend([r() for r in rules])
             except Exception as e:
                 print(f"Warning: Could not load rules from {rule_dir}: {e}", file=sys.stderr)
     
@@ -140,18 +140,17 @@ def load_rule_rules(args):
         for rule_module in args.rule_modules:
             try:
                 rules = load_rule_module(rule_module)
-                rule_rules.extend([r() for r in rules])
+                plugin_rules.extend([r() for r in rules])
             except Exception as e:
                 print(f"Warning: Could not load rule module {rule_module}: {e}", file=sys.stderr)
     
-    return rule_rules
-
+    return plugin_rules
 
 def handle_tidy_command(args):
     """Handle the tidy command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else 'sqlserver'
     config = create_rulebook_from_file(dialect)
-    rule_rules = load_rule_rules(args)
+    plugin_rules = load_plugin_rules(args)
     
     if args.input:
         input_path = Path(args.input)
@@ -161,7 +160,7 @@ def handle_tidy_command(args):
             with open(args.input, "r", encoding="utf-8") as f:
                 sql = f.read()
             
-            formatted_sql = format_sql(sql, config=config, custom_rules=rule_rules, rule_type='tidy')
+            formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
             
             if args.output:
                 with open(args.output, "w", encoding="utf-8") as f:
@@ -184,7 +183,7 @@ def handle_tidy_command(args):
                 folder_path=input_path,
                 output_folder=args.output,
                 config=config,
-                custom_rules=rule_rules,
+                custom_rules=plugin_rules,
                 rule_type='tidy',
                 pattern=args.pattern,
                 recursive=args.recursive,
@@ -215,7 +214,7 @@ def handle_tidy_command(args):
             sys.exit(1)
         
         sql = sys.stdin.read()
-        formatted_sql = format_sql(sql, config=config, custom_rules=rule_rules, rule_type='tidy')
+        formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
         print(formatted_sql)
 
 
@@ -223,7 +222,7 @@ def handle_rewrite_command(args):
     """Handle the rewrite command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else 'sqlserver'
     config = create_rulebook_from_file(dialect)
-    rule_rules = load_rule_rules(args)
+    plugin_rules = load_plugin_rules(args)
     
     if args.input:
         input_path = Path(args.input)
@@ -233,7 +232,7 @@ def handle_rewrite_command(args):
             with open(args.input, "r", encoding="utf-8") as f:
                 sql = f.read()
             
-            formatted_sql = format_sql(sql, config=config, custom_rules=rule_rules, rule_type='rewrite')
+            formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
             
             if args.tidy:
                 formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
@@ -261,7 +260,7 @@ def handle_rewrite_command(args):
                     folder_path=input_path,
                     output_folder=args.output,
                     config=config,
-                    custom_rules=rule_rules,
+                    custom_rules=plugin_rules,
                     rule_type='rewrite',
                     pattern=args.pattern,
                     recursive=args.recursive,
@@ -287,7 +286,7 @@ def handle_rewrite_command(args):
                     folder_path=input_path,
                     output_folder=args.output,
                     config=config,
-                    custom_rules=rule_rules,
+                    custom_rules=plugin_rules,
                     rule_type='rewrite',
                     pattern=args.pattern,
                     recursive=args.recursive,
@@ -318,7 +317,7 @@ def handle_rewrite_command(args):
             sys.exit(1)
         
         sql = sys.stdin.read()
-        formatted_sql = format_sql(sql, config=config, custom_rules=rule_rules, rule_type='rewrite')
+        formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
         
         if args.tidy:
             formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
@@ -485,7 +484,7 @@ def main():
     rules_parser = subparsers.add_parser(
         "rules",
         help="Manage custom rules",
-        description="Add, list, or remove custom rule rules"
+        description="Add, list, or remove custom plugin rules"
     )
     
     rules_subparsers = rules_parser.add_subparsers(title='Rules Commands', dest="rules_command", required=True)

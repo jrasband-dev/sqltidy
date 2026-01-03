@@ -31,18 +31,18 @@ def _load_config_for_dialect(dialect: str) -> SQLTidyConfig:
 
 def register_rule(rule: BaseRule):
     """
-    Register a rule rule at runtime.
+    Register a rule at runtime.
 
     Args:
         rule (BaseRule): An instance of a rule to apply.
     """
     if not isinstance(rule, BaseRule):
-        raise TypeError("rule must be an instance of BaseRule")
+        raise TypeError("Rule must be an instance of BaseRule")
     _extra_rules.append(rule)
 
 def clear_rules():
     """
-    Clear all runtime-registered rule rules.
+    Clear all runtime-registered rules.
     """
     _extra_rules.clear()
 
@@ -54,7 +54,7 @@ def format_sql(
     rule_type: Optional[str] = None
 ) -> str:
     """
-    Format a SQL string using all registered rules, including runtime rules.
+    Format a SQL string using all registered rules, including custom rules.
 
     Args:
         sql (str): The SQL string to format.
@@ -179,7 +179,7 @@ def tidy_and_rewrite_sql(
 
 def load_user_rules() -> List[type]:
     """
-    Load all rules from the user's rule directory (~/.sqltidy/rules/).
+    Load all rules from the user's rule plugin directory (~/.sqltidy/rules/).
     
     Returns:
         List[type]: List of rule classes found in user rules.
@@ -199,7 +199,7 @@ def load_user_rules() -> List[type]:
 
 def load_rule(filepath: str) -> List[type]:
     """
-    Load rule rules from a Python file.
+    Load rules from a Python file.
     
     Args:
         filepath (str): Path to the rule Python file.

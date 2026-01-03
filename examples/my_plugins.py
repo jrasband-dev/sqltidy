@@ -6,16 +6,16 @@ This file demonstrates how to create custom formatting rules using the
 
 Usage:
     # From command line:
-    sqltidy tidy input.sql --plugin my_plugins.py
+    sqltidy tidy input.sql --rule my_plugins.py
     
     # Load from directory:
-    sqltidy tidy input.sql --plugin-dir ~/.sqltidy/plugins
+    sqltidy tidy input.sql --rule-dir ~/.sqltidy/rules
     
     # From Python:
-    from sqltidy.plugins import load_plugin_file
+    from sqltidy.plugins import load_rule_file
     from sqltidy.api import format_sql
     
-    load_plugin_file('my_plugins.py')
+    load_rule_file('my_plugins.py')
     result = format_sql(sql)
 """
 
