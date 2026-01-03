@@ -93,7 +93,7 @@ Specify a dialect when formatting SQL:
 .. code-block:: python
 
    from sqltidy import format_sql
-   from sqltidy.config import SQLTidyConfig
+   from sqltidy.rulebook import SQLTidyConfig
    
    config = SQLTidyConfig(dialect='postgresql')
    sql = "SELECT * FROM users WHERE id = 1"

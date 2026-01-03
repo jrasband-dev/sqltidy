@@ -1,7 +1,7 @@
 # Configuration for sqltidy
 # Each dialect can have its own config file (e.g., sqltidy_sqlserver.json, sqltidy_postgresql.json)
 
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 from typing import Optional, Dict, Any
 import json
 from pathlib import Path
@@ -32,6 +32,10 @@ class SQLTidyConfig:
     compact: bool = True
     leading_commas: bool = True
     indent_select_columns: bool = True
+    newline_on_join: bool = True  # Move ON keyword to newline after JOIN
+    
+    # JOIN pattern formatting - adds blank line before JOIN keywords
+    newline_join_pattern: bool = False
     
     # Identifier quoting (disabled by default)
     quote_identifiers: bool = False

@@ -1,7 +1,7 @@
 # sqltidy/core.py
 import re
 from typing import List
-from .config import SQLTidyConfig
+from .rulebook import SQLTidyConfig
 from .tokenizer import TOKEN_RE
 
 class SQLFormatter:

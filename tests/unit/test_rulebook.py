@@ -7,7 +7,7 @@ Tests:
 - Config file loading and saving
 """
 import pytest
-from sqltidy.config import SQLTidyConfig, SUPPORTED_DIALECTS
+from sqltidy.rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 
 
 class TestSQLTidyConfig:

@@ -15,7 +15,7 @@ from sqltidy.plugins import (
     create_plugin_formatter
 )
 from sqltidy.rules.base import BaseRule
-from sqltidy.config import SQLTidyConfig
+from sqltidy.rulebook import SQLTidyConfig
 from sqltidy.api import format_sql
 
 

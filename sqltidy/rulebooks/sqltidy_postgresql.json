@@ -1,12 +1,14 @@
 {
-  "dialect": "sqlserver",
-  "uppercase_keywords": true,
+  "dialect": "postgresql",
+  "uppercase_keywords": false,
   "newline_after_select": true,
   "compact": true,
   "leading_commas": true,
   "indent_select_columns": true,
+  "newline_on_join": true,
+  "newline_join_pattern": true,
   "quote_identifiers": false,
-  "enable_subquery_to_cte": false,
+  "enable_subquery_to_cte": true,
   "enable_alias_style_abc": false,
   "enable_alias_style_t_numeric": false
 }

@@ -5,7 +5,7 @@ Tests complete workflows from input SQL to formatted output.
 """
 import pytest
 from sqltidy import format_sql
-from sqltidy.config import SQLTidyConfig
+from sqltidy.rulebook import SQLTidyConfig
 
 
 class TestEndToEndFormatting:

@@ -9,7 +9,7 @@ tests/
 ├── conftest.py              # Pytest fixtures and configuration
 ├── unit/                    # Unit tests for individual components
 │   ├── test_tokenizer.py    # Tokenizer tests
-│   ├── test_config.py       # Configuration tests
+│   ├── test_rulebook.py     # Rulebook configuration tests
 │   └── test_rules.py        # Rule tests
 ├── integration/             # End-to-end integration tests
 │   └── test_formatting.py   # Complete formatting workflows
@@ -175,7 +175,7 @@ Available fixtures:
 ```python
 import pytest
 from sqltidy import format_sql
-from sqltidy.config import SQLTidyConfig
+from sqltidy.rulebook import SQLTidyConfig
 
 
 class TestMyFeature:

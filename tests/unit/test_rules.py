@@ -13,7 +13,7 @@ from sqltidy.rules.tidy.compact_whitespace import CompactWhitespaceRule
 from sqltidy.rules.tidy.quote_identifiers import QuoteIdentifiersRule
 from sqltidy.rules.tidy.sqlserver_top_formatting import SQLServerTopFormattingRule
 from sqltidy.rules.tidy.oracle_connect_by import OracleConnectByFormattingRule
-from sqltidy.config import SQLTidyConfig
+from sqltidy.rulebook import SQLTidyConfig
 from sqltidy.tokenizer import tokenize
 
 

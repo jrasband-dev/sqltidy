@@ -1,6 +1,6 @@
 # SQLTidy
 
-![alt text](sqltidy.svg)
+![alt text](https://raw.githubusercontent.com/jrasband-dev/sqltidy/refs/heads/main/sqltidy.svg)
 
 [![PyPI version](https://img.shields.io/pypi/v/sqltidy.svg)](https://pypi.org/project/sqltidy/)  
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)  

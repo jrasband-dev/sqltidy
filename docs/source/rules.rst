@@ -186,7 +186,7 @@ Rules can be enabled or disabled via configuration:
 .. code-block:: python
 
    from sqltidy import format_sql
-   from sqltidy.config import SQLTidyConfig, SQLTidyConfig
+   from sqltidy.rulebook import SQLTidyConfig
    
    config = SQLTidyConfig(
        uppercase_keywords=True,
