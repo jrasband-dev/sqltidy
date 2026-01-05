@@ -114,22 +114,55 @@ def generate_config_defaults(rules: List[BaseRule], dialect: str) -> Dict[str, A
     """
     Generate default configuration values based on loaded rules and dialect.
     
+    Creates a nested structure with 'tidy' and 'rewrite' sections based on
+    each rule's rule_type.
+    
     Args:
         rules: List of rule instances
         dialect: Target SQL dialect
         
     Returns:
-        Dict of config field names to default values
+        Dict with 'dialect', 'tidy', and 'rewrite' sections
     """
-    config_values = {'dialect': dialect}
+    config_values = {
+        'dialect': dialect,
+        'tidy': {},
+        'rewrite': {}
+    }
     schema = build_config_schema_from_rules(rules)
     
     for field_name, field_meta in schema.items():
-        # Check for dialect-specific default first
+        # Determine value (dialect-specific or default)
         if field_meta.dialect_defaults and dialect in field_meta.dialect_defaults:
-            config_values[field_name] = field_meta.dialect_defaults[dialect]
+            value = field_meta.dialect_defaults[dialect]
         else:
-            config_values[field_name] = field_meta.default
+            value = field_meta.default
+        
+        # Find the rule that owns this config field to determine section
+        section = None
+        for rule in rules:
+            if hasattr(rule, 'config_fields'):
+                # config_fields can be a dict or list
+                if isinstance(rule.config_fields, dict):
+                    if field_name in rule.config_fields:
+                        section = rule.rule_type  # 'tidy' or 'rewrite'
+                        break
+                elif isinstance(rule.config_fields, list):
+                    for cfg_field in rule.config_fields:
+                        if hasattr(cfg_field, 'name') and cfg_field.name == field_name:
+                            section = rule.rule_type
+                            break
+            if section:
+                break
+        
+        # Place in appropriate section
+        if section == 'tidy':
+            config_values['tidy'][field_name] = value
+        elif section == 'rewrite':
+            config_values['rewrite'][field_name] = value
+        else:
+            # Fallback: put in tidy if rule_type not found
+            config_values['tidy'][field_name] = value
     
     return config_values
 
