@@ -240,19 +240,22 @@ def get_default_filename(dialect: str) -> str:
     return f"sqltidy_{dialect}.json"
 
 
-def create_rulebook(dialect: Optional[str] = None, template_file: Optional[str] = None, include_plugins: bool = False) -> None:
+def create_rulebook(dialect: Optional[str] = None, template_file: Optional[str] = None, include_plugins: bool = True) -> None:
     """
     Create a new rulebook file in the user's rulebook directory.
     
+    **Auto-loads user plugins:** Automatically includes custom rules from ~/.sqltidy/rules/
+    when include_plugins=True (default).
+    
     With Option 2, this function now:
     1. Generates config from rule metadata (includes all registered rules)
-    2. Saves to ~/.sqltidy/rulebooks/ by default
-    3. Optionally includes plugin rules if --include-plugins flag is used
+    2. Auto-loads user plugins from ~/.sqltidy/rules/
+    3. Saves to ~/.sqltidy/rulebooks/ by default
     
     Args:
         dialect: SQL dialect (if None, will prompt)
         template_file: Optional template rulebook file to copy from
-        include_plugins: If True, include loaded plugin rules in the config
+        include_plugins: If True, include plugin rules in the config (default: True)
     """
     try:
         # Select dialect if not provided
@@ -580,14 +583,17 @@ def reset_rulebook(rulebook_name: Optional[str] = None) -> None:
         print("\nReset cancelled.")
 
 
-def update_rulebook(rulebook_name: Optional[str] = None, include_plugins: bool = False) -> None:
+def update_rulebook(rulebook_name: Optional[str] = None, include_plugins: bool = True) -> None:
     """
     Update an existing rulebook file with new rules that have been added since creation.
     Preserves user's existing settings and only adds new fields from newly registered rules.
     
+    **Auto-loads user plugins:** Automatically includes custom rules from ~/.sqltidy/rules/
+    when include_plugins=True (default).
+    
     Args:
         rulebook_name: Name of the rulebook file or dialect to update, or 'all' to update all
-        include_plugins: Whether to include plugin rules in the update
+        include_plugins: Whether to include plugin rules in the update (default: True)
     """
     from .config_schema import generate_dialect_config
     
@@ -630,20 +636,43 @@ def update_rulebook(rulebook_name: Optional[str] = None, include_plugins: bool =
                 # Generate fresh config from current rules
                 fresh_config = generate_dialect_config(dialect, include_plugins=include_plugins)
                 
-                # Merge: keep existing values, add new fields
-                merged_config = fresh_config.copy()
-                merged_config.update(existing_config)
+                # Merge nested structure: keep existing values, add new fields
+                merged_config = {
+                    'dialect': dialect,
+                    'tidy': {},
+                    'rewrite': {}
+                }
                 
-                # Check if any new fields were added
-                new_fields = set(fresh_config.keys()) - set(existing_config.keys())
+                # Get existing tidy and rewrite sections
+                existing_tidy = existing_config.get('tidy', {})
+                existing_rewrite = existing_config.get('rewrite', {})
+                
+                # Merge tidy section
+                fresh_tidy = fresh_config.get('tidy', {})
+                merged_config['tidy'] = {**fresh_tidy, **existing_tidy}
+                
+                # Merge rewrite section
+                fresh_rewrite = fresh_config.get('rewrite', {})
+                merged_config['rewrite'] = {**fresh_rewrite, **existing_rewrite}
+                
+                # Find new fields
+                new_tidy_fields = set(fresh_tidy.keys()) - set(existing_tidy.keys())
+                new_rewrite_fields = set(fresh_rewrite.keys()) - set(existing_rewrite.keys())
+                new_fields = new_tidy_fields | new_rewrite_fields
                 
                 if new_fields:
                     # Save updated config
                     with open(rulebook_file, 'w', encoding='utf-8') as f:
                         json.dump(merged_config, f, indent=2)
                     print(f"  ✓ Updated {dialect}: Added {len(new_fields)} new field(s)")
-                    for field in sorted(new_fields):
-                        print(f"    + {field}")
+                    if new_tidy_fields:
+                        print(f"    Tidy rules:")
+                        for field in sorted(new_tidy_fields):
+                            print(f"      + {field}")
+                    if new_rewrite_fields:
+                        print(f"    Rewrite rules:")
+                        for field in sorted(new_rewrite_fields):
+                            print(f"      + {field}")
                     updated_count += 1
                 else:
                     print(f"  • {dialect}: Already up-to-date")
@@ -705,21 +734,45 @@ def update_rulebook(rulebook_name: Optional[str] = None, include_plugins: bool =
         print(f"\nError generating config for {dialect}: {e}")
         return
     
-    # Merge: keep existing values, add new fields
-    merged_config = fresh_config.copy()
-    merged_config.update(existing_config)
+    # Merge nested structure: keep existing values, add new fields
+    merged_config = {
+        'dialect': dialect,
+        'tidy': {},
+        'rewrite': {}
+    }
     
-    # Check if any new fields were added
-    new_fields = set(fresh_config.keys()) - set(existing_config.keys())
+    # Get existing tidy and rewrite sections
+    existing_tidy = existing_config.get('tidy', {})
+    existing_rewrite = existing_config.get('rewrite', {})
+    
+    # Merge tidy section
+    fresh_tidy = fresh_config.get('tidy', {})
+    merged_config['tidy'] = {**fresh_tidy, **existing_tidy}
+    
+    # Merge rewrite section
+    fresh_rewrite = fresh_config.get('rewrite', {})
+    merged_config['rewrite'] = {**fresh_rewrite, **existing_rewrite}
+    
+    # Find new fields
+    new_tidy_fields = set(fresh_tidy.keys()) - set(existing_tidy.keys())
+    new_rewrite_fields = set(fresh_rewrite.keys()) - set(existing_rewrite.keys())
+    new_fields = new_tidy_fields | new_rewrite_fields
     
     if not new_fields:
         print(f"\n✓ {dialect} rulebook is already up-to-date!")
         return
     
     print(f"\nFound {len(new_fields)} new field(s) to add to {dialect} rulebook:")
-    for field in sorted(new_fields):
-        default_value = fresh_config[field]
-        print(f"  + {field} = {default_value}")
+    if new_tidy_fields:
+        print(f"\n  Tidy rules:")
+        for field in sorted(new_tidy_fields):
+            default_value = fresh_tidy[field]
+            print(f"    + {field} = {default_value}")
+    if new_rewrite_fields:
+        print(f"\n  Rewrite rules:")
+        for field in sorted(new_rewrite_fields):
+            default_value = fresh_rewrite[field]
+            print(f"    + {field} = {default_value}")
     
     confirm = input(f"\nUpdate {rulebook_file.name} with new fields? [Y/n]: ").strip().lower()
     if confirm in ('', 'y', 'yes'):

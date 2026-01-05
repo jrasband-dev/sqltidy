@@ -833,9 +833,11 @@ def main():
         help="Use existing rulebook file as template"
     )
     create_parser.add_argument(
-        "--include-plugins",
-        action="store_true",
-        help="Include loaded plugin rules in the generated configuration"
+        "--no-plugins",
+        dest="include_plugins",
+        action="store_false",
+        default=True,
+        help="Exclude user plugin rules from the generated configuration (by default, plugins are included)"
     )
     
     # rulebook list
@@ -886,9 +888,11 @@ def main():
         help="Dialect name (e.g., 'postgresql'), rulebook filename to update, or 'all' to update all rulebooks"
     )
     update_parser.add_argument(
-        "--include-plugins",
-        action="store_true",
-        help="Include loaded plugin rules in the update"
+        "--no-plugins",
+        dest="include_plugins",
+        action="store_false",
+        default=True,
+        help="Exclude user plugin rules from the update (by default, plugins are included)"
     )
 
 
@@ -1058,7 +1062,7 @@ def main():
     # rulebooks command
     if args.command == "rulebooks":
         if args.rulebook_command == "create":
-            include_plugins = getattr(args, 'include_plugins', False)
+            include_plugins = args.include_plugins
             create_rulebook(dialect=args.dialect, template_file=args.template, include_plugins=include_plugins)
         elif args.rulebook_command == "list":
             list_rulebooks(directory=args.directory)
@@ -1067,7 +1071,7 @@ def main():
         elif args.rulebook_command == "reset":
             reset_rulebook(rulebook_name=args.rulebook)
         elif args.rulebook_command == "update":
-            include_plugins = getattr(args, 'include_plugins', False)
+            include_plugins = args.include_plugins
             update_rulebook(rulebook_name=args.rulebook, include_plugins=include_plugins)
         return
 

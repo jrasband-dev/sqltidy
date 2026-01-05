@@ -26,19 +26,68 @@ Example:
 import importlib.util
 import sys
 from pathlib import Path
-from typing import Callable, Optional, Set, List, Union
+from typing import Callable, Optional, Set, List, Union, Dict
 from sqltidy.rules.base import BaseRule
 
 
 # Global registry of rules
 _RULE_PLUGIN_REGISTRY = []
 
+# Track which files have been loaded to avoid duplicates
+_LOADED_PLUGIN_FILES = set()
+
+
+def get_user_rules_directory() -> Path:
+    """Get the user's custom rules directory (~/.sqltidy/rules/)."""
+    return Path.home() / '.sqltidy' / 'rules'
+
+
+def auto_load_user_rules() -> List[type]:
+    """
+    Automatically load all custom rules from user's rules directory.
+    
+    Looks for Python files in ~/.sqltidy/rules/ and loads them.
+    Creates the directory if it doesn't exist.
+    Skips files that have already been loaded to avoid duplicates.
+    
+    Returns:
+        List of rule classes that were loaded
+    """
+    rules_dir = get_user_rules_directory()
+    
+    # Create directory if it doesn't exist
+    rules_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Load all .py files from the directory
+    loaded_rules = []
+    if rules_dir.exists():
+        for filepath in rules_dir.glob("*.py"):
+            if filepath.name.startswith("_"):
+                continue  # Skip private files
+            
+            # Skip if already loaded
+            file_key = str(filepath.absolute())
+            if file_key in _LOADED_PLUGIN_FILES:
+                continue
+            
+            try:
+                rules = load_rule_file(filepath)
+                loaded_rules.extend(rules)
+                _LOADED_PLUGIN_FILES.add(file_key)
+            except Exception:
+                # Silently skip files that can't be loaded
+                # (they might not be rule files)
+                pass
+    
+    return loaded_rules
+
 
 def sqltidy_rule(
     rule_type: str = "tidy",
     order: int = 50,
     supported_dialects: Optional[Set[str]] = None,
-    name: Optional[str] = None
+    name: Optional[str] = None,
+    config_fields: Optional[Dict] = None
 ):
     """
     Decorator to register a function as a SQLTidy rule.
@@ -51,12 +100,15 @@ def sqltidy_rule(
         order: Execution order (lower runs first)
         supported_dialects: Set of dialects this rule applies to, or None for all
         name: Optional custom name for the rule class
+        config_fields: Optional dict of ConfigField declarations for this rule
     
     Returns:
         Decorator function
     
     Example:
-        @sqltidy_rule(rule_type="tidy", order=100)
+        @sqltidy_rule(rule_type="tidy", order=100, config_fields={
+            "my_option": ConfigField(name="my_option", default=True, ...)
+        })
         def my_rule(tokens, ctx):
             '''Remove trailing semicolons.'''
             if tokens and tokens[-1] == ';':
@@ -82,6 +134,13 @@ def sqltidy_rule(
         
         if supported_dialects:
             PluginRule.supported_dialects = supported_dialects
+        
+        # Set config_fields if provided as decorator parameter
+        if config_fields:
+            PluginRule.config_fields = config_fields
+        # Or copy config_fields if defined on the function (for backward compatibility)
+        elif hasattr(func, 'config_fields'):
+            PluginRule.config_fields = func.config_fields
         
         # Override apply method to call the function
         def apply(self, tokens, ctx):
@@ -139,8 +198,9 @@ def get_registered_rules() -> List[type]:
 
 
 def clear_rules():
-    """Clear all registered rules."""
+    """Clear all registered rules and reset loaded files tracker."""
     _RULE_PLUGIN_REGISTRY.clear()
+    _LOADED_PLUGIN_FILES.clear()
 
 
 def load_rule_file(filepath: Union[str, Path]) -> List[type]:

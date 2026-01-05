@@ -51,9 +51,12 @@ def generate_dialect_config(dialect: str, include_plugins: bool = True) -> Dict[
     This creates a config dict with all fields set to appropriate defaults
     based on the dialect. Rules can specify dialect-specific defaults.
     
+    **Auto-loads user plugins:** Automatically loads custom rules from 
+    ~/.sqltidy/rules/ when include_plugins=True (default).
+    
     Args:
         dialect: SQL dialect name (e.g., 'postgresql', 'sqlserver')
-        include_plugins: Whether to include plugin rules
+        include_plugins: Whether to include plugin rules (default: True)
         
     Returns:
         Dict of configuration values ready to be saved as JSON or used directly
@@ -66,9 +69,15 @@ def generate_dialect_config(dialect: str, include_plugins: bool = True) -> Dict[
         >>> print(config['uppercase_keywords'])  # True for SQL Server
         True
     """
+    from .plugins import auto_load_user_rules, get_registered_rules
+    
     rules = load_rules()
     
     if include_plugins:
+        # Auto-load user rules from ~/.sqltidy/rules/
+        auto_load_user_rules()
+        
+        # Get all registered plugins (includes auto-loaded ones)
         plugin_rules = get_registered_rules()
         rules.extend([cls() for cls in plugin_rules])
     
