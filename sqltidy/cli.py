@@ -13,17 +13,24 @@ from .dialects.registry import list_dialects, get_dialect, is_dialect_available
 try:
     from rich.console import Console
     from rich.text import Text
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeElapsedColumn
+    from rich.syntax import Syntax
+    from rich.tree import Tree
+    from rich import box
     HAS_RICH = True
 except ImportError:
     HAS_RICH = False
+
+# Create a global console instance
+console = Console() if HAS_RICH else None
 
 
 def print_logo():
     """Print the sqltidy ASCII art logo."""
     if not HAS_RICH:
         return
-        
-    console = Console()
     
     logo = Text("""
 ███████╗ ██████╗ ██╗  ████████╗██╗██████╗ ██╗   ██╗
@@ -32,10 +39,12 @@ def print_logo():
 ╚════██║██║▄▄ ██║██║     ██║   ██║██║  ██║  ╚██╔╝  
 ███████║╚██████╔╝███████╗██║   ██║██████╔╝   ██║   
 ╚══════╝ ╚══▀▀═╝ ╚══════╝╚═╝   ╚═╝╚═════╝    ╚═╝   
-""", style="bold #328a32")
+""", style="bold cyan")
     
     console.print(logo)
-    console.print("[#328a32]SQL Formatting & Rewriting Tool[/#328a32]\n")
+    console.print(Panel("[bold cyan]SQL Formatting & Rewriting Tool[/bold cyan]", 
+                        border_style="cyan", 
+                        box=box.ROUNDED))
 
 
 def resolve_rulebook_path(rulebook_ref: str) -> str:
@@ -158,10 +167,17 @@ def handle_tidy_command(args):
         
         if input_path.is_file():
             # Single file processing
-            with open(args.input, "r", encoding="utf-8") as f:
-                sql = f.read()
-            
-            formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
+            if HAS_RICH:
+                with console.status(f"[cyan]Processing {input_path.name}...", spinner="dots"):
+                    with open(args.input, "r", encoding="utf-8") as f:
+                        sql = f.read()
+                    formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
+                
+                console.print(f"[green]✓[/green] Formatted {input_path.name}")
+            else:
+                with open(args.input, "r", encoding="utf-8") as f:
+                    sql = f.read()
+                formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
             
             if args.output:
                 with open(args.output, "w", encoding="utf-8") as f:
@@ -174,35 +190,112 @@ def handle_tidy_command(args):
                 
         elif input_path.is_dir():
             # Folder processing
-            print(f"Processing SQL files in: {input_path}")
+            if HAS_RICH:
+                console.print(Panel(
+                    f"[cyan]Path:[/cyan] {input_path}\n"
+                    f"[cyan]Mode:[/cyan] {'Recursive' if args.recursive else 'Non-recursive'}\n"
+                    f"[cyan]Pattern:[/cyan] {args.pattern}\n"
+                    f"[cyan]Dialect:[/cyan] {dialect}",
+                    title="[bold cyan]Processing SQL Files",
+                    border_style="cyan"
+                ))
+            else:
+                print(f"Processing SQL files in: {input_path}")
+                if args.recursive:
+                    print(f"  Mode: Recursive")
+                print(f"  Pattern: {args.pattern}")
+                print(f"  Dialect: {dialect}")
+            
+            # Get list of files to process
             if args.recursive:
-                print(f"  Mode: Recursive")
-            print(f"  Pattern: {args.pattern}")
-            print(f"  Dialect: {dialect}")
+                files = list(input_path.rglob(args.pattern))
+            else:
+                files = list(input_path.glob(args.pattern))
             
-            results = format_sql_folder(
-                folder_path=input_path,
-                output_folder=args.output,
-                config=config,
-                custom_rules=plugin_rules,
-                rule_type='tidy',
-                pattern=args.pattern,
-                recursive=args.recursive,
-                in_place=not args.no_in_place
-            )
-            
-            print(f"\nResults:")
-            print(f"  Total files: {results['total']}")
-            print(f"  Successful: {results['success']}")
-            print(f"  Failed: {results['failed']}")
-            
-            if results['errors']:
-                print(f"\nErrors:")
-                for error in results['errors']:
-                    print(f"  {error['file']}: {error['error']}")
-            
-            if results['failed'] > 0:
-                sys.exit(1)
+            # Process with progress bar
+            if HAS_RICH and files:
+                results = {'total': 0, 'success': 0, 'failed': 0, 'errors': []}
+                
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    BarColumn(),
+                    TaskProgressColumn(),
+                    TimeElapsedColumn(),
+                    console=console
+                ) as progress:
+                    task = progress.add_task("[cyan]Formatting files...", total=len(files))
+                    
+                    for file_path in files:
+                        results['total'] += 1
+                        try:
+                            with open(file_path, "r", encoding="utf-8") as f:
+                                sql = f.read()
+                            
+                            formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
+                            
+                            if args.output:
+                                output_path = Path(args.output) / file_path.relative_to(input_path)
+                                output_path.parent.mkdir(parents=True, exist_ok=True)
+                                with open(output_path, "w", encoding="utf-8") as f:
+                                    f.write(formatted_sql)
+                            elif not args.no_in_place:
+                                with open(file_path, "w", encoding="utf-8") as f:
+                                    f.write(formatted_sql)
+                            
+                            results['success'] += 1
+                            progress.update(task, advance=1, description=f"[cyan]Formatting files...")
+                            console.print(f"  [green]✓[/green] {file_path.name}")
+                        except Exception as e:
+                            results['failed'] += 1
+                            results['errors'].append({'file': str(file_path), 'error': str(e)})
+                            progress.update(task, advance=1, description=f"[cyan]Formatting files...")
+                            console.print(f"  [red]✗[/red] {file_path.name}: {str(e)}")
+                
+                # Display results in a table
+                table = Table(title="Results", box=box.ROUNDED, border_style="cyan")
+                table.add_column("Metric", style="cyan", no_wrap=True)
+                table.add_column("Count", justify="right", style="bold")
+                
+                table.add_row("Total files", str(results['total']))
+                table.add_row("Successful", f"[green]{results['success']}[/green]")
+                table.add_row("Failed", f"[red]{results['failed']}[/red]")
+                
+                console.print()
+                console.print(table)
+                
+                if results['errors']:
+                    console.print("\n[bold red]Errors:[/bold red]")
+                    for error in results['errors']:
+                        console.print(f"  [red]✗[/red] {error['file']}: {error['error']}")
+                
+                if results['failed'] > 0:
+                    sys.exit(1)
+            else:
+                # Fallback to original implementation
+                results = format_sql_folder(
+                    folder_path=input_path,
+                    output_folder=args.output,
+                    config=config,
+                    custom_rules=plugin_rules,
+                    rule_type='tidy',
+                    pattern=args.pattern,
+                    recursive=args.recursive,
+                    in_place=not args.no_in_place
+                )
+                
+                print(f"\nResults:")
+                print(f"  Total files: {results['total']}")
+                print(f"  Successful: {results['success']}")
+                print(f"  Failed: {results['failed']}")
+                
+                if results['errors']:
+                    print(f"\nErrors:")
+                    for error in results['errors']:
+                        print(f"  {error['file']}: {error['error']}")
+                
+                if results['failed'] > 0:
+                    sys.exit(1)
         else:
             print(f"Error: Input path does not exist: {args.input}", file=sys.stderr)
             sys.exit(1)
@@ -230,13 +323,23 @@ def handle_rewrite_command(args):
         
         if input_path.is_file():
             # Single file processing
-            with open(args.input, "r", encoding="utf-8") as f:
-                sql = f.read()
-            
-            formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
-            
-            if args.tidy:
-                formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
+            if HAS_RICH:
+                with console.status(f"[cyan]Rewriting {input_path.name}...", spinner="dots"):
+                    with open(args.input, "r", encoding="utf-8") as f:
+                        sql = f.read()
+                    formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
+                    
+                    if args.tidy:
+                        formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
+                
+                console.print(f"[green]✓[/green] Rewritten {input_path.name}")
+            else:
+                with open(args.input, "r", encoding="utf-8") as f:
+                    sql = f.read()
+                formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
+                
+                if args.tidy:
+                    formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
             
             if args.output:
                 with open(args.output, "w", encoding="utf-8") as f:
@@ -249,63 +352,146 @@ def handle_rewrite_command(args):
                 
         elif input_path.is_dir():
             # Folder processing
-            print(f"Processing SQL files in: {input_path}")
-            if args.recursive:
-                print(f"  Mode: Recursive")
-            print(f"  Pattern: {args.pattern}")
-            print(f"  Dialect: {dialect}")
+            mode_text = "Rewrite + Tidy" if args.tidy else "Rewrite"
             
-            if args.tidy:
-                print("  Mode: Rewrite + Tidy")
-                results = format_sql_folder(
-                    folder_path=input_path,
-                    output_folder=args.output,
-                    config=config,
-                    custom_rules=plugin_rules,
-                    rule_type='rewrite',
-                    pattern=args.pattern,
-                    recursive=args.recursive,
-                    in_place=not args.no_in_place
-                )
+            if HAS_RICH:
+                console.print(Panel(
+                    f"[cyan]Path:[/cyan] {input_path}\n"
+                    f"[cyan]Mode:[/cyan] {mode_text} ({'Recursive' if args.recursive else 'Non-recursive'})\n"
+                    f"[cyan]Pattern:[/cyan] {args.pattern}\n"
+                    f"[cyan]Dialect:[/cyan] {dialect}",
+                    title="[bold cyan]Processing SQL Files",
+                    border_style="cyan"
+                ))
+            else:
+                print(f"Processing SQL files in: {input_path}")
+                if args.recursive:
+                    print(f"  Mode: Recursive")
+                print(f"  Pattern: {args.pattern}")
+                print(f"  Dialect: {dialect}")
+                if args.tidy:
+                    print("  Mode: Rewrite + Tidy")
+            
+            # Get list of files to process
+            if args.recursive:
+                files = list(input_path.rglob(args.pattern))
+            else:
+                files = list(input_path.glob(args.pattern))
+            
+            # Process with progress bar
+            if HAS_RICH and files:
+                results = {'total': 0, 'success': 0, 'failed': 0, 'errors': []}
                 
-                if results['success'] > 0:
-                    target_folder = Path(args.output) if args.output else input_path
-                    tidy_results = format_sql_folder(
-                        folder_path=target_folder,
-                        output_folder=None,
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    BarColumn(),
+                    TaskProgressColumn(),
+                    TimeElapsedColumn(),
+                    console=console
+                ) as progress:
+                    task = progress.add_task(f"[cyan]{mode_text}...", total=len(files))
+                    
+                    for file_path in files:
+                        results['total'] += 1
+                        try:
+                            with open(file_path, "r", encoding="utf-8") as f:
+                                sql = f.read()
+                            
+                            formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
+                            
+                            if args.tidy:
+                                formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
+                            
+                            if args.output:
+                                output_path = Path(args.output) / file_path.relative_to(input_path)
+                                output_path.parent.mkdir(parents=True, exist_ok=True)
+                                with open(output_path, "w", encoding="utf-8") as f:
+                                    f.write(formatted_sql)
+                            elif not args.no_in_place:
+                                with open(file_path, "w", encoding="utf-8") as f:
+                                    f.write(formatted_sql)
+                            
+                            results['success'] += 1
+                            progress.update(task, advance=1, description=f"[cyan]{mode_text}...")
+                            console.print(f"  [green]✓[/green] {file_path.name}")
+                        except Exception as e:
+                            results['failed'] += 1
+                            results['errors'].append({'file': str(file_path), 'error': str(e)})
+                            progress.update(task, advance=1, description=f"[cyan]{mode_text}...")
+                            console.print(f"  [red]✗[/red] {file_path.name}: {str(e)}")
+                
+                # Display results in a table
+                table = Table(title="Results", box=box.ROUNDED, border_style="cyan")
+                table.add_column("Metric", style="cyan", no_wrap=True)
+                table.add_column("Count", justify="right", style="bold")
+                
+                table.add_row("Total files", str(results['total']))
+                table.add_row("Successful", f"[green]{results['success']}[/green]")
+                table.add_row("Failed", f"[red]{results['failed']}[/red]")
+                
+                console.print()
+                console.print(table)
+                
+                if results['errors']:
+                    console.print("\n[bold red]Errors:[/bold red]")
+                    for error in results['errors']:
+                        console.print(f"  [red]✗[/red] {error['file']}: {error['error']}")
+                
+                if results['failed'] > 0:
+                    sys.exit(1)
+            else:
+                # Fallback to original implementation
+                if args.tidy:
+                    results = format_sql_folder(
+                        folder_path=input_path,
+                        output_folder=args.output,
                         config=config,
-                        custom_rules=[],
-                        rule_type='tidy',
+                        custom_rules=plugin_rules,
+                        rule_type='rewrite',
                         pattern=args.pattern,
                         recursive=args.recursive,
-                        in_place=True
+                        in_place=not args.no_in_place
                     )
-                    results['failed'] += tidy_results['failed']
-                    results['errors'].extend(tidy_results['errors'])
-            else:
-                results = format_sql_folder(
-                    folder_path=input_path,
-                    output_folder=args.output,
-                    config=config,
-                    custom_rules=plugin_rules,
-                    rule_type='rewrite',
-                    pattern=args.pattern,
-                    recursive=args.recursive,
-                    in_place=not args.no_in_place
-                )
-            
-            print(f"\nResults:")
-            print(f"  Total files: {results['total']}")
-            print(f"  Successful: {results['success']}")
-            print(f"  Failed: {results['failed']}")
-            
-            if results['errors']:
-                print(f"\nErrors:")
-                for error in results['errors']:
-                    print(f"  {error['file']}: {error['error']}")
-            
-            if results['failed'] > 0:
-                sys.exit(1)
+                    
+                    if results['success'] > 0:
+                        target_folder = Path(args.output) if args.output else input_path
+                        tidy_results = format_sql_folder(
+                            folder_path=target_folder,
+                            output_folder=None,
+                            config=config,
+                            custom_rules=[],
+                            rule_type='tidy',
+                            pattern=args.pattern,
+                            recursive=args.recursive,
+                            in_place=True
+                        )
+                        results['failed'] += tidy_results['failed']
+                        results['errors'].extend(tidy_results['errors'])
+                else:
+                    results = format_sql_folder(
+                        folder_path=input_path,
+                        output_folder=args.output,
+                        config=config,
+                        custom_rules=plugin_rules,
+                        rule_type='rewrite',
+                        pattern=args.pattern,
+                        recursive=args.recursive,
+                        in_place=not args.no_in_place
+                    )
+                
+                print(f"\nResults:")
+                print(f"  Total files: {results['total']}")
+                print(f"  Successful: {results['success']}")
+                print(f"  Failed: {results['failed']}")
+                
+                if results['errors']:
+                    print(f"\nErrors:")
+                    for error in results['errors']:
+                        print(f"  {error['file']}: {error['error']}")
+                
+                if results['failed'] > 0:
+                    sys.exit(1)
         else:
             print(f"Error: Input path does not exist: {args.input}", file=sys.stderr)
             sys.exit(1)
@@ -346,17 +532,37 @@ def handle_dialects_command(args):
                 })
             print(json.dumps(dialect_info, indent=2))
         else:
-            print(f"\n{'='*60}")
-            print(f"Available SQL Dialects")
-            print(f"{'='*60}\n")
-            
-            for dialect_name in dialects:
-                dialect = get_dialect(dialect_name)
-                print(f"  {dialect_name:<15} - {len(dialect.keywords):>3} keywords, "
-                      f"{len(dialect.data_types):>2} types, {len(dialect.functions):>2} functions")
-            
-            print(f"\n{'='*60}")
-            print(f"Total: {len(dialects)} dialects\n")
+            if HAS_RICH:
+                table = Table(title="Available SQL Dialects", box=box.ROUNDED, border_style="cyan")
+                table.add_column("Dialect", style="cyan bold", no_wrap=True)
+                table.add_column("Keywords", justify="right", style="yellow")
+                table.add_column("Data Types", justify="right", style="green")
+                table.add_column("Functions", justify="right", style="magenta")
+                
+                for dialect_name in dialects:
+                    dialect = get_dialect(dialect_name)
+                    table.add_row(
+                        dialect_name,
+                        str(len(dialect.keywords)),
+                        str(len(dialect.data_types)),
+                        str(len(dialect.functions))
+                    )
+                
+                console.print()
+                console.print(table)
+                console.print(f"\n[cyan]Total:[/cyan] {len(dialects)} dialects\n")
+            else:
+                print(f"\n{'='*60}")
+                print(f"Available SQL Dialects")
+                print(f"{'='*60}\n")
+                
+                for dialect_name in dialects:
+                    dialect = get_dialect(dialect_name)
+                    print(f"  {dialect_name:<15} - {len(dialect.keywords):>3} keywords, "
+                          f"{len(dialect.data_types):>2} types, {len(dialect.functions):>2} functions")
+                
+                print(f"\n{'='*60}")
+                print(f"Total: {len(dialects)} dialects\n")
     
     # Keywords subcommand
     elif args.dialects_command == "keywords":
@@ -368,18 +574,29 @@ def handle_dialects_command(args):
                 import json
                 print(json.dumps(keywords, indent=2))
             else:
-                print(f"\n{'='*60}")
-                print(f"Keywords for {dialect.name.upper()} ({len(keywords)} total)")
-                print(f"{'='*60}\n")
-                
-                # Display keywords in columns
-                cols = 5
-                max_len = max(len(k) for k in keywords) + 2 if keywords else 10
-                for i in range(0, len(keywords), cols):
-                    row = keywords[i:i+cols]
-                    print("  " + "".join(f"{k:<{max_len}}" for k in row))
-                
-                print(f"\n{'='*60}\n")
+                if HAS_RICH:
+                    panel = Panel(
+                        "\n".join([f"  {k}" for k in keywords]),
+                        title=f"[bold cyan]Keywords for {dialect.name.upper()} ({len(keywords)} total)",
+                        border_style="cyan",
+                        box=box.ROUNDED
+                    )
+                    console.print()
+                    console.print(panel)
+                    console.print()
+                else:
+                    print(f"\n{'='*60}")
+                    print(f"Keywords for {dialect.name.upper()} ({len(keywords)} total)")
+                    print(f"{'='*60}\n")
+                    
+                    # Display keywords in columns
+                    cols = 5
+                    max_len = max(len(k) for k in keywords) + 2 if keywords else 10
+                    for i in range(0, len(keywords), cols):
+                        row = keywords[i:i+cols]
+                        print("  " + "".join(f"{k:<{max_len}}" for k in row))
+                    
+                    print(f"\n{'='*60}\n")
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)
@@ -394,22 +611,42 @@ def handle_dialects_command(args):
                 import json
                 print(json.dumps(types, indent=2))
             else:
-                print(f"\n{'='*60}")
-                print(f"Data Types for {dialect.name.upper()} ({len(types)} total)")
-                print(f"{'='*60}\n")
-                
-                if types:
-                    # Display types in columns
-                    cols = 5
-                    max_len = max(len(t) for t in types) + 2
-                    for i in range(0, len(types), cols):
-                        row = types[i:i+cols]
-                        print("  " + "".join(f"{t:<{max_len}}" for t in row))
+                if HAS_RICH:
+                    if types:
+                        panel = Panel(
+                            "\n".join([f"  {t}" for t in types]),
+                            title=f"[bold cyan]Data Types for {dialect.name.upper()} ({len(types)} total)",
+                            border_style="cyan",
+                            box=box.ROUNDED
+                        )
+                    else:
+                        panel = Panel(
+                            "No data types categorized separately for this dialect.\n"
+                            "Data types may be included in the general keywords list.",
+                            title=f"[bold cyan]Data Types for {dialect.name.upper()}",
+                            border_style="yellow",
+                            box=box.ROUNDED
+                        )
+                    console.print()
+                    console.print(panel)
+                    console.print()
                 else:
-                    print("  No data types categorized separately for this dialect.")
-                    print("  Data types may be included in the general keywords list.")
-                
-                print(f"\n{'='*60}\n")
+                    print(f"\n{'='*60}")
+                    print(f"Data Types for {dialect.name.upper()} ({len(types)} total)")
+                    print(f"{'='*60}\n")
+                    
+                    if types:
+                        # Display types in columns
+                        cols = 5
+                        max_len = max(len(t) for t in types) + 2
+                        for i in range(0, len(types), cols):
+                            row = types[i:i+cols]
+                            print("  " + "".join(f"{t:<{max_len}}" for t in row))
+                    else:
+                        print("  No data types categorized separately for this dialect.")
+                        print("  Data types may be included in the general keywords list.")
+                    
+                    print(f"\n{'='*60}\n")
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)
@@ -424,22 +661,42 @@ def handle_dialects_command(args):
                 import json
                 print(json.dumps(functions, indent=2))
             else:
-                print(f"\n{'='*60}")
-                print(f"Built-in Functions for {dialect.name.upper()} ({len(functions)} total)")
-                print(f"{'='*60}\n")
-                
-                if functions:
-                    # Display functions in columns
-                    cols = 5
-                    max_len = max(len(f) for f in functions) + 2
-                    for i in range(0, len(functions), cols):
-                        row = functions[i:i+cols]
-                        print("  " + "".join(f"{f:<{max_len}}" for f in row))
+                if HAS_RICH:
+                    if functions:
+                        panel = Panel(
+                            "\n".join([f"  {f}" for f in functions]),
+                            title=f"[bold cyan]Built-in Functions for {dialect.name.upper()} ({len(functions)} total)",
+                            border_style="cyan",
+                            box=box.ROUNDED
+                        )
+                    else:
+                        panel = Panel(
+                            "No functions categorized separately for this dialect.\n"
+                            "Functions may be included in the general keywords list.",
+                            title=f"[bold cyan]Built-in Functions for {dialect.name.upper()}",
+                            border_style="yellow",
+                            box=box.ROUNDED
+                        )
+                    console.print()
+                    console.print(panel)
+                    console.print()
                 else:
-                    print("  No functions categorized separately for this dialect.")
-                    print("  Functions may be included in the general keywords list.")
-                
-                print(f"\n{'='*60}\n")
+                    print(f"\n{'='*60}")
+                    print(f"Built-in Functions for {dialect.name.upper()} ({len(functions)} total)")
+                    print(f"{'='*60}\n")
+                    
+                    if functions:
+                        # Display functions in columns
+                        cols = 5
+                        max_len = max(len(f) for f in functions) + 2
+                        for i in range(0, len(functions), cols):
+                            row = functions[i:i+cols]
+                            print("  " + "".join(f"{f:<{max_len}}" for f in row))
+                    else:
+                        print("  No functions categorized separately for this dialect.")
+                        print("  Functions may be included in the general keywords list.")
+                    
+                    print(f"\n{'='*60}\n")
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)
@@ -799,7 +1056,11 @@ def main():
             sql = sys.stdin.read()
 
         # Tokenize the SQL
-        tokens = tokenize_with_types(sql)
+        if HAS_RICH:
+            with console.status("[cyan]Tokenizing SQL...", spinner="dots"):
+                tokens = tokenize_with_types(sql)
+        else:
+            tokens = tokenize_with_types(sql)
         
         # Filter tokens based on options
         display_tokens = tokens
@@ -823,69 +1084,127 @@ def main():
                 output_lines.append(f"{token.type.value}: {repr(token.value)}")
         
         else:  # table format
-            # Calculate column widths
-            max_type_len = max(len(t.type.value) for t in display_tokens) if display_tokens else 10
-            max_value_len = max(len(repr(t.value)) for t in display_tokens) if display_tokens else 10
-            max_type_len = max(max_type_len, 10)
-            max_value_len = min(max_value_len, 60)  # Cap at 60 chars
-            
-            # Header
-            output_lines.append("=" * (max_type_len + max_value_len + 10))
-            output_lines.append(f"{'Type':<{max_type_len}} | {'Value':<{max_value_len}} | Keyword")
-            output_lines.append("-" * (max_type_len + max_value_len + 10))
-            
-            # Tokens
-            for token in display_tokens:
-                value_str = repr(token.value)
-                if len(value_str) > max_value_len:
-                    value_str = value_str[:max_value_len-3] + "..."
+            if HAS_RICH:
+                # Use rich table
+                table = Table(title="SQL Tokens", box=box.ROUNDED, border_style="cyan")
+                table.add_column("Type", style="yellow", no_wrap=True)
+                table.add_column("Value", style="white")
+                table.add_column("Keyword", justify="center", style="green")
                 
-                is_kw = "✓" if is_keyword(token.value) else ""
-                output_lines.append(f"{token.type.value:<{max_type_len}} | {value_str:<{max_value_len}} | {is_kw}")
-            
-            output_lines.append("=" * (max_type_len + max_value_len + 10))
+                for token in display_tokens:
+                    value_str = repr(token.value)
+                    if len(value_str) > 60:
+                        value_str = value_str[:57] + "..."
+                    
+                    is_kw = "✓" if is_keyword(token.value) else ""
+                    table.add_row(token.type.value, value_str, is_kw)
+                
+                console.print()
+                console.print(table)
+            else:
+                # Calculate column widths
+                max_type_len = max(len(t.type.value) for t in display_tokens) if display_tokens else 10
+                max_value_len = max(len(repr(t.value)) for t in display_tokens) if display_tokens else 10
+                max_type_len = max(max_type_len, 10)
+                max_value_len = min(max_value_len, 60)  # Cap at 60 chars
+                
+                # Header
+                output_lines.append("=" * (max_type_len + max_value_len + 10))
+                output_lines.append(f"{'Type':<{max_type_len}} | {'Value':<{max_value_len}} | Keyword")
+                output_lines.append("-" * (max_type_len + max_value_len + 10))
+                
+                # Tokens
+                for token in display_tokens:
+                    value_str = repr(token.value)
+                    if len(value_str) > max_value_len:
+                        value_str = value_str[:max_value_len-3] + "..."
+                    
+                    is_kw = "✓" if is_keyword(token.value) else ""
+                    output_lines.append(f"{token.type.value:<{max_type_len}} | {value_str:<{max_value_len}} | {is_kw}")
+                
+                output_lines.append("=" * (max_type_len + max_value_len + 10))
         
         # Add statistics if requested
         if args.stats:
-            output_lines.append("\nToken Statistics:")
-            output_lines.append("-" * 40)
-            
             # Count by type
             type_counts = {}
             for token in tokens:
                 type_counts[token.type] = type_counts.get(token.type, 0) + 1
             
-            output_lines.append(f"Total tokens: {len(tokens)}")
-            output_lines.append("\nToken distribution:")
-            for token_type in sorted(type_counts.keys(), key=lambda t: type_counts[t], reverse=True):
-                count = type_counts[token_type]
-                pct = count / len(tokens) * 100
-                output_lines.append(f"  {token_type.value:12s}: {count:4d} ({pct:5.1f}%)")
-            
-            # Keyword statistics
-            keywords = sorted(set(t.value.upper() for t in tokens if t.type == TokenType.KEYWORD))
-            if keywords:
-                output_lines.append(f"\nUnique keywords ({len(keywords)}):")
-                output_lines.append(f"  {', '.join(keywords)}")
-            
-            # Identifier statistics
-            identifiers = sorted(set(t.value for t in tokens if t.type == TokenType.IDENTIFIER))
-            if identifiers:
-                output_lines.append(f"\nUnique identifiers ({len(identifiers)}):")
-                # Show first 20
-                if len(identifiers) <= 20:
-                    output_lines.append(f"  {', '.join(identifiers)}")
-                else:
-                    output_lines.append(f"  {', '.join(identifiers[:20])}")
-                    output_lines.append(f"  ... and {len(identifiers) - 20} more")
+            if HAS_RICH:
+                # Display stats in a rich panel
+                stats_table = Table(box=box.SIMPLE, show_header=True, border_style="cyan")
+                stats_table.add_column("Token Type", style="cyan")
+                stats_table.add_column("Count", justify="right", style="yellow")
+                stats_table.add_column("Percentage", justify="right", style="green")
+                
+                for token_type in sorted(type_counts.keys(), key=lambda t: type_counts[t], reverse=True):
+                    count = type_counts[token_type]
+                    pct = count / len(tokens) * 100
+                    stats_table.add_row(token_type.value, str(count), f"{pct:.1f}%")
+                
+                console.print()
+                console.print(Panel(stats_table, title=f"[bold cyan]Token Statistics (Total: {len(tokens)})", border_style="cyan"))
+                
+                # Keyword statistics
+                keywords = sorted(set(t.value.upper() for t in tokens if t.type == TokenType.KEYWORD))
+                if keywords:
+                    console.print(Panel(
+                        ", ".join(keywords),
+                        title=f"[bold cyan]Unique Keywords ({len(keywords)})",
+                        border_style="cyan"
+                    ))
+                
+                # Identifier statistics
+                identifiers = sorted(set(t.value for t in tokens if t.type == TokenType.IDENTIFIER))
+                if identifiers:
+                    if len(identifiers) <= 20:
+                        id_text = ", ".join(identifiers)
+                    else:
+                        id_text = ", ".join(identifiers[:20]) + f"\n... and {len(identifiers) - 20} more"
+                    
+                    console.print(Panel(
+                        id_text,
+                        title=f"[bold cyan]Unique Identifiers ({len(identifiers)})",
+                        border_style="cyan"
+                    ))
+            else:
+                output_lines.append("\nToken Statistics:")
+                output_lines.append("-" * 40)
+                
+                output_lines.append(f"Total tokens: {len(tokens)}")
+                output_lines.append("\nToken distribution:")
+                for token_type in sorted(type_counts.keys(), key=lambda t: type_counts[t], reverse=True):
+                    count = type_counts[token_type]
+                    pct = count / len(tokens) * 100
+                    output_lines.append(f"  {token_type.value:12s}: {count:4d} ({pct:5.1f}%)")
+                
+                # Keyword statistics
+                keywords = sorted(set(t.value.upper() for t in tokens if t.type == TokenType.KEYWORD))
+                if keywords:
+                    output_lines.append(f"\nUnique keywords ({len(keywords)}):")
+                    output_lines.append(f"  {', '.join(keywords)}")
+                
+                # Identifier statistics
+                identifiers = sorted(set(t.value for t in tokens if t.type == TokenType.IDENTIFIER))
+                if identifiers:
+                    output_lines.append(f"\nUnique identifiers ({len(identifiers)}):")
+                    # Show first 20
+                    if len(identifiers) <= 20:
+                        output_lines.append(f"  {', '.join(identifiers)}")
+                    else:
+                        output_lines.append(f"  {', '.join(identifiers[:20])}")
+                        output_lines.append(f"  ... and {len(identifiers) - 20} more")
         
         # Write output
-        result = "\n".join(output_lines)
-        if args.output:
-            with open(args.output, "w", encoding="utf-8") as f:
-                f.write(result)
-        else:
-            print(result)
+        if not HAS_RICH or args.output or args.format != "table":
+            result = "\n".join(output_lines)
+            if args.output:
+                with open(args.output, "w", encoding="utf-8") as f:
+                    f.write(result)
+            else:
+                if output_lines:
+                    print(result)
         
         return
 
