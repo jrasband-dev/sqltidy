@@ -1,5 +1,5 @@
 import re
-from ..base import BaseRule
+from ..base import BaseRule, ConfigField
 
 
 def _next_t_numeric(n: int) -> str:
@@ -9,6 +9,15 @@ def _next_t_numeric(n: int) -> str:
 class AliasStyleTNumericRule(BaseRule):
     rule_type = "rewrite"
     order = 9
+    
+    config_fields = {
+        "enable_alias_style_t_numeric": ConfigField(
+            name="enable_alias_style_t_numeric",
+            default=False,
+            description="Convert table aliases to numeric style (T1, T2, T3, ...)?",
+            field_type=bool
+        )
+    }
     
     def _extract_cte_scopes(self, sql):
         """Extract CTE scopes and main query, return list of (scope_sql, start_pos, end_pos)."""

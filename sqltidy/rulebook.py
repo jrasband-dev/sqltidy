@@ -52,8 +52,16 @@ class SQLTidyConfig:
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'SQLTidyConfig':
-        """Create config from dictionary."""
-        return cls(**data)
+        """
+        Create config from dictionary.
+        
+        Supports both static configs and dynamically generated configs from rules.
+        Ignores extra fields that aren't in the dataclass definition.
+        """
+        # Filter to only include fields that exist in the dataclass
+        valid_fields = {f.name for f in cls.__dataclass_fields__.values()}
+        filtered_data = {k: v for k, v in data.items() if k in valid_fields}
+        return cls(**filtered_data)
     
     @classmethod
     def from_file(cls, filepath: str) -> 'SQLTidyConfig':

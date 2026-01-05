@@ -5,7 +5,7 @@ This rule demonstrates dialect-specific behavior where different databases
 use different quoting characters for identifiers.
 """
 
-from ..base import BaseRule
+from ..base import BaseRule, ConfigField
 from sqltidy.tokenizer import is_keyword
 
 
@@ -24,6 +24,15 @@ class QuoteIdentifiersRule(BaseRule):
     """
     rule_type = "tidy"
     order = 11
+    
+    config_fields = {
+        "quote_identifiers": ConfigField(
+            name="quote_identifiers",
+            default=False,
+            description="Add quotes around identifiers (table/column names)?",
+            field_type=bool
+        )
+    }
     
     # Dialect-specific quote characters
     QUOTE_CHARS = {

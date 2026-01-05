@@ -1,4 +1,4 @@
-from ..base import BaseRule
+from ..base import BaseRule, ConfigField
 
 
 class IndentSelectColumnsRule(BaseRule):
@@ -8,6 +8,15 @@ class IndentSelectColumnsRule(BaseRule):
     """
     rule_type = "tidy"
     order = 50
+    
+    config_fields = {
+        "indent_select_columns": ConfigField(
+            name="indent_select_columns",
+            default=True,
+            description="Add 4-space indentation to SELECT column lists?",
+            field_type=bool
+        )
+    }
 
     def apply(self, tokens, ctx):
         if not getattr(ctx.config, "indent_select_columns", False):

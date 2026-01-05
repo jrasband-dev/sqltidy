@@ -1,4 +1,4 @@
-from ..base import BaseRule
+from ..base import BaseRule, ConfigField
 
 
 class LeadingCommasRule(BaseRule):
@@ -16,6 +16,15 @@ class LeadingCommasRule(BaseRule):
     """
     rule_type = "tidy"
     order = 45
+    
+    config_fields = {
+        "leading_commas": ConfigField(
+            name="leading_commas",
+            default=True,
+            description="Use leading commas in column lists (e.g., col1\\n  , col2\\n  , col3)?",
+            field_type=bool
+        )
+    }
 
     def apply(self, tokens, ctx):
         leading = getattr(ctx.config, "leading_commas", False)

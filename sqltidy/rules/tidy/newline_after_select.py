@@ -1,10 +1,19 @@
 import re
-from ..base import BaseRule
+from ..base import BaseRule, ConfigField
 
 
 class NewlineAfterSelectRule(BaseRule):
     rule_type = "tidy"
     order = 15
+    
+    config_fields = {
+        "newline_after_select": ConfigField(
+            name="newline_after_select",
+            default=True,
+            description="Add newlines after SELECT and format column list?",
+            field_type=bool
+        )
+    }
     
     def apply(self, tokens, ctx):
         if not getattr(ctx.config, "newline_after_select", False):

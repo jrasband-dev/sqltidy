@@ -1,10 +1,19 @@
 import re
-from ..base import BaseRule
+from ..base import BaseRule, ConfigField
 
 
 class SubqueryToCTERule(BaseRule):
     rule_type = "rewrite"
     order = 5
+    
+    config_fields = {
+        "enable_subquery_to_cte": ConfigField(
+            name="enable_subquery_to_cte",
+            default=False,
+            description="Convert subqueries to Common Table Expressions (CTEs)?",
+            field_type=bool
+        )
+    }
     
     def _find_cte_end(self, sql):
         """Find the end of the CTE block by matching parentheses."""

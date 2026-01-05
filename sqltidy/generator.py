@@ -36,8 +36,10 @@ def get_bundled_rulebooks_dir() -> Path:
 
 def initialize_user_rulebooks() -> None:
     """
-    Initialize user rulebook directory with all bundled rulebooks if not already present.
-    Copies all bundled rulebooks to user directory.
+    Initialize user rulebook directory.
+    
+    If bundled rulebooks exist, copies them to user directory.
+    If no bundled rulebooks exist, generates them from rule metadata.
     """
     user_dir = get_user_rulebooks_dir()
     bundled_dir = get_bundled_rulebooks_dir()
@@ -45,13 +47,23 @@ def initialize_user_rulebooks() -> None:
     # Create user rulebook directory if it doesn't exist
     user_dir.mkdir(parents=True, exist_ok=True)
     
-    # Copy all bundled rulebooks if they don't exist in user directory
+    # Try to copy bundled rulebooks if they exist
     if bundled_dir.exists():
         bundled_rulebooks = list(bundled_dir.glob("sqltidy_*.json"))
-        for bundled_rulebook in bundled_rulebooks:
-            user_rulebook = user_dir / bundled_rulebook.name
-            if not user_rulebook.exists():
-                shutil.copy2(bundled_rulebook, user_rulebook)
+        if bundled_rulebooks:
+            # Bundled files exist - copy them
+            for bundled_rulebook in bundled_rulebooks:
+                user_rulebook = user_dir / bundled_rulebook.name
+                if not user_rulebook.exists():
+                    shutil.copy2(bundled_rulebook, user_rulebook)
+            return
+    
+    # No bundled files - generate from rules
+    from .config_schema import save_dialect_config_to_json
+    for dialect in SUPPORTED_DIALECTS:
+        user_rulebook = user_dir / f"sqltidy_{dialect}.json"
+        if not user_rulebook.exists():
+            save_dialect_config_to_json(dialect, str(user_rulebook), include_plugins=False)
 
 
 def get_rulebook_path(dialect: str) -> Path:
@@ -63,6 +75,8 @@ def get_rulebook_path(dialect: str) -> Path:
         
     Returns:
         Path to the rulebook file (user rulebook if exists, otherwise bundled)
+        Note: May return a path that doesn't exist if bundled files are not present.
+              Callers should check existence or use _load_config_for_dialect() instead.
     """
     user_path = get_user_rulebooks_dir() / f"sqltidy_{dialect}.json"
     if user_path.exists():
@@ -226,13 +240,19 @@ def get_default_filename(dialect: str) -> str:
     return f"sqltidy_{dialect}.json"
 
 
-def create_rulebook(dialect: Optional[str] = None, template_file: Optional[str] = None) -> None:
+def create_rulebook(dialect: Optional[str] = None, template_file: Optional[str] = None, include_plugins: bool = False) -> None:
     """
-    Create a new rulebook file.
+    Create a new rulebook file in the user's rulebook directory.
+    
+    With Option 2, this function now:
+    1. Generates config from rule metadata (includes all registered rules)
+    2. Saves to ~/.sqltidy/rulebooks/ by default
+    3. Optionally includes plugin rules if --include-plugins flag is used
     
     Args:
         dialect: SQL dialect (if None, will prompt)
         template_file: Optional template rulebook file to copy from
+        include_plugins: If True, include loaded plugin rules in the config
     """
     try:
         # Select dialect if not provided
@@ -251,27 +271,48 @@ def create_rulebook(dialect: Optional[str] = None, template_file: Optional[str] 
                 base_config.dialect = dialect  # Override dialect
             except Exception as e:
                 print(f"Warning: Could not load template file: {e}")
-                print("Proceeding with dialect defaults...\n")
+                print("Proceeding with auto-generation from rules...\n")
         
-        # Generate rulebook interactively
+        # If no template, generate from rules (Option 2!)
+        if base_config is None:
+            from .config_schema import generate_dialect_config
+            print(f"\nAuto-generating config from rule metadata...")
+            if include_plugins:
+                print("Including plugin rules in configuration...")
+            config_dict = generate_dialect_config(dialect, include_plugins=include_plugins)
+            base_config = SQLTidyConfig.from_dict(config_dict)
+            print("✓ Config generated from rules")
+        
+        # Generate rulebook interactively (allows user to customize)
         config = generate_rulebook_interactive(dialect, base_config)
         
-        # Get output filename
-        default_filename = get_default_filename(dialect)
-        filename = input(f"\nOutput filename [{default_filename}]: ").strip()
+        # Get output location - default to user's rulebook directory
+        user_dir = get_user_rulebooks_dir()
+        user_dir.mkdir(parents=True, exist_ok=True)
+        
+        default_path = user_dir / f"sqltidy_{dialect}.json"
+        print(f"\nDefault location: {default_path}")
+        
+        filename = input(f"Output filename (or path) [{default_path}]: ").strip()
         if not filename:
-            filename = default_filename
+            filename = str(default_path)
+        
+        # Expand to absolute path
+        output_path = Path(filename).expanduser().absolute()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         
         # Save rulebook
-        config.save(filename)
+        config.save(str(output_path))
         
         print("\n" + "=" * 70)
         print("✓ Rulebook saved successfully!")
-        print(f"File: {Path(filename).absolute()}")
+        print(f"File: {output_path}")
+        if include_plugins:
+            print("Note: Plugin rules included in configuration")
         print("=" * 70)
         print("\nUsage:")
-        print(f"  sqltidy tidy -cfg {filename} <input_file>")
-        print(f"  sqltidy rewrite -cfg {filename} <input_file>")
+        print(f"  sqltidy tidy <input_file> -d {dialect}")
+        print(f"  sqltidy tidy <input_file> -cfg {output_path}")
         print()
         
     except KeyboardInterrupt:
@@ -321,18 +362,22 @@ def list_rulebooks(directory: str = ".") -> None:
     Args:
         directory: Directory to search (default: current directory)
     """
-    # Initialize user rulebooks with bundled defaults
-    initialize_user_rulebooks()
-    
     user_dir = get_user_rulebooks_dir()
     
     print(f"\nUser rulebook directory: {user_dir}\n")
+    
+    # Check if directory exists
+    if not user_dir.exists():
+        print("Directory does not exist yet.")
+        print(f"\nTip: Create a rulebook with 'sqltidy rulebooks create -d <dialect>'")
+        return
     
     # List all files in the user rulebook directory
     all_files = list(user_dir.glob("*"))
     
     if not all_files:
         print("Directory is empty.")
+        print(f"\nTip: Create a rulebook with 'sqltidy rulebooks create -d <dialect>'")
         return
     
     # Separate rulebook files from other files
@@ -357,89 +402,100 @@ def list_rulebooks(directory: str = ".") -> None:
 
 def edit_rulebook(rulebook_name: Optional[str] = None) -> None:
     """
-    Edit a rulebook file in the user's rulebook directory.
-    Copies from bundled rulebook if user rulebook doesn't exist yet.
+    Edit an existing rulebook file in the user's rulebook directory.
     Opens the file in the system's default editor.
+    
+    Note: This only edits existing files. Use 'sqltidy rulebooks create' to create new rulebooks.
     
     Args:
         rulebook_name: Name of the rulebook file or dialect (e.g., 'postgresql' or 'sqltidy_postgresql.json')
     """
-    bundled_dir = get_bundled_rulebooks_dir()
     user_dir = get_user_rulebooks_dir()
     
-    if not bundled_dir.exists():
-        print("Error: No bundled rulebooks found.")
+    # Check if user directory exists
+    if not user_dir.exists():
+        print("\nNo user rulebooks found.")
+        print(f"\nTip: Create a rulebook with 'sqltidy rulebooks create -d <dialect>'")
         return
     
-    bundled_rulebooks = list(bundled_dir.glob("sqltidy_*.json"))
+    # Get all existing user rulebooks
+    existing_user_rulebooks = list(user_dir.glob("sqltidy_*.json"))
     
-    if not bundled_rulebooks:
-        print("Error: No bundled rulebooks found.")
+    if not existing_user_rulebooks:
+        print("\nNo user rulebooks found.")
+        print(f"\nUser rulebook directory: {user_dir}")
+        print(f"\nTip: Create a rulebook with 'sqltidy rulebooks create -d <dialect>'")
         return
+    
+    # Build list of existing rulebooks
+    available_options = {}
+    
+    for rulebook_file in existing_user_rulebooks:
+        try:
+            cfg = SQLTidyConfig.from_file(str(rulebook_file))
+            dialect = cfg.dialect
+            available_options[dialect] = rulebook_file
+        except Exception:
+            # Use filename as fallback
+            name = rulebook_file.stem.replace('sqltidy_', '')
+            available_options[name] = rulebook_file
     
     # If no rulebook specified, let user choose
     if rulebook_name is None:
-        print("\nAvailable rulebooks to edit:\n")
-        for i, rulebook_file in enumerate(sorted(bundled_rulebooks), 1):
-            try:
-                cfg = SQLTidyConfig.from_file(str(rulebook_file))
-                dialect = cfg.dialect
-                # Check if user has customized this rulebook
-                user_rulebook = user_dir / rulebook_file.name
-                status = " (customized)" if user_rulebook.exists() else ""
-                print(f"{i}. {dialect}{status}")
-            except Exception:
-                print(f"{i}. {rulebook_file.name}")
+        print("\nExisting user rulebooks:\n")
+        sorted_options = sorted(available_options.items())
+        for i, (name, filepath) in enumerate(sorted_options, 1):
+            print(f"{i}. {name}")
         
         while True:
-            choice = input(f"\nSelect rulebook to edit (1-{len(bundled_rulebooks)}): ").strip()
+            choice = input(f"\nSelect rulebook to edit (1-{len(sorted_options)}): ").strip()
             try:
                 idx = int(choice) - 1
-                if 0 <= idx < len(bundled_rulebooks):
-                    source_file = sorted(bundled_rulebooks)[idx]
+                if 0 <= idx < len(sorted_options):
+                    selected_name, selected_file = sorted_options[idx]
                     break
             except ValueError:
                 pass
-            print(f"Please enter a number between 1 and {len(bundled_rulebooks)}")
+            print(f"Please enter a number between 1 and {len(sorted_options)}")
     else:
         # Try to find the rulebook by name or dialect
-        # First try as dialect name
-        if rulebook_name in SUPPORTED_DIALECTS:
-            source_file = bundled_dir / f"sqltidy_{rulebook_name}.json"
-        # Then try as filename
-        elif rulebook_name.startswith("sqltidy_") and rulebook_name.endswith(".json"):
-            source_file = bundled_dir / rulebook_name
-        # Then try adding the prefix/suffix
-        else:
-            source_file = bundled_dir / f"sqltidy_{rulebook_name}.json"
+        selected_file = None
         
-        if not source_file.exists():
-            print(f"Error: Rulebook '{rulebook_name}' not found in bundled rulebooks.")
-            print(f"\nAvailable rulebooks: {', '.join([d for d in SUPPORTED_DIALECTS])}")
+        # Try as dialect name
+        if rulebook_name in available_options:
+            selected_file = available_options[rulebook_name]
+        # Try as filename
+        elif rulebook_name.startswith("sqltidy_") and rulebook_name.endswith(".json"):
+            potential_file = user_dir / rulebook_name
+            if potential_file.exists():
+                selected_file = potential_file
+        # Try adding prefix/suffix
+        else:
+            potential_file = user_dir / f"sqltidy_{rulebook_name}.json"
+            if potential_file.exists():
+                selected_file = potential_file
+        
+        if selected_file is None:
+            print(f"\nRulebook '{rulebook_name}' not found in user directory.")
+            print(f"\nExisting rulebooks: {', '.join(sorted(available_options.keys()))}")
+            print(f"\nTip: Create with 'sqltidy rulebooks create -d {rulebook_name}'")
             return
     
-    # Ensure user rulebook directory exists and is initialized with defaults
-    initialize_user_rulebooks()
-    
-    # Path to user's rulebook file
-    user_rulebook_file = user_dir / source_file.name
-    
-    # The file should already exist from initialization, just inform the user
-    print(f"\n✓ Opening user rulebook: {user_rulebook_file}")
+    print(f"\n✓ Opening user rulebook: {selected_file}")
     
     # Open in default editor
     try:
         if os.name == 'nt':  # Windows
-            os.startfile(user_rulebook_file)
+            os.startfile(selected_file)
         elif os.name == 'posix':  # macOS and Linux
             opener = "open" if os.uname().sysname == "Darwin" else "xdg-open"
-            subprocess.run([opener, str(user_rulebook_file)])
+            subprocess.run([opener, str(selected_file)])
         
-        print(f"\nThis rulebook will be used instead of the bundled default.")
-        print(f"To reset to default, delete: {user_rulebook_file}")
+        print(f"\nTip: This file overrides auto-generated defaults.")
+        print(f"To revert to auto-generated config, delete: {selected_file}")
     except Exception as e:
         print(f"\nCouldn't open editor automatically: {e}")
-        print(f"Please manually edit: {user_rulebook_file}")
+        print(f"Please manually edit: {selected_file}")
 
 
 def reset_rulebook(rulebook_name: Optional[str] = None) -> None:
@@ -522,6 +578,157 @@ def reset_rulebook(rulebook_name: Optional[str] = None) -> None:
         print(f"\n✓ Reset {rulebook_file.name} to bundled default.")
     else:
         print("\nReset cancelled.")
+
+
+def update_rulebook(rulebook_name: Optional[str] = None, include_plugins: bool = False) -> None:
+    """
+    Update an existing rulebook file with new rules that have been added since creation.
+    Preserves user's existing settings and only adds new fields from newly registered rules.
+    
+    Args:
+        rulebook_name: Name of the rulebook file or dialect to update, or 'all' to update all
+        include_plugins: Whether to include plugin rules in the update
+    """
+    from .config_schema import generate_dialect_config
+    
+    user_dir = get_user_rulebooks_dir()
+    
+    if not user_dir.exists():
+        print("\nNo user rulebooks to update.")
+        print("Tip: Use 'sqltidy rulebooks create' to create a new rulebook.")
+        return
+    
+    user_rulebooks = list(user_dir.glob("sqltidy_*.json"))
+    
+    if not user_rulebooks:
+        print("\nNo user rulebooks to update.")
+        print("Tip: Use 'sqltidy rulebooks create' to create a new rulebook.")
+        return
+    
+    # Handle 'all' option to update all rulebooks
+    if rulebook_name == 'all':
+        print(f"\nFound {len(user_rulebooks)} user rulebook(s) to update:\n")
+        for rulebook_file in sorted(user_rulebooks):
+            try:
+                cfg = SQLTidyConfig.from_file(str(rulebook_file))
+                print(f"  • {cfg.dialect}")
+            except Exception:
+                print(f"  • {rulebook_file.name}")
+        
+        confirm = input(f"\nUpdate all {len(user_rulebooks)} rulebook(s) with new rules? [y/N]: ").strip().lower()
+        if confirm not in ('y', 'yes'):
+            print("\nUpdate cancelled.")
+            return
+        
+        updated_count = 0
+        for rulebook_file in sorted(user_rulebooks):
+            try:
+                # Load existing config
+                existing_config = load_rulebook_file(str(rulebook_file))
+                dialect = existing_config.get('dialect', 'postgresql')
+                
+                # Generate fresh config from current rules
+                fresh_config = generate_dialect_config(dialect, include_plugins=include_plugins)
+                
+                # Merge: keep existing values, add new fields
+                merged_config = fresh_config.copy()
+                merged_config.update(existing_config)
+                
+                # Check if any new fields were added
+                new_fields = set(fresh_config.keys()) - set(existing_config.keys())
+                
+                if new_fields:
+                    # Save updated config
+                    with open(rulebook_file, 'w', encoding='utf-8') as f:
+                        json.dump(merged_config, f, indent=2)
+                    print(f"  ✓ Updated {dialect}: Added {len(new_fields)} new field(s)")
+                    for field in sorted(new_fields):
+                        print(f"    + {field}")
+                    updated_count += 1
+                else:
+                    print(f"  • {dialect}: Already up-to-date")
+            except Exception as e:
+                print(f"  ✗ Error updating {rulebook_file.name}: {e}")
+        
+        if updated_count > 0:
+            print(f"\n✓ Updated {updated_count} rulebook(s).")
+        else:
+            print(f"\nAll rulebooks are already up-to-date!")
+        return
+    
+    # Handle single rulebook update
+    if rulebook_name is None:
+        print("\nAvailable rulebooks to update:\n")
+        for i, rulebook_file in enumerate(sorted(user_rulebooks), 1):
+            try:
+                cfg = SQLTidyConfig.from_file(str(rulebook_file))
+                print(f"{i}. {cfg.dialect}")
+            except Exception:
+                print(f"{i}. {rulebook_file.name}")
+        
+        while True:
+            choice = input(f"\nSelect rulebook to update (1-{len(user_rulebooks)}): ").strip()
+            try:
+                idx = int(choice) - 1
+                if 0 <= idx < len(user_rulebooks):
+                    rulebook_file = sorted(user_rulebooks)[idx]
+                    break
+            except ValueError:
+                pass
+            print(f"Please enter a number between 1 and {len(user_rulebooks)}")
+    else:
+        # Try to find the rulebook by name or dialect
+        if rulebook_name in SUPPORTED_DIALECTS:
+            rulebook_file = user_dir / f"sqltidy_{rulebook_name}.json"
+        elif rulebook_name.startswith("sqltidy_") and rulebook_name.endswith(".json"):
+            rulebook_file = user_dir / rulebook_name
+        else:
+            rulebook_file = user_dir / f"sqltidy_{rulebook_name}.json"
+        
+        if not rulebook_file.exists():
+            print(f"\nNo user customization found for '{rulebook_name}'.")
+            print(f"Tip: Use 'sqltidy rulebooks create -d {rulebook_name}' to create one.")
+            return
+    
+    # Load existing config
+    try:
+        existing_config = load_rulebook_file(str(rulebook_file))
+        dialect = existing_config.get('dialect', 'postgresql')
+    except Exception as e:
+        print(f"\nError loading {rulebook_file.name}: {e}")
+        return
+    
+    # Generate fresh config from current rules
+    try:
+        fresh_config = generate_dialect_config(dialect, include_plugins=include_plugins)
+    except Exception as e:
+        print(f"\nError generating config for {dialect}: {e}")
+        return
+    
+    # Merge: keep existing values, add new fields
+    merged_config = fresh_config.copy()
+    merged_config.update(existing_config)
+    
+    # Check if any new fields were added
+    new_fields = set(fresh_config.keys()) - set(existing_config.keys())
+    
+    if not new_fields:
+        print(f"\n✓ {dialect} rulebook is already up-to-date!")
+        return
+    
+    print(f"\nFound {len(new_fields)} new field(s) to add to {dialect} rulebook:")
+    for field in sorted(new_fields):
+        default_value = fresh_config[field]
+        print(f"  + {field} = {default_value}")
+    
+    confirm = input(f"\nUpdate {rulebook_file.name} with new fields? [Y/n]: ").strip().lower()
+    if confirm in ('', 'y', 'yes'):
+        # Save updated config
+        with open(rulebook_file, 'w', encoding='utf-8') as f:
+            json.dump(merged_config, f, indent=2)
+        print(f"\n✓ Updated {rulebook_file.name} with {len(new_fields)} new field(s).")
+    else:
+        print("\nUpdate cancelled.")
 
 
 def load_rulebook_file(filepath: str) -> Dict[str, Any]:

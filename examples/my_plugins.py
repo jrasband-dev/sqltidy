@@ -17,17 +17,39 @@ Usage:
     
     load_rule_file('my_plugins.py')
     result = format_sql(sql)
+
+Naming Convention for Config Fields:
+    - Rewrite rules (transformations): Use 'enable_' prefix
+      Example: enable_my_transformation
+    
+    - Tidy rules (formatting): No prefix
+      Example: my_formatting_option
 """
 
 from sqltidy.plugins import sqltidy_rule
+from sqltidy.rules.base import ConfigField
 
 
 @sqltidy_rule(rule_type="tidy", order=100)
 def remove_trailing_semicolons(tokens, ctx):
     """Remove trailing semicolons from SQL."""
+    # Check config option (tidy rules don't use 'enable_' prefix)
+    if not getattr(ctx.config, "remove_trailing_semicolons", True):
+        return tokens
+    
     if tokens and tokens[-1] == ';':
         return tokens[:-1]
     return tokens
+
+# Declare config field for this rule
+remove_trailing_semicolons.config_fields = {
+    "remove_trailing_semicolons": ConfigField(
+        name="remove_trailing_semicolons",
+        default=True,
+        description="Remove trailing semicolons from SQL statements?",
+        field_type=bool
+    )
+}
 
 
 @sqltidy_rule(rule_type="tidy", order=10)
@@ -72,7 +94,13 @@ def expand_select_star(tokens, ctx):
     
     In a real implementation, you would need schema information.
     This is just a demonstration of a rewrite rule.
+    
+    Note: Rewrite rules use 'enable_' prefix for config fields.
     """
+    # Rewrite rules use 'enable_' prefix
+    if not getattr(ctx.config, "enable_expand_select_star", False):
+        return tokens
+    
     result = []
     for i, token in enumerate(tokens):
         if token == '*' and i > 0 and tokens[i-1].upper() == 'SELECT':
@@ -81,6 +109,16 @@ def expand_select_star(tokens, ctx):
         else:
             result.append(token)
     return result
+
+# Declare config field (rewrite rules use 'enable_' prefix)
+expand_select_star.config_fields = {
+    "enable_expand_select_star": ConfigField(
+        name="enable_expand_select_star",
+        default=False,
+        description="Expand SELECT * to explicit column names (requires schema info)?",
+        field_type=bool
+    )
+}
 
 
 @sqltidy_rule(rule_type="tidy", order=5)
@@ -95,13 +133,27 @@ def standardize_keywords(tokens, ctx):
         'on', 'and', 'or', 'in', 'not', 'null', 'as', 'distinct', 'order',
         'by', 'group', 'having', 'limit', 'offset', 'union', 'except', 'intersect'
     }
+     with config field."""
     
-    result = []
-    for token in tokens:
-        if token.lower() in keywords:
-            result.append(token.upper())
-        else:
-            result.append(token)
+    rule_type = "tidy"
+    order = 60
+    
+    # Declare config fields (tidy rules don't use 'enable_' prefix)
+    config_fields = {
+        "custom_spacing": ConfigField(
+            name="custom_spacing",
+            default=True,
+            description="Apply custom spacing rules to remove redundant whitespace?",
+            field_type=bool
+        )
+    }
+    
+    def apply(self, tokens, ctx):
+        """Ensure single space between tokens (simplified example)."""
+        # Check config option
+        if not getattr(ctx.config, "custom_spacing", True):
+            return tokens
+        
     return result
 
 
@@ -124,12 +176,51 @@ class CustomSpacingRule(BaseRule):
                 # Skip redundant whitespace
                 continue
             result.append(token)
-        return result
+    # Config check (tidy rules don't use 'enable_' prefix)
+    if not getattr(ctx.config, "remove_double_spaces", True):
+        return tokens
+    
+    result = []
+    for token in tokens:
+        if token == ' ' and result and result[-1] == ' ':
+            continue  # Skip double space
+        result.append(token)
+    return result
+
+remove_double_spaces.config_fields = {
+    "remove_double_spaces": ConfigField(
+        name="remove_double_spaces",
+        default=True,
+        description="Remove consecutive spaces in SQL?",
+        field_type=bool
+    )
+}
 
 
-# Register the class-based rule
-register_rule_class(CustomSpacingRule)
+# Example with dialect-specific defaults
+@rule(rule_type="tidy", order=95)
+def add_schema_prefix(tokens, ctx):
+    """Example rule with dialect-specific defaults."""
+    # This would be enabled by default for SQL Server but not others
+    if not getattr(ctx.config, "add_schema_prefix", False):
+        return tokens
+    
+    # Your custom logic here
+    return tokens
 
+add_schema_prefix.config_fields = {
+    "add_schema_prefix": ConfigField(
+        name="add_schema_prefix",
+        default=False,
+        description="Add schema prefix to table names (e.g., dbo.TableName)?",
+        field_type=bool,
+        # Dialect-specific defaults
+        dialect_defaults={
+            "sqlserver": True,  # Enable by default for SQL Server
+            "oracle": True      # Enable by default for Oracle
+        }
+    )
+}
 
 # You can also use the shorter alias 'rule' instead of 'sqltidy_rule'
 from sqltidy.plugins import rule

@@ -1,5 +1,5 @@
 import re
-from ..base import BaseRule
+from ..base import BaseRule, ConfigField
 
 
 class NewlineOnJoinRule(BaseRule):
@@ -20,6 +20,15 @@ class NewlineOnJoinRule(BaseRule):
     """
     rule_type = "tidy"
     order = 25  # After compact whitespace (20), before leading commas (45)
+    
+    config_fields = {
+        "newline_on_join": ConfigField(
+            name="newline_on_join",
+            default=False,
+            description="Place ON keyword on a new line after JOIN clauses?",
+            field_type=bool
+        )
+    }
     
     # JOIN type patterns (dialect-agnostic keywords)
     JOIN_PATTERNS = [

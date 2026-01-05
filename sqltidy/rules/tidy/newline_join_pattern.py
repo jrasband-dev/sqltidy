@@ -1,5 +1,5 @@
 import re
-from ..base import BaseRule
+from ..base import BaseRule, ConfigField
 
 class NewlineJoinPatternRule(BaseRule):
     """
@@ -23,6 +23,15 @@ class NewlineJoinPatternRule(BaseRule):
     """
     rule_type = "tidy"
     order = 24  # Before newline_on_join (25)
+    
+    config_fields = {
+        "newline_join_pattern": ConfigField(
+            name="newline_join_pattern",
+            default=False,
+            description="Add blank line before JOIN keywords?",
+            field_type=bool
+        )
+    }
     
     # JOIN type patterns
     JOIN_KEYWORDS = [

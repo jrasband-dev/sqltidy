@@ -1,5 +1,5 @@
 from typing import Optional
-from ..base import BaseRule
+from ..base import BaseRule, ConfigField
 from sqltidy.tokenizer import is_keyword
 
 
@@ -22,7 +22,24 @@ class UppercaseKeywordsRule(BaseRule):
     rule_type = "tidy"
     order = 10
     
-    # Dialect-specific defaults for keyword casing
+    # Self-describing configuration
+    config_fields = {
+        "uppercase_keywords": ConfigField(
+            name="uppercase_keywords",
+            default=None,  # None means use dialect default
+            description="Convert SQL keywords to UPPERCASE (True) or lowercase (False)",
+            field_type=Optional[bool],
+            dialect_defaults={
+                'sqlserver': True,
+                'oracle': True,
+                'postgresql': False,
+                'mysql': False,
+                'sqlite': False
+            }
+        )
+    }
+    
+    # Dialect-specific defaults for keyword casing (kept for backwards compatibility)
     DIALECT_DEFAULTS = {
         'sqlserver': True,    # T-SQL convention: UPPERCASE
         'oracle': True,       # Oracle/PL-SQL convention: UPPERCASE

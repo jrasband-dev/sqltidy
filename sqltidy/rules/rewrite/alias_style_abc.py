@@ -1,5 +1,5 @@
 import re
-from ..base import BaseRule
+from ..base import BaseRule, ConfigField
 
 
 def _num_to_letters(n: int) -> str:
@@ -15,6 +15,15 @@ def _num_to_letters(n: int) -> str:
 class AliasStyleABCRule(BaseRule):
     rule_type = "rewrite"
     order = 8
+    
+    config_fields = {
+        "enable_alias_style_abc": ConfigField(
+            name="enable_alias_style_abc",
+            default=False,
+            description="Convert table aliases to alphabetic style (A, B, C, ...)?",
+            field_type=bool
+        )
+    }
     
     def _extract_cte_scopes(self, sql):
         """Extract CTE scopes and main query, return list of (scope_sql, start_pos, end_pos)."""

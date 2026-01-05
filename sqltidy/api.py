@@ -13,7 +13,11 @@ _extra_rules = []
 def _load_config_for_dialect(dialect: str) -> SQLTidyConfig:
     """
     Load configuration for a specific dialect.
-    Checks user rulebook first, then falls back to bundled rulebook.
+    
+    Priority order:
+    1. User's custom rulebook (~/.sqltidy/rulebooks/sqltidy_{dialect}.json)
+    2. Bundled rulebook (sqltidy/rulebooks/sqltidy_{dialect}.json) if exists
+    3. Auto-generate from rule metadata (fallback)
     
     Args:
         dialect: SQL dialect name
@@ -21,13 +25,22 @@ def _load_config_for_dialect(dialect: str) -> SQLTidyConfig:
     Returns:
         SQLTidyConfig: Loaded configuration
     """
+    # Check for user's custom rulebook first
     user_rulebook_path = get_user_rulebooks_dir() / f"sqltidy_{dialect}.json"
     if user_rulebook_path.exists():
         rulebook_data = load_rulebook_file(str(user_rulebook_path))
-    else:
-        rulebook_path = get_bundled_rulebook_path(dialect)
-        rulebook_data = load_rulebook_file(str(rulebook_path))
-    return SQLTidyConfig.from_dict(rulebook_data)
+        return SQLTidyConfig.from_dict(rulebook_data)
+    
+    # Check for bundled rulebook
+    bundled_path = get_bundled_rulebook_path(dialect)
+    if bundled_path.exists():
+        rulebook_data = load_rulebook_file(str(bundled_path))
+        return SQLTidyConfig.from_dict(rulebook_data)
+    
+    # No JSON file found - generate from rules (Option 2!)
+    from .config_schema import generate_dialect_config
+    config_dict = generate_dialect_config(dialect, include_plugins=False)
+    return SQLTidyConfig.from_dict(config_dict)
 
 def register_rule(rule: BaseRule):
     """

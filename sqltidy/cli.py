@@ -5,7 +5,7 @@ from pathlib import Path
 from . import __version__
 from .api import format_sql, format_sql_folder
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
-from .generator import create_rulebook, list_rulebooks, edit_rulebook, reset_rulebook, load_rulebook_file, get_bundled_rulebook_path, get_user_rulebooks_dir, add_rule, list_rules, remove_rule
+from .generator import create_rulebook, list_rulebooks, edit_rulebook, reset_rulebook, update_rulebook, load_rulebook_file, get_bundled_rulebook_path, get_user_rulebooks_dir, add_rule, list_rules, remove_rule
 from .tokenizer import tokenize_with_types, TokenType, is_keyword
 from .plugins import load_rule_file, load_rules_from_directory
 from .dialects.registry import list_dialects, get_dialect, is_dialect_available
@@ -78,6 +78,8 @@ def resolve_rulebook_path(rulebook_ref: str) -> str:
         bundled_path = get_bundled_rulebook_path(rulebook_ref)
         if bundled_path.exists():
             return str(bundled_path)
+        # No file found - return None to trigger auto-generation
+        return None
     
     # Try as filename in user rulebooks first, then bundled
     if rulebook_ref.endswith('.json'):
@@ -98,8 +100,12 @@ def resolve_rulebook_path(rulebook_ref: str) -> str:
 
 def create_rulebook_from_file(rulebook_file: str) -> SQLTidyConfig:
     """
-    Load SQLTidyConfig from a JSON rulebook file.
-    Also resolves bundled rulebook references.
+    Load SQLTidyConfig from a JSON rulebook file or auto-generate from rules.
+    
+    Priority:
+    1. User's custom rulebook
+    2. Bundled rulebook (if exists)
+    3. Auto-generate from rule metadata
     
     Args:
         rulebook_file: Path, dialect name, or filename of the rulebook
@@ -109,9 +115,17 @@ def create_rulebook_from_file(rulebook_file: str) -> SQLTidyConfig:
     """
     try:
         resolved_path = resolve_rulebook_path(rulebook_file)
-        rulebook_data = load_rulebook_file(resolved_path)
         
-        # Create SQLTidyConfig with loaded values
+        # If path is None, auto-generate from rules
+        if resolved_path is None:
+            from .config_schema import generate_dialect_config
+            # Extract dialect from rulebook_file (should be a dialect name)
+            dialect = rulebook_file if rulebook_file in SUPPORTED_DIALECTS else 'sqlserver'
+            config_dict = generate_dialect_config(dialect, include_plugins=False)
+            return SQLTidyConfig.from_dict(config_dict)
+        
+        # Load from file
+        rulebook_data = load_rulebook_file(resolved_path)
         return SQLTidyConfig.from_dict(rulebook_data)
     except (FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Error loading rulebook file: {e}", file=sys.stderr)
@@ -818,6 +832,11 @@ def main():
         "-t", "--template",
         help="Use existing rulebook file as template"
     )
+    create_parser.add_argument(
+        "--include-plugins",
+        action="store_true",
+        help="Include loaded plugin rules in the generated configuration"
+    )
     
     # rulebook list
     list_parser = rulebook_subparsers.add_parser(
@@ -834,8 +853,8 @@ def main():
     # rulebook edit
     edit_parser = rulebook_subparsers.add_parser(
         "edit",
-        help="Edit a rulebook file",
-        description="Edit a rulebook in user directory (~/.sqltidy/rulebooks/). Creates from bundled template if needed."
+        help="Edit an existing rulebook file",
+        description="Edit an existing rulebook in user directory (~/.sqltidy/rulebooks/). Use 'create' command to make new rulebooks."
     )
     edit_parser.add_argument(
         "rulebook",
@@ -847,12 +866,29 @@ def main():
     reset_parser = rulebook_subparsers.add_parser(
         "reset",
         help="Reset a rulebook to default",
-        description="Remove user customization and revert to bundled default"
+        description="Remove user customization and revert to auto-generated defaults"
     )
     reset_parser.add_argument(
         "rulebook",
         nargs="?",
         help="Dialect name (e.g., 'postgresql'), rulebook filename to reset, or 'all' to reset all rulebooks"
+    )
+    
+    # rulebook update
+    update_parser = rulebook_subparsers.add_parser(
+        "update",
+        help="Update rulebook with new rules",
+        description="Sync existing rulebook with newly registered rules (preserves existing settings)"
+    )
+    update_parser.add_argument(
+        "rulebook",
+        nargs="?",
+        help="Dialect name (e.g., 'postgresql'), rulebook filename to update, or 'all' to update all rulebooks"
+    )
+    update_parser.add_argument(
+        "--include-plugins",
+        action="store_true",
+        help="Include loaded plugin rules in the update"
     )
 
 
@@ -1022,13 +1058,17 @@ def main():
     # rulebooks command
     if args.command == "rulebooks":
         if args.rulebook_command == "create":
-            create_rulebook(dialect=args.dialect, template_file=args.template)
+            include_plugins = getattr(args, 'include_plugins', False)
+            create_rulebook(dialect=args.dialect, template_file=args.template, include_plugins=include_plugins)
         elif args.rulebook_command == "list":
             list_rulebooks(directory=args.directory)
         elif args.rulebook_command == "edit":
             edit_rulebook(rulebook_name=args.rulebook)
         elif args.rulebook_command == "reset":
             reset_rulebook(rulebook_name=args.rulebook)
+        elif args.rulebook_command == "update":
+            include_plugins = getattr(args, 'include_plugins', False)
+            update_rulebook(rulebook_name=args.rulebook, include_plugins=include_plugins)
         return
 
     # rules command
