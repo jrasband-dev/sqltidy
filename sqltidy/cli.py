@@ -7,7 +7,7 @@ from .api import format_sql, format_sql_folder
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 from .generator import create_rulebook, list_rulebooks, edit_rulebook, reset_rulebook, update_rulebook, load_rulebook_file, get_bundled_rulebook_path, get_user_rulebooks_dir, add_rule, list_rules, remove_rule
 from .tokenizer import tokenize_with_types, TokenType, is_keyword
-from .plugins import load_rule_file, load_rules_from_directory
+from .plugins import load_rule_file, load_rules_from_directory, load_rules_module
 from .dialects.registry import list_dialects, get_dialect, is_dialect_available
 
 try:
@@ -163,7 +163,7 @@ def load_plugin_rules(args):
     if hasattr(args, 'rule_modules') and args.rule_modules:
         for rule_module in args.rule_modules:
             try:
-                rules = load_rule_module(rule_module)
+                rules = load_rules_module(rule_module)
                 plugin_rules.extend([r() for r in rules])
             except Exception as e:
                 print(f"Warning: Could not load rule module {rule_module}: {e}", file=sys.stderr)
@@ -959,6 +959,8 @@ def main():
                                       help="Show only SQL keywords")
     parse_parameter_group.add_argument("--show-tokens", action="store_true",
                                       help="Show detailed token table (hidden by default when patterns shown)")
+    parse_parameter_group.add_argument("--no-patterns", action="store_true",
+                                      help="Skip SQL pattern analysis")
 
     # -------------------
     # dialects Command
