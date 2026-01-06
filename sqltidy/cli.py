@@ -957,9 +957,8 @@ def main():
                                       help="Include whitespace tokens in output")
     parse_parameter_group.add_argument("--keywords-only", action="store_true",
                                       help="Show only SQL keywords")
-    parse_parameter_group.add_argument("--stats", action="store_true",
-                                      help="Show token statistics")
-
+    parse_parameter_group.add_argument("--show-tokens", action="store_true",
+                                      help="Show detailed token table (hidden by default when patterns shown)")
 
     # -------------------
     # dialects Command
@@ -1106,139 +1105,304 @@ def main():
         else:
             tokens = tokenize_with_types(sql)
         
-        # Filter tokens based on options
-        display_tokens = tokens
-        if not args.show_whitespace:
-            display_tokens = [t for t in tokens if t.type not in (TokenType.WHITESPACE, TokenType.NEWLINE)]
-        
-        if args.keywords_only:
-            display_tokens = [t for t in tokens if t.type == TokenType.KEYWORD]
-        
         # Generate output
         output_lines = []
         
-        if args.format == "json":
-            # JSON format
-            token_data = [{"value": t.value, "type": t.type.value} for t in display_tokens]
-            output_lines.append(json.dumps(token_data, indent=2))
-        
-        elif args.format == "simple":
-            # Simple format: one token per line
-            for token in display_tokens:
-                output_lines.append(f"{token.type.value}: {repr(token.value)}")
-        
-        else:  # table format
-            if HAS_RICH:
-                # Use rich table
-                table = Table(title="SQL Tokens", box=box.ROUNDED, border_style="cyan")
-                table.add_column("Type", style="yellow", no_wrap=True)
-                table.add_column("Value", style="white")
-                table.add_column("Keyword", justify="center", style="green")
-                
-                for token in display_tokens:
-                    value_str = repr(token.value)
-                    if len(value_str) > 60:
-                        value_str = value_str[:57] + "..."
-                    
-                    is_kw = "✓" if is_keyword(token.value) else ""
-                    table.add_row(token.type.value, value_str, is_kw)
-                
-                console.print()
-                console.print(table)
-            else:
-                # Calculate column widths
-                max_type_len = max(len(t.type.value) for t in display_tokens) if display_tokens else 10
-                max_value_len = max(len(repr(t.value)) for t in display_tokens) if display_tokens else 10
-                max_type_len = max(max_type_len, 10)
-                max_value_len = min(max_value_len, 60)  # Cap at 60 chars
-                
-                # Header
-                output_lines.append("=" * (max_type_len + max_value_len + 10))
-                output_lines.append(f"{'Type':<{max_type_len}} | {'Value':<{max_value_len}} | Keyword")
-                output_lines.append("-" * (max_type_len + max_value_len + 10))
-                
-                # Tokens
-                for token in display_tokens:
-                    value_str = repr(token.value)
-                    if len(value_str) > max_value_len:
-                        value_str = value_str[:max_value_len-3] + "..."
-                    
-                    is_kw = "✓" if is_keyword(token.value) else ""
-                    output_lines.append(f"{token.type.value:<{max_type_len}} | {value_str:<{max_value_len}} | {is_kw}")
-                
-                output_lines.append("=" * (max_type_len + max_value_len + 10))
-        
-        # Add statistics if requested
-        if args.stats:
-            # Count by type
-            type_counts = {}
-            for token in tokens:
-                type_counts[token.type] = type_counts.get(token.type, 0) + 1
+        # Add pattern analysis first (unless disabled)
+        if not args.no_patterns:
+            from sqltidy.patterns import (
+                JoinPattern, SelectClausePattern, WhereClausePattern,
+                SubqueryPattern, FunctionCallPattern, CaseExpressionPattern, CTEPattern,
+                GroupByPattern, OrderByPattern, HavingPattern, UnionPattern,
+                DistinctPattern, LimitPattern
+            )
+            from sqltidy.tokenizer import group_tokens
             
-            if HAS_RICH:
-                # Display stats in a rich panel
-                stats_table = Table(box=box.SIMPLE, show_header=True, border_style="cyan")
-                stats_table.add_column("Token Type", style="cyan")
-                stats_table.add_column("Count", justify="right", style="yellow")
-                stats_table.add_column("Percentage", justify="right", style="green")
-                
-                for token_type in sorted(type_counts.keys(), key=lambda t: type_counts[t], reverse=True):
-                    count = type_counts[token_type]
-                    pct = count / len(tokens) * 100
-                    stats_table.add_row(token_type.value, str(count), f"{pct:.1f}%")
-                
+            # Group tokens for pattern matching (handles nested parentheses)
+            grouped_tokens = group_tokens(tokens, group_parentheses_flag=True)
+            
+            # Use Rich only if not outputting to file
+            use_rich_patterns = HAS_RICH and not args.output
+            
+            if use_rich_patterns:
                 console.print()
-                console.print(Panel(stats_table, title=f"[bold cyan]Token Statistics (Total: {len(tokens)})", border_style="cyan"))
-                
-                # Keyword statistics
-                keywords = sorted(set(t.value.upper() for t in tokens if t.type == TokenType.KEYWORD))
-                if keywords:
-                    console.print(Panel(
-                        ", ".join(keywords),
-                        title=f"[bold cyan]Unique Keywords ({len(keywords)})",
-                        border_style="cyan"
-                    ))
-                
-                # Identifier statistics
-                identifiers = sorted(set(t.value for t in tokens if t.type == TokenType.IDENTIFIER))
-                if identifiers:
-                    if len(identifiers) <= 20:
-                        id_text = ", ".join(identifiers)
-                    else:
-                        id_text = ", ".join(identifiers[:20]) + f"\n... and {len(identifiers) - 20} more"
-                    
-                    console.print(Panel(
-                        id_text,
-                        title=f"[bold cyan]Unique Identifiers ({len(identifiers)})",
-                        border_style="cyan"
-                    ))
+                console.print("[bold cyan]═══ SQL Pattern Analysis ═══[/bold cyan]", style="bold")
+                console.print()
             else:
-                output_lines.append("\nToken Statistics:")
-                output_lines.append("-" * 40)
+                output_lines.append("\n")
+                output_lines.append("═" * 60)
+                output_lines.append("SQL Pattern Analysis")
+                output_lines.append("═" * 60)
+            
+            # Analyze JOINs
+            join_pattern = JoinPattern()
+            join_matches = list(join_pattern.find_all(tokens))
+            
+            if join_matches:
+                if use_rich_patterns:
+                    join_table = Table(title="JOIN Patterns", box=box.ROUNDED, border_style="green")
+                    join_table.add_column("Join Type", style="cyan", no_wrap=True)
+                    join_table.add_column("Table", style="yellow")
+                    join_table.add_column("Alias", style="magenta")
+                    join_table.add_column("Has ON", justify="center", style="green")
+                    
+                    for match in join_matches:
+                        join_type = match.metadata.get('join_type', 'JOIN')
+                        table = match.metadata.get('table', '?')
+                        alias = match.metadata.get('alias', '-')
+                        has_on = "✓" if match.metadata.get('has_on') else ""
+                        join_table.add_row(join_type, table, alias, has_on)
+                    
+                    console.print(join_table)
+                else:
+                    output_lines.append(f"\n[JOINs] Found {len(join_matches)} JOIN pattern(s):")
+                    for i, match in enumerate(join_matches, 1):
+                        join_type = match.metadata.get('join_type', 'JOIN')
+                        table = match.metadata.get('table', '?')
+                        alias = match.metadata.get('alias')
+                        has_on = match.metadata.get('has_on')
+                        
+                        line = f"  {i}. {join_type} {table}"
+                        if alias:
+                            line += f" AS {alias}"
+                        if has_on:
+                            line += " (with ON clause)"
+                        output_lines.append(line)
+            
+            # Analyze Functions
+            func_pattern = FunctionCallPattern()
+            func_matches = list(func_pattern.find_all(grouped_tokens))
+            
+            if func_matches:
+                func_names = [m.metadata.get('function_name', '?') for m in func_matches]
+                unique_funcs = sorted(set(func_names))
                 
-                output_lines.append(f"Total tokens: {len(tokens)}")
-                output_lines.append("\nToken distribution:")
-                for token_type in sorted(type_counts.keys(), key=lambda t: type_counts[t], reverse=True):
-                    count = type_counts[token_type]
-                    pct = count / len(tokens) * 100
-                    output_lines.append(f"  {token_type.value:12s}: {count:4d} ({pct:5.1f}%)")
+                if use_rich_patterns:
+                    func_table = Table(title="Function Calls", box=box.ROUNDED, border_style="blue")
+                    func_table.add_column("Function", style="cyan")
+                    func_table.add_column("Count", justify="right", style="yellow")
+                    
+                    for func_name in unique_funcs:
+                        count = func_names.count(func_name)
+                        func_table.add_row(func_name, str(count))
+                    
+                    console.print()
+                    console.print(func_table)
+                else:
+                    output_lines.append(f"\n[Functions] Found {len(func_matches)} function call(s):")
+                    for func_name in unique_funcs:
+                        count = func_names.count(func_name)
+                        output_lines.append(f"  {func_name}: {count}")
+            
+            # Analyze SELECT clauses
+            select_pattern = SelectClausePattern()
+            select_matches = list(select_pattern.find_all(tokens))
+            
+            if select_matches:
+                if use_rich_patterns:
+                    console.print()
+                    console.print(f"[green]✓[/green] Found {len(select_matches)} SELECT clause(s)")
+                else:
+                    output_lines.append(f"\n[SELECT] Found {len(select_matches)} SELECT clause(s)")
+            
+            # Analyze WHERE clauses
+            where_pattern = WhereClausePattern()
+            where_matches = list(where_pattern.find_all(tokens))
+            
+            if where_matches:
+                if use_rich_patterns:
+                    console.print(f"[green]✓[/green] Found {len(where_matches)} WHERE clause(s)")
+                else:
+                    output_lines.append(f"[WHERE] Found {len(where_matches)} WHERE clause(s)")
+            
+            # Analyze Subqueries
+            subquery_pattern = SubqueryPattern()
+            subquery_matches = list(subquery_pattern.find_all(grouped_tokens))
+            
+            if subquery_matches:
+                if use_rich_patterns:
+                    console.print(f"[green]✓[/green] Found {len(subquery_matches)} subquery(ies)")
+                else:
+                    output_lines.append(f"[Subqueries] Found {len(subquery_matches)} subquery(ies)")
+            
+            # Analyze CASE expressions
+            case_pattern = CaseExpressionPattern()
+            case_matches = list(case_pattern.find_all(tokens))
+            
+            if case_matches:
+                if use_rich_patterns:
+                    console.print(f"[green]✓[/green] Found {len(case_matches)} CASE expression(s)")
+                else:
+                    output_lines.append(f"[CASE] Found {len(case_matches)} CASE expression(s)")
+            
+            # Analyze CTEs
+            cte_pattern = CTEPattern()
+            cte_matches = list(cte_pattern.find_all(tokens))
+            
+            if cte_matches:
+                if use_rich_patterns:
+                    console.print(f"[green]✓[/green] Found {len(cte_matches)} CTE(s)")
+                else:
+                    output_lines.append(f"[CTE] Found {len(cte_matches)} CTE(s)")
+            
+            # Analyze GROUP BY
+            groupby_pattern = GroupByPattern()
+            groupby_matches = list(groupby_pattern.find_all(tokens))
+            
+            if groupby_matches:
+                if use_rich_patterns:
+                    console.print(f"[green]✓[/green] Found {len(groupby_matches)} GROUP BY clause(s)")
+                else:
+                    output_lines.append(f"[GROUP BY] Found {len(groupby_matches)} GROUP BY clause(s)")
+            
+            # Analyze ORDER BY
+            orderby_pattern = OrderByPattern()
+            orderby_matches = list(orderby_pattern.find_all(tokens))
+            
+            if orderby_matches:
+                if use_rich_patterns:
+                    console.print(f"[green]✓[/green] Found {len(orderby_matches)} ORDER BY clause(s)")
+                else:
+                    output_lines.append(f"[ORDER BY] Found {len(orderby_matches)} ORDER BY clause(s)")
+            
+            # Analyze HAVING
+            having_pattern = HavingPattern()
+            having_matches = list(having_pattern.find_all(tokens))
+            
+            if having_matches:
+                if use_rich_patterns:
+                    console.print(f"[green]✓[/green] Found {len(having_matches)} HAVING clause(s)")
+                else:
+                    output_lines.append(f"[HAVING] Found {len(having_matches)} HAVING clause(s)")
+            
+            # Analyze UNION
+            union_pattern = UnionPattern()
+            union_matches = list(union_pattern.find_all(tokens))
+            
+            if union_matches:
+                union_all_count = sum(1 for m in union_matches if m.metadata.get('is_all'))
+                union_distinct_count = len(union_matches) - union_all_count
                 
-                # Keyword statistics
-                keywords = sorted(set(t.value.upper() for t in tokens if t.type == TokenType.KEYWORD))
-                if keywords:
-                    output_lines.append(f"\nUnique keywords ({len(keywords)}):")
-                    output_lines.append(f"  {', '.join(keywords)}")
-                
-                # Identifier statistics
-                identifiers = sorted(set(t.value for t in tokens if t.type == TokenType.IDENTIFIER))
-                if identifiers:
-                    output_lines.append(f"\nUnique identifiers ({len(identifiers)}):")
-                    # Show first 20
-                    if len(identifiers) <= 20:
-                        output_lines.append(f"  {', '.join(identifiers)}")
+                if use_rich_patterns:
+                    if union_all_count > 0 and union_distinct_count > 0:
+                        console.print(f"[green]✓[/green] Found {len(union_matches)} UNION(s) ({union_all_count} ALL, {union_distinct_count} DISTINCT)")
+                    elif union_all_count > 0:
+                        console.print(f"[green]✓[/green] Found {union_all_count} UNION ALL")
                     else:
-                        output_lines.append(f"  {', '.join(identifiers[:20])}")
-                        output_lines.append(f"  ... and {len(identifiers) - 20} more")
+                        console.print(f"[green]✓[/green] Found {union_distinct_count} UNION")
+                else:
+                    if union_all_count > 0 and union_distinct_count > 0:
+                        output_lines.append(f"[UNION] Found {len(union_matches)} UNION(s) ({union_all_count} ALL, {union_distinct_count} DISTINCT)")
+                    elif union_all_count > 0:
+                        output_lines.append(f"[UNION] Found {union_all_count} UNION ALL")
+                    else:
+                        output_lines.append(f"[UNION] Found {union_distinct_count} UNION")
+            
+            # Analyze DISTINCT
+            distinct_pattern = DistinctPattern()
+            distinct_matches = list(distinct_pattern.find_all(tokens))
+            
+            if distinct_matches:
+                if use_rich_patterns:
+                    console.print(f"[green]✓[/green] Found DISTINCT in SELECT")
+                else:
+                    output_lines.append(f"[DISTINCT] Found DISTINCT in SELECT")
+            
+            # Analyze LIMIT/TOP
+            limit_pattern = LimitPattern()
+            limit_matches = list(limit_pattern.find_all(tokens))
+            
+            if limit_matches:
+                for match in limit_matches:
+                    limit_type = match.metadata.get('limit_type', 'LIMIT')
+                    limit_value = match.metadata.get('limit_value', '?')
+                    
+                    if use_rich_patterns:
+                        console.print(f"[green]✓[/green] Found {limit_type} {limit_value}")
+                    else:
+                        output_lines.append(f"[{limit_type}] Found {limit_type} {limit_value}")
+            
+            # Summary
+            total_patterns = (len(join_matches) + len(func_matches) + len(select_matches) + 
+                           len(where_matches) + len(subquery_matches) + len(case_matches) + 
+                           len(cte_matches) + len(groupby_matches) + len(orderby_matches) + 
+                           len(having_matches) + len(union_matches) + len(distinct_matches) + 
+                           len(limit_matches))
+            
+            if total_patterns == 0:
+                if use_rich_patterns:
+                    console.print("\n[yellow]No complex SQL patterns detected[/yellow]")
+                else:
+                    output_lines.append("\nNo complex SQL patterns detected")
+            else:
+                if use_rich_patterns:
+                    console.print(f"\n[bold green]Total patterns found: {total_patterns}[/bold green]")
+                else:
+                    output_lines.append(f"\nTotal patterns found: {total_patterns}")
+        
+        # Show token table only if explicitly requested or if patterns are disabled
+        show_token_table = args.show_tokens or args.no_patterns or args.format != "table"
+        
+        if show_token_table:
+            # Filter tokens based on options
+            display_tokens = tokens
+            if not args.show_whitespace:
+                display_tokens = [t for t in tokens if t.type not in (TokenType.WHITESPACE, TokenType.NEWLINE)]
+            
+            if args.keywords_only:
+                display_tokens = [t for t in tokens if t.type == TokenType.KEYWORD]
+            
+            # Generate token output
+            if args.format == "json":
+                # JSON format
+                token_data = [{"value": t.value, "type": t.type.value} for t in display_tokens]
+                output_lines.append(json.dumps(token_data, indent=2))
+            
+            elif args.format == "simple":
+                # Simple format: one token per line
+                for token in display_tokens:
+                    output_lines.append(f"{token.type.value}: {repr(token.value)}")
+            
+            else:  # table format
+                if HAS_RICH and not args.output:
+                    # Use rich table
+                    table = Table(title="SQL Tokens", box=box.ROUNDED, border_style="cyan")
+                    table.add_column("Type", style="yellow", no_wrap=True)
+                    table.add_column("Value", style="white")
+                    table.add_column("Keyword", justify="center", style="green")
+                    
+                    for token in display_tokens:
+                        value_str = repr(token.value)
+                        if len(value_str) > 60:
+                            value_str = value_str[:57] + "..."
+                        
+                        is_kw = "✓" if is_keyword(token.value) else ""
+                        table.add_row(token.type.value, value_str, is_kw)
+                    
+                    console.print()
+                    console.print(table)
+                else:
+                    # Calculate column widths
+                    max_type_len = max(len(t.type.value) for t in display_tokens) if display_tokens else 10
+                    max_value_len = max(len(repr(t.value)) for t in display_tokens) if display_tokens else 10
+                    max_type_len = max(max_type_len, 10)
+                    max_value_len = min(max_value_len, 60)  # Cap at 60 chars
+                    
+                    # Header
+                    output_lines.append("=" * (max_type_len + max_value_len + 10))
+                    output_lines.append(f"{'Type':<{max_type_len}} | {'Value':<{max_value_len}} | Keyword")
+                    output_lines.append("-" * (max_type_len + max_value_len + 10))
+                    
+                    # Tokens
+                    for token in display_tokens:
+                        value_str = repr(token.value)
+                        if len(value_str) > max_value_len:
+                            value_str = value_str[:max_value_len-3] + "..."
+                        
+                        is_kw = "✓" if is_keyword(token.value) else ""
+                        output_lines.append(f"{token.type.value:<{max_type_len}} | {value_str:<{max_value_len}} | {is_kw}")
+                    
+                    output_lines.append("=" * (max_type_len + max_value_len + 10))
         
         # Write output
         if not HAS_RICH or args.output or args.format != "table":
