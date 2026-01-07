@@ -228,7 +228,11 @@ def handle_tidy_command(args):
             
             # Process with progress bar
             if HAS_RICH and files:
-                results = {'total': 0, 'success': 0, 'failed': 0, 'errors': []}
+                results = {
+                    'total': 0, 'success': 0, 'failed': 0, 'errors': [],
+                    'tidy_rules': set(), 'rewrite_rules': set(),
+                    'all_tidy_rules': set(), 'all_rewrite_rules': set()
+                }
                 
                 with Progress(
                     SpinnerColumn(),
@@ -246,7 +250,26 @@ def handle_tidy_command(args):
                             with open(file_path, "r", encoding="utf-8") as f:
                                 sql = f.read()
                             
-                            formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
+                            result = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy', return_metadata=True)
+                            formatted_sql = result['sql'] if isinstance(result, dict) else result
+                            
+                            # Track applied rules by type
+                            if isinstance(result, dict) and 'applied_rules' in result:
+                                for rule in result['applied_rules']:
+                                    rule_type = rule.get('type', 'unknown')
+                                    if rule_type == 'tidy':
+                                        results['tidy_rules'].add(rule['name'])
+                                    elif rule_type == 'rewrite':
+                                        results['rewrite_rules'].add(rule['name'])
+                            
+                            # Track all available rules
+                            if isinstance(result, dict) and 'all_applicable_rules' in result:
+                                for rule in result['all_applicable_rules']:
+                                    rule_type = rule.get('type', 'unknown')
+                                    if rule_type == 'tidy':
+                                        results['all_tidy_rules'].add(rule['name'])
+                                    elif rule_type == 'rewrite':
+                                        results['all_rewrite_rules'].add(rule['name'])
                             
                             if args.output:
                                 output_path = Path(args.output) / file_path.relative_to(input_path)
@@ -277,6 +300,45 @@ def handle_tidy_command(args):
                 
                 console.print()
                 console.print(table)
+                
+                # Display applied rules checklist by type
+                if results['tidy_rules'] or results['rewrite_rules'] or results['all_tidy_rules'] or results['all_rewrite_rules']:
+                    console.print()
+                    
+                    if results['all_tidy_rules']:
+                        # Separate applied and unapplied tidy rules
+                        applied = sorted(results['tidy_rules'])
+                        unapplied = sorted(results['all_tidy_rules'] - results['tidy_rules'])
+                        
+                        lines = []
+                        lines.extend([f"[green]✓[/green] {rule}" for rule in applied])
+                        lines.extend([f"[dim]✗ {rule}[/dim]" for rule in unapplied])
+                        
+                        tidy_panel = Panel(
+                            "\n".join(lines),
+                            title="[bold cyan]Tidy Rules[/bold cyan]",
+                            border_style="cyan",
+                            box=box.ROUNDED
+                        )
+                        console.print(tidy_panel)
+                    
+                    if results['all_rewrite_rules']:
+                        console.print()
+                        # Separate applied and unapplied rewrite rules
+                        applied = sorted(results['rewrite_rules'])
+                        unapplied = sorted(results['all_rewrite_rules'] - results['rewrite_rules'])
+                        
+                        lines = []
+                        lines.extend([f"[green]✓[/green] {rule}" for rule in applied])
+                        lines.extend([f"[dim]✗ {rule}[/dim]" for rule in unapplied])
+                        
+                        rewrite_panel = Panel(
+                            "\n".join(lines),
+                            title="[bold cyan]Rewrite Rules[/bold cyan]",
+                            border_style="magenta",
+                            box=box.ROUNDED
+                        )
+                        console.print(rewrite_panel)
                 
                 if results['errors']:
                     console.print("\n[bold red]Errors:[/bold red]")
@@ -394,7 +456,11 @@ def handle_rewrite_command(args):
             
             # Process with progress bar
             if HAS_RICH and files:
-                results = {'total': 0, 'success': 0, 'failed': 0, 'errors': []}
+                results = {
+                    'total': 0, 'success': 0, 'failed': 0, 'errors': [],
+                    'tidy_rules': set(), 'rewrite_rules': set(),
+                    'all_tidy_rules': set(), 'all_rewrite_rules': set()
+                }
                 
                 with Progress(
                     SpinnerColumn(),
@@ -412,10 +478,40 @@ def handle_rewrite_command(args):
                             with open(file_path, "r", encoding="utf-8") as f:
                                 sql = f.read()
                             
-                            formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
+                            result = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite', return_metadata=True)
+                            formatted_sql = result['sql'] if isinstance(result, dict) else result
+                            
+                            # Track applied rewrite rules
+                            if isinstance(result, dict) and 'applied_rules' in result:
+                                for rule in result['applied_rules']:
+                                    rule_type = rule.get('type', 'unknown')
+                                    if rule_type == 'rewrite':
+                                        results['rewrite_rules'].add(rule['name'])
+                            
+                            # Track all available rewrite rules
+                            if isinstance(result, dict) and 'all_applicable_rules' in result:
+                                for rule in result['all_applicable_rules']:
+                                    rule_type = rule.get('type', 'unknown')
+                                    if rule_type == 'rewrite':
+                                        results['all_rewrite_rules'].add(rule['name'])
                             
                             if args.tidy:
-                                formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
+                                tidy_result = format_sql(formatted_sql, config=config, rule_type='tidy', return_metadata=True)
+                                formatted_sql = tidy_result['sql'] if isinstance(tidy_result, dict) else tidy_result
+                                
+                                # Track applied tidy rules
+                                if isinstance(tidy_result, dict) and 'applied_rules' in tidy_result:
+                                    for rule in tidy_result['applied_rules']:
+                                        rule_type = rule.get('type', 'unknown')
+                                        if rule_type == 'tidy':
+                                            results['tidy_rules'].add(rule['name'])
+                                
+                                # Track all available tidy rules
+                                if isinstance(tidy_result, dict) and 'all_applicable_rules' in tidy_result:
+                                    for rule in tidy_result['all_applicable_rules']:
+                                        rule_type = rule.get('type', 'unknown')
+                                        if rule_type == 'tidy':
+                                            results['all_tidy_rules'].add(rule['name'])
                             
                             if args.output:
                                 output_path = Path(args.output) / file_path.relative_to(input_path)
@@ -446,6 +542,45 @@ def handle_rewrite_command(args):
                 
                 console.print()
                 console.print(table)
+                
+                # Display applied rules checklist by type
+                if results['tidy_rules'] or results['rewrite_rules'] or results['all_tidy_rules'] or results['all_rewrite_rules']:
+                    console.print()
+                    
+                    if results['all_rewrite_rules']:
+                        # Separate applied and unapplied rewrite rules
+                        applied = sorted(results['rewrite_rules'])
+                        unapplied = sorted(results['all_rewrite_rules'] - results['rewrite_rules'])
+                        
+                        lines = []
+                        lines.extend([f"[green]✓[/green] {rule}" for rule in applied])
+                        lines.extend([f"[dim]✗ {rule}[/dim]" for rule in unapplied])
+                        
+                        rewrite_panel = Panel(
+                            "\n".join(lines),
+                            title="[bold magenta]Rewrite Rules[/bold magenta]",
+                            border_style="magenta",
+                            box=box.ROUNDED
+                        )
+                        console.print(rewrite_panel)
+                    
+                    if results['all_tidy_rules']:
+                        console.print()
+                        # Separate applied and unapplied tidy rules
+                        applied = sorted(results['tidy_rules'])
+                        unapplied = sorted(results['all_tidy_rules'] - results['tidy_rules'])
+                        
+                        lines = []
+                        lines.extend([f"[green]✓[/green] {rule}" for rule in applied])
+                        lines.extend([f"[dim]✗ {rule}[/dim]" for rule in unapplied])
+                        
+                        tidy_panel = Panel(
+                            "\n".join(lines),
+                            title="[bold cyan]Tidy Rules[/bold cyan]",
+                            border_style="cyan",
+                            box=box.ROUNDED
+                        )
+                        console.print(tidy_panel)
                 
                 if results['errors']:
                     console.print("\n[bold red]Errors:[/bold red]")

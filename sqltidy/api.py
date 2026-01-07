@@ -64,8 +64,9 @@ def format_sql(
     config: Optional[SQLTidyConfig] = None,
     dialect: Optional[str] = None,
     custom_rules: Optional[List[BaseRule]] = None,
-    rule_type: Optional[str] = None
-) -> str:
+    rule_type: Optional[str] = None,
+    return_metadata: bool = False
+) -> Union[str, dict]:
     """
     Format a SQL string using all registered rules, including custom rules.
 
@@ -77,9 +78,10 @@ def format_sql(
             'mysql', 'oracle', 'sqlite'. Ignored if config is provided.
         custom_rules (List[BaseRule], optional): Additional custom rules to apply.
         rule_type (str, optional): Filter rules by type ('tidy' or 'rewrite'). None loads all.
+        return_metadata (bool, optional): If True, return dict with 'sql' and 'applied_rules'.
 
     Returns:
-        str: Formatted SQL string.
+        str or dict: Formatted SQL string, or metadata dict if return_metadata=True.
         
     Raises:
         ValueError: If dialect is provided but not in SUPPORTED_DIALECTS.
@@ -106,7 +108,7 @@ def format_sql(
     if custom_rules:
         formatter.rules.extend(custom_rules)
 
-    return formatter.format(sql)
+    return formatter.format(sql, return_metadata=return_metadata)
 
 
 def tidy_sql(sql: str, dialect: str = 'sqlserver', config: Optional[SQLTidyConfig] = None) -> str:

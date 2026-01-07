@@ -4,7 +4,7 @@ from ..base import BaseRule, ConfigField
 class IndentSelectColumnsRule(BaseRule):
     """
     Add 4 spaces of indentation to each selected column.
-    This rule should run after NewlineAfterSelectRule and LeadingCommasRule.
+    This rule should run after ClauseFormattingRule and LeadingCommasRule.
     """
     rule_type = "tidy"
     order = 50
