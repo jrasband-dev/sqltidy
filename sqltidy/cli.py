@@ -1105,7 +1105,7 @@ def main():
             sql = sys.stdin.read()
 
         # Import semantic tokenizer components
-        from sqltidy.tokenizer import SemanticLevel, TokenGroup, GroupType
+        from sqltidy.tokenizer import SemanticLevel, TokenGroup, GroupType, Token
         
         # Tokenize the SQL with semantic analysis
         level = SemanticLevel(args.level)
@@ -1133,15 +1133,6 @@ def main():
             # Use Rich only if not outputting to file
             use_rich = HAS_RICH and not args.output
             
-            if use_rich:
-                console.print()
-                console.print(f"[bold cyan]═══ Semantic SQL Analysis ({args.level.upper()}) ═══[/bold cyan]", style="bold")
-                console.print()
-            else:
-                output_lines.append("\n")
-                output_lines.append("═" * 60)
-                output_lines.append(f"Semantic SQL Analysis ({args.level.upper()})")
-                output_lines.append("═" * 60)
             
             # Find semantic groups
             join_groups = find_all_groups(tokens, GroupType.JOIN_CLAUSE)
@@ -1158,8 +1149,198 @@ def main():
             union_groups = find_all_groups(tokens, GroupType.UNION_CLAUSE)
             limit_groups = find_all_groups(tokens, GroupType.LIMIT_CLAUSE)
             func_groups = find_all_groups(tokens, GroupType.FUNCTION)
+        
+            # 1. CLAUSES FOUND
+            clause_counts = []
+            if select_groups:
+                clause_counts.append(("SELECT", len(select_groups)))
+            if from_groups:
+                clause_counts.append(("FROM", len(from_groups)))
+            if where_groups:
+                clause_counts.append(("WHERE", len(where_groups)))
+            if groupby_groups:
+                clause_counts.append(("GROUP BY", len(groupby_groups)))
+            if having_groups:
+                clause_counts.append(("HAVING", len(having_groups)))
+            if orderby_groups:
+                clause_counts.append(("ORDER BY", len(orderby_groups)))
+            if join_groups:
+                clause_counts.append(("JOIN", len(join_groups)))
+            if subquery_groups:
+                clause_counts.append(("Subqueries", len(subquery_groups)))
+            if union_groups:
+                clause_counts.append(("UNION", len(union_groups)))
+            if limit_groups:
+                clause_counts.append(("LIMIT/TOP", len(limit_groups)))
             
-            # Analyze JOINs
+            if clause_counts:
+                if use_rich:
+                    clause_table = Table(title="Clauses Found", box=box.ROUNDED, border_style="green")
+                    clause_table.add_column("Clause Type", style="cyan")
+                    clause_table.add_column("Count", justify="right", style="yellow")
+                    
+                    for name, count in clause_counts:
+                        clause_table.add_row(name, str(count))
+                    
+                    console.print(clause_table)
+                    console.print()
+                else:
+                    output_lines.append("\n[Clauses Found]")
+                    for name, count in clause_counts:
+                        output_lines.append(f"  {name}: {count}")
+            
+            # 2. TABLES REFERENCED (Comprehensive - includes both FROM and JOIN tables)
+            all_table_refs = []
+            
+            # Extract from FROM clauses
+            if from_groups:
+                def extract_table_names(group):
+                    """Extract table names and aliases from a FROM clause group"""
+                    tables = []
+                    tokens = group.tokens if isinstance(group, TokenGroup) else [group]
+                    
+                    i = 0
+                    while i < len(tokens):
+                        item = tokens[i]
+                        
+                        # Skip JOIN groups - they're handled separately
+                        if isinstance(item, TokenGroup) and item.group_type == GroupType.JOIN_CLAUSE:
+                            i += 1
+                            continue
+                        
+                        # Skip whitespace and operators
+                        if isinstance(item, Token) and item.type in (TokenType.WHITESPACE, TokenType.NEWLINE, TokenType.OPERATOR, TokenType.PUNCTUATION):
+                            i += 1
+                            continue
+                        
+                        # Look for pattern: FROM table_name [AS] alias
+                        if isinstance(item, Token) and item.type == TokenType.KEYWORD and item.value.upper() == 'FROM':
+                            # Next non-whitespace token should be table name
+                            i += 1
+                            while i < len(tokens) and isinstance(tokens[i], Token) and tokens[i].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                                i += 1
+                            
+                            if i < len(tokens):
+                                table_item = tokens[i]
+                                if isinstance(table_item, Token) and table_item.type in (TokenType.IDENTIFIER, TokenType.KEYWORD):
+                                    table_name = table_item.value
+                                    alias = None
+                                    
+                                    # Look ahead for alias
+                                    j = i + 1
+                                    while j < len(tokens) and isinstance(tokens[j], Token) and tokens[j].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                                        j += 1
+                                    
+                                    if j < len(tokens):
+                                        next_token = tokens[j]
+                                        if isinstance(next_token, Token):
+                                            if next_token.value.upper() == 'AS':
+                                                # Skip AS and whitespace
+                                                j += 1
+                                                while j < len(tokens) and isinstance(tokens[j], Token) and tokens[j].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                                                    j += 1
+                                                if j < len(tokens) and isinstance(tokens[j], Token) and tokens[j].type == TokenType.IDENTIFIER:
+                                                    alias = tokens[j].value
+                                            elif next_token.type == TokenType.IDENTIFIER and next_token.value.upper() not in ('JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'CROSS', 'FULL', 'WHERE', 'GROUP', 'ORDER', 'HAVING', 'UNION'):
+                                                alias = next_token.value
+                                    
+                                    tables.append((table_name, alias, 'FROM'))
+                        
+                        elif isinstance(item, TokenGroup) and item.group_type != GroupType.SUBQUERY and item.group_type != GroupType.JOIN_CLAUSE:
+                            # Recursively check other groups
+                            tables.extend(extract_table_names(item))
+                        
+                        i += 1
+                    
+                    return tables
+                
+                for group in from_groups:
+                    tables = extract_table_names(group)
+                    all_table_refs.extend(tables)
+            
+            # Add JOIN tables
+            if join_groups:
+                for group in join_groups:
+                    table = group.metadata.get('table', '?')
+                    alias = group.metadata.get('alias', None)
+                    join_type = group.metadata.get('join_type', 'JOIN')
+                    all_table_refs.append((table, alias, join_type))
+            
+            # Remove duplicates while preserving order
+            seen = set()
+            unique_tables = []
+            for table, alias, source in all_table_refs:
+                key = table.lower()
+                if key not in seen:
+                    seen.add(key)
+                    unique_tables.append((table, alias, source))
+            
+            if unique_tables:
+                if use_rich:
+                    table_table = Table(title="Tables Referenced", box=box.ROUNDED, border_style="cyan")
+                    table_table.add_column("Table", style="yellow")
+                    table_table.add_column("Alias", style="magenta")
+                    table_table.add_column("Source", style="dim")
+                    
+                    for table_name, alias, source in unique_tables:
+                        table_table.add_row(table_name, alias or '-', source)
+                    
+                    console.print(table_table)
+                    console.print()
+                else:
+                    output_lines.append(f"\n[Tables Referenced] {len(unique_tables)} table(s):")
+                    for table_name, alias, source in unique_tables:
+                        line = f"  {table_name}"
+                        if alias:
+                            line += f" AS {alias}"
+                        line += f" ({source})"
+                        output_lines.append(line)
+            
+            # 3. FUNCTION CALLS
+            if func_groups:
+                func_names = [g.name for g in func_groups if g.name]
+                unique_funcs = sorted(set(func_names))
+                
+                if use_rich:
+                    func_table = Table(title="Function Calls", box=box.ROUNDED, border_style="blue")
+                    func_table.add_column("Function", style="cyan")
+                    func_table.add_column("Count", justify="right", style="yellow")
+                    
+                    for func_name in unique_funcs:
+                        count = func_names.count(func_name)
+                        func_table.add_row(func_name, str(count))
+                    
+                    console.print(func_table)
+                    console.print()
+                else:
+                    output_lines.append(f"\n[Function Calls] {len(func_groups)} function call(s):")
+                    for func_name in unique_funcs:
+                        count = func_names.count(func_name)
+                        output_lines.append(f"  {func_name}: {count}")
+            
+            # 4. CASE WHEN CLAUSES
+            if case_groups:
+                if use_rich:
+                    case_table = Table(title="CASE WHEN Clauses", box=box.ROUNDED, border_style="magenta")
+                    case_table.add_column("#", justify="right", style="cyan")
+                    case_table.add_column("WHEN Count", justify="center", style="yellow")
+                    case_table.add_column("Has ELSE", justify="center", style="green")
+                    
+                    for i, group in enumerate(case_groups, 1):
+                        when_count = group.metadata.get('when_count', '?')
+                        has_else = "✓" if group.metadata.get('has_else') else ""
+                        case_table.add_row(str(i), str(when_count), has_else)
+                    
+                    console.print(case_table)
+                    console.print()
+                else:
+                    output_lines.append(f"\n[CASE WHEN Clauses] {len(case_groups)} CASE expression(s):")
+                    for i, group in enumerate(case_groups, 1):
+                        when_count = group.metadata.get('when_count', '?')
+                        has_else = group.metadata.get('has_else', False)
+                        output_lines.append(f"  {i}. {when_count} WHEN clause(s)" + (", has ELSE" if has_else else ""))
+            
+            # 5. JOIN CLAUSES
             if join_groups:
                 if use_rich:
                     join_table = Table(title="JOIN Clauses", box=box.ROUNDED, border_style="green")
@@ -1191,29 +1372,9 @@ def main():
                             line += " (with ON clause)"
                         output_lines.append(line)
             
-            # Analyze CASE expressions
-            if case_groups:
-                if use_rich:
-                    case_table = Table(title="CASE Expressions", box=box.ROUNDED, border_style="magenta")
-                    case_table.add_column("#", justify="right", style="cyan")
-                    case_table.add_column("WHEN Count", justify="center", style="yellow")
-                    case_table.add_column("Has ELSE", justify="center", style="green")
-                    
-                    for i, group in enumerate(case_groups, 1):
-                        when_count = group.metadata.get('when_count', '?')
-                        has_else = "✓" if group.metadata.get('has_else') else ""
-                        case_table.add_row(str(i), str(when_count), has_else)
-                    
-                    console.print()
-                    console.print(case_table)
-                else:
-                    output_lines.append(f"\n[CASE] Found {len(case_groups)} CASE expression(s):")
-                    for i, group in enumerate(case_groups, 1):
-                        when_count = group.metadata.get('when_count', '?')
-                        has_else = group.metadata.get('has_else', False)
-                        output_lines.append(f"  {i}. {when_count} WHEN clause(s)" + (", has ELSE" if has_else else ""))
+            # === OPTIONAL SECTIONS (if present) ===
             
-            # Analyze Window Functions  
+            # Window Functions (optional - show if present)
             if window_groups:
                 if use_rich:
                     win_table = Table(title="Window Functions", box=box.ROUNDED, border_style="blue")
@@ -1242,29 +1403,7 @@ def main():
                             line += f" ORDER BY {', '.join(order)}"
                         output_lines.append(line)
             
-            # Analyze Functions
-            if func_groups:
-                func_names = [g.name for g in func_groups if g.name]
-                unique_funcs = sorted(set(func_names))
-                
-                if use_rich:
-                    func_table = Table(title="Function Calls", box=box.ROUNDED, border_style="blue")
-                    func_table.add_column("Function", style="cyan")
-                    func_table.add_column("Count", justify="right", style="yellow")
-                    
-                    for func_name in unique_funcs:
-                        count = func_names.count(func_name)
-                        func_table.add_row(func_name, str(count))
-                    
-                    console.print()
-                    console.print(func_table)
-                else:
-                    output_lines.append(f"\n[Functions] Found {len(func_groups)} function call(s):")
-                    for func_name in unique_funcs:
-                        count = func_names.count(func_name)
-                        output_lines.append(f"  {func_name}: {count}")
-            
-            # Analyze CTEs
+            # CTEs (optional - show if present)
             if cte_groups:
                 if use_rich:
                     cte_table = Table(title="Common Table Expressions (CTEs)", box=box.ROUNDED, border_style="yellow")
@@ -1292,39 +1431,6 @@ def main():
                         if is_recursive:
                             line += " [RECURSIVE]"
                         output_lines.append(line)
-            
-            # Display clause counts
-            if use_rich:
-                console.print()
-            
-            clause_counts = []
-            if select_groups:
-                clause_counts.append(("SELECT", len(select_groups)))
-            if from_groups:
-                clause_counts.append(("FROM", len(from_groups)))
-            if where_groups:
-                clause_counts.append(("WHERE", len(where_groups)))
-            if groupby_groups:
-                clause_counts.append(("GROUP BY", len(groupby_groups)))
-            if having_groups:
-                clause_counts.append(("HAVING", len(having_groups)))
-            if orderby_groups:
-                clause_counts.append(("ORDER BY", len(orderby_groups)))
-            if subquery_groups:
-                clause_counts.append(("Subqueries", len(subquery_groups)))
-            if union_groups:
-                clause_counts.append(("UNION", len(union_groups)))
-            if limit_groups:
-                clause_counts.append(("LIMIT/TOP", len(limit_groups)))
-            
-            if clause_counts:
-                if use_rich:
-                    for name, count in clause_counts:
-                        console.print(f"[green]✓[/green] Found {count} {name} clause(s)")
-                else:
-                    output_lines.append("\n[Clauses]")
-                    for name, count in clause_counts:
-                        output_lines.append(f"  {name}: {count}")
             
             # Summary
             total_groups = (len(join_groups) + len(case_groups) + len(window_groups) + 

@@ -49,6 +49,11 @@ class SQLDialect(ABC):
         return set()
     
     @property
+    def ddl_object_keywords(self) -> Set[str]:
+        """Set of DDL keywords that precede object names (e.g., TABLE, INDEX, VIEW)."""
+        return {'table', 'index', 'view', 'procedure', 'function', 'trigger', 'type', 'schema', 'database'}
+    
+    @property
     def identifier_chars(self) -> str:
         """
         Special characters allowed in identifiers.
@@ -123,6 +128,18 @@ class SQLDialect(ABC):
             True if the token is a built-in function, False otherwise
         """
         return token.lower() in self.functions
+    
+    def is_ddl_object_keyword(self, token: str) -> bool:
+        """
+        Check if a token is a DDL object keyword (TABLE, INDEX, etc.).
+        
+        Args:
+            token: The token to check (case-insensitive)
+            
+        Returns:
+            True if the token is a DDL object keyword, False otherwise
+        """
+        return token.lower() in self.ddl_object_keywords
     
     def normalize_identifier(self, identifier: str) -> str:
         """

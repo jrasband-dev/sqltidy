@@ -166,6 +166,19 @@ class SQLServerDialect(SQLDialect):
         }
     
     @property
+    def ddl_object_keywords(self) -> Set[str]:
+        """SQL Server DDL object keywords that precede object definitions."""
+        return {
+            'table', 'index', 'view', 'procedure', 'function', 'trigger',
+            'type', 'schema', 'database', 'assembly', 'certificate',
+            'credential', 'cryptographic', 'endpoint', 'event', 'login',
+            'master', 'message', 'partition', 'queue', 'remote', 'role',
+            'route', 'rule', 'sequence', 'server', 'service', 'signature',
+            'statistics', 'symmetric', 'synonym', 'user', 'workload',
+            'xml', 'references'  # FOREIGN KEY ... REFERENCES table(col)
+        }
+    
+    @property
     def identifier_chars(self) -> str:
         """SQL Server allows @, #, and $ in identifiers."""
         return '@#$'

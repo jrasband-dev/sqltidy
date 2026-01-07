@@ -353,7 +353,7 @@ def tokenize_with_types(sql: str, dialect: Union[str, SQLDialect] = 'sqlserver',
     
     # GROUPED level: parentheses and functions
     if level in (SemanticLevel.GROUPED, SemanticLevel.STRUCTURED, SemanticLevel.SEMANTIC):
-        result = group_parentheses(result)
+        result = group_parentheses(result, dialect_obj)
     
     # STRUCTURED level: add statements and clauses
     if level in (SemanticLevel.STRUCTURED, SemanticLevel.SEMANTIC):
@@ -445,10 +445,14 @@ def get_token_type(token: str, dialect: Union[str, SQLDialect] = 'sqlserver') ->
 # Token Grouping Functions
 # ============================================================================
 
-def group_parentheses(tokens: List[Union[Token, TokenGroup]]) -> List[Union[Token, TokenGroup]]:
+def group_parentheses(tokens: List[Union[Token, TokenGroup]], dialect: SQLDialect = None) -> List[Union[Token, TokenGroup]]:
     """
     Group tokens within parentheses into TokenGroup objects.
     This handles nested parentheses recursively.
+    
+    Args:
+        tokens: List of tokens to process
+        dialect: SQL dialect for function and DDL keyword detection
     """
     result = []
     i = 0
@@ -474,7 +478,7 @@ def group_parentheses(tokens: List[Union[Token, TokenGroup]]) -> List[Union[Toke
                 inner_tokens = tokens[i+1:j-1]  # Exclude the parentheses themselves
                 
                 # Recursively group inner tokens
-                grouped_inner = group_parentheses(inner_tokens)
+                grouped_inner = group_parentheses(inner_tokens, dialect)
                 
                 # Check if this is a function call
                 # Look back to see if previous non-whitespace token is an identifier or keyword
@@ -489,20 +493,41 @@ def group_parentheses(tokens: List[Union[Token, TokenGroup]]) -> List[Union[Toke
                 
                 # SQL function keywords or identifiers followed by parentheses are functions
                 if prev_token and (prev_token.type == TokenType.IDENTIFIER or prev_token.type == TokenType.KEYWORD):
-                    # Check if it looks like a function (not a keyword like IF, WHILE, etc.)
-                    # Simple heuristic: if it's a common function keyword or an identifier
-                    function_keywords = {
-                        'cast', 'convert', 'coalesce', 'nullif', 'isnull',
-                        'count', 'sum', 'avg', 'min', 'max', 'stdev', 'var',
-                        'row_number', 'rank', 'dense_rank', 'ntile', 'lag', 'lead',
-                        'first_value', 'last_value', 'string_agg',
-                        'dateadd', 'datediff', 'getdate', 'year', 'month', 'day',
-                        'upper', 'lower', 'substring', 'replace', 'trim', 'len',
-                        'abs', 'ceiling', 'floor', 'round', 'power', 'sqrt',
-                    }
+                    # Check if this is a DDL object definition (e.g., CREATE TABLE name (...))
+                    # Look backwards to find the token before prev_token
+                    is_ddl_object = False
                     
-                    is_function = (prev_token.value.lower() in function_keywords or 
-                                  prev_token.type == TokenType.IDENTIFIER)
+                    # Find the position of prev_token in result
+                    prev_token_found = False
+                    for k in range(len(result) - 1, -1, -1):
+                        if isinstance(result[k], Token):
+                            if result[k] == prev_token:
+                                prev_token_found = True
+                                continue  # Skip prev_token itself
+                            
+                            # After finding prev_token, look for DDL keywords
+                            if prev_token_found:
+                                # Skip whitespace, newline, and punctuation (like dots in schema.table)
+                                if result[k].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                                    continue
+                                elif result[k].type == TokenType.PUNCTUATION and result[k].value == '.':
+                                    continue
+                                # Skip identifiers (schema/database qualifiers like dbo, sys, etc.)
+                                elif result[k].type == TokenType.IDENTIFIER:
+                                    continue
+                                # Check if this is a DDL object keyword using dialect
+                                elif result[k].type == TokenType.KEYWORD and dialect and dialect.is_ddl_object_keyword(result[k].value):
+                                    is_ddl_object = True
+                                    break
+                                else:
+                                    # Found a different token (e.g., another keyword not in our list), stop looking
+                                    break
+                    
+                    # Use dialect to check if it's a function, or default to identifier heuristic
+                    is_function = not is_ddl_object and (
+                        (dialect and dialect.is_function(prev_token.value)) or 
+                        prev_token.type == TokenType.IDENTIFIER
+                    )
                     
                     if is_function:
                         # Function call - include function name
@@ -700,6 +725,7 @@ def _extract_case_expression(tokens: List[Union[Token, TokenGroup]], start: int)
     case_tokens = [tokens[start]]  # Include CASE keyword
     i = start + 1
     has_else = False
+    when_count = 0
     
     # Find matching END keyword
     depth = 1  # Track nested CASE expressions
@@ -716,13 +742,15 @@ def _extract_case_expression(tokens: List[Union[Token, TokenGroup]], start: int)
                     case_tokens.append(item)
                     i += 1
                     break
+            elif keyword == 'WHEN' and depth == 1:
+                when_count += 1
             elif keyword == 'ELSE' and depth == 1:
                 has_else = True
         
         case_tokens.append(item)
         i += 1
     
-    metadata = {'has_else': has_else}
+    metadata = {'has_else': has_else, 'when_count': when_count}
     return case_tokens, i, metadata
 
 
