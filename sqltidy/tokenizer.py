@@ -93,13 +93,37 @@ class TokenGroup:
     
     def get_text(self) -> str:
         """Get the text representation of this group"""
-        result = []
+        # Render inner content first
+        inner_parts = []
         for item in self.tokens:
             if isinstance(item, Token):
-                result.append(item.value)
+                inner_parts.append(item.value)
             elif isinstance(item, TokenGroup):
-                result.append(item.get_text())
-        return ''.join(result)
+                inner_parts.append(item.get_text())
+        inner = ''.join(inner_parts)
+
+        # Wrap or augment based on group type
+        if self.group_type == GroupType.PARENTHESIS or self.group_type == GroupType.SUBQUERY:
+            return f"({inner})"
+        
+        if self.group_type == GroupType.FUNCTION:
+            # Expect first token to be the function name
+            func_name = ''
+            args_text = inner
+            if self.tokens and isinstance(self.tokens[0], Token):
+                func_name = self.tokens[0].value
+                # Re-render args without the first token
+                arg_parts = []
+                for item in self.tokens[1:]:
+                    if isinstance(item, Token):
+                        arg_parts.append(item.value)
+                    elif isinstance(item, TokenGroup):
+                        arg_parts.append(item.get_text())
+                args_text = ''.join(arg_parts)
+            return f"{func_name}({args_text})"
+
+        # Default: just return inner content for other group types
+        return inner
     
     def flatten(self) -> List[Token]:
         """Flatten the group to get all tokens (recursive)"""

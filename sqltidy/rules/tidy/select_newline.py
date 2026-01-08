@@ -1,12 +1,12 @@
 """
-SELECT newline formatting rule using semantic tokenizer.
+SELECT newline formatting rule using Token objects.
 
 This rule ensures SELECT keywords appear on their own line with proper spacing.
 """
 
-from typing import List
+from typing import List, Union
 from ..base import BaseRule, ConfigField, FormatterContext
-from sqltidy.tokenizer import tokenize_with_types, Token, TokenType, SemanticLevel
+from sqltidy.tokenizer import Token, TokenGroup, TokenType, GroupType
 
 
 class SelectNewlineRule(BaseRule):
@@ -24,9 +24,12 @@ class SelectNewlineRule(BaseRule):
     
     Configuration:
         select_newline (bool): If True, add blank line before SELECT keywords
+        
+    Works with Token objects for efficiency - no re-tokenization needed.
     """
     rule_type = "tidy"
     order = 35  # After all other formatting rules to fix spacing around SELECT
+    supports_token_objects = True
     
     config_fields = {
         "select_newline": ConfigField(
@@ -37,116 +40,77 @@ class SelectNewlineRule(BaseRule):
         )
     }
     
-    def apply(self, tokens: List[str], ctx: FormatterContext) -> List[str]:
-        """Apply SELECT newline formatting using semantic tokenizer."""
-        enabled = getattr(ctx.config, "select_newline", False)
+    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
+        """Apply SELECT newline formatting using Token objects."""
+        enabled = getattr(ctx.config, "select_newline", self.config_fields["select_newline"].default)
         
         if not enabled:
             return tokens
         
-        # Convert string tokens to typed Token objects
-        sql = ''.join(tokens)
-        typed_tokens = tokenize_with_types(sql, ctx.config.dialect, SemanticLevel.SEMANTIC)
-        
-        # Flatten to simple token list for processing
-        flat_tokens = self._flatten_tokens(typed_tokens)
-        
-        # Process tokens
+        return self._process_tokens(tokens)
+    
+    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]]) -> List[Union[Token, TokenGroup]]:
+        """
+        Process tokens to add blank lines before SELECT keywords.
+        """
         result = []
-        i = 0
-        seen_meaningful_token = False  # Track if we've seen any meaningful token before SELECT
         
-        while i < len(flat_tokens):
-            token = flat_tokens[i]
+        def first_token(g):
+            """Recursively find the first token in a group."""
+            for it in g.tokens:
+                if isinstance(it, Token):
+                    return it
+                if isinstance(it, TokenGroup):
+                    ft = first_token(it)
+                    if ft:
+                        return ft
+            return None
+        
+        i = 0
+        while i < len(tokens):
+            token = tokens[i]
             
-            # Track if we've seen meaningful tokens (not just whitespace/newlines at start)
-            if not seen_meaningful_token and token.type not in (TokenType.WHITESPACE, TokenType.NEWLINE):
-                seen_meaningful_token = True
-            
-            # Detect SELECT keyword
-            if token.type == TokenType.KEYWORD and token.value.upper() == 'SELECT':
-                # Add blank line before SELECT if there's content before it
-                if seen_meaningful_token and result:
-                    # Check if previous token is not already a newline
-                    has_content_before = False
-                    for prev_token in reversed(result):
-                        if prev_token.type not in (TokenType.WHITESPACE, TokenType.NEWLINE):
-                            has_content_before = True
-                            break
-                    
-                    if has_content_before:
-                        # Remove trailing whitespace
-                        while result and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
-                            result.pop()
-                        
-                        # Add blank line (two newlines)
-                        result.append(Token('\n', TokenType.NEWLINE))
-                        result.append(Token('\n', TokenType.NEWLINE))
+            if isinstance(token, TokenGroup):
+                # Recursively process this group's contents  
+                processed_tokens = self._process_tokens(token.tokens)
                 
-                # Reset for next SELECT
-                seen_meaningful_token = False
+                # Now check: does the NEXT sibling (after this one) start with SELECT?
+                # If so, we need to add blank lines to the END of this group's tokens
+                next_token = tokens[i + 1] if i + 1 < len(tokens) else None
+                
+                # Check if next token starts with SELECT
+                next_is_select = False
+                if next_token:
+                    if isinstance(next_token, Token) and next_token.type == TokenType.KEYWORD and next_token.value.upper() == 'SELECT':
+                        next_is_select = True
+                    elif isinstance(next_token, TokenGroup):
+                        ft = first_token(next_token)
+                        if ft and ft.type == TokenType.KEYWORD and ft.value.upper() == 'SELECT':
+                            next_is_select = True
+                
+                # If next is SELECT and we have content, add blank lines at END of this group's tokens
+                if next_is_select and result:
+                    # Remove trailing whitespace from processed_tokens
+                    while processed_tokens and isinstance(processed_tokens[-1], Token) and processed_tokens[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                        processed_tokens.pop()
+                    
+                    # Add two newlines at the end
+                    processed_tokens.append(Token('\n', TokenType.NEWLINE))
+                    processed_tokens.append(Token('\n', TokenType.NEWLINE))
+                
+                group_out = TokenGroup(
+                    token.group_type,
+                    processed_tokens,
+                    token.name,
+                    token.metadata
+                )
+                result.append(group_out)
+            else:
                 result.append(token)
-                i += 1
-                continue
             
-            result.append(token)
             i += 1
         
-        # Convert back to string tokens
-        return [t.value for t in result]
-    
-    def _flatten_tokens(self, tokens: List) -> List[Token]:
-        """Flatten token groups to simple token list, preserving parentheses."""
-        from sqltidy.tokenizer import TokenGroup, GroupType
-        
-        result = []
-        for i, item in enumerate(tokens):
-            if isinstance(item, Token):
-                result.append(item)
-            elif isinstance(item, TokenGroup):
-                # For PARENTHESIS and SUBQUERY groups, add the parentheses that the tokenizer excluded
-                if item.group_type in (GroupType.PARENTHESIS, GroupType.SUBQUERY):
-                    result.append(Token('(', TokenType.PUNCTUATION))
-                    result.extend(self._flatten_tokens(item.tokens))
-                    result.append(Token(')', TokenType.PUNCTUATION))
-                    
-                    # Add spacing after closing paren if next token is SELECT
-                    if i + 1 < len(tokens):
-                        next_item = tokens[i + 1]
-                        if isinstance(next_item, Token) and next_item.type == TokenType.KEYWORD:
-                            if next_item.value.upper() == 'SELECT':
-                                # Add blank line after closing paren before SELECT
-                                result.append(Token('\n', TokenType.NEWLINE))
-                                result.append(Token('\n', TokenType.NEWLINE))
-                        elif isinstance(next_item, TokenGroup):
-                            # Check first token in the group
-                            first_token = self._get_first_token(next_item)
-                            if first_token and first_token.type == TokenType.KEYWORD and first_token.value.upper() == 'SELECT':
-                                result.append(Token('\n', TokenType.NEWLINE))
-                                result.append(Token('\n', TokenType.NEWLINE))
-                # For FUNCTION groups, first token is function name, rest is args
-                elif item.group_type == GroupType.FUNCTION:
-                    if item.tokens:
-                        result.append(item.tokens[0])  # Function name
-                        result.append(Token('(', TokenType.PUNCTUATION))
-                        result.extend(self._flatten_tokens(item.tokens[1:]))
-                        result.append(Token(')', TokenType.PUNCTUATION))
-                else:
-                    result.extend(self._flatten_tokens(item.tokens))
         return result
-    
-    def _get_first_token(self, group) -> Token:
-        """Get the first Token from a TokenGroup recursively."""
-        from sqltidy.tokenizer import TokenGroup
-        
-        for item in group.tokens:
-            if isinstance(item, Token):
-                return item
-            elif isinstance(item, TokenGroup):
-                first = self._get_first_token(item)
-                if first:
-                    return first
-        return None
     
     def __repr__(self):
         return f"<SelectNewlineRule(order={self.order})>"

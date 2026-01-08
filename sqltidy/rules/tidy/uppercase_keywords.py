@@ -1,6 +1,6 @@
-from typing import Optional
-from ..base import BaseRule, ConfigField
-from sqltidy.tokenizer import is_keyword
+from typing import List, Union, Optional
+from ..base import BaseRule, ConfigField, FormatterContext
+from sqltidy.tokenizer import Token, TokenGroup, TokenType, is_keyword
 
 
 class UppercaseKeywordsRule(BaseRule):
@@ -21,6 +21,7 @@ class UppercaseKeywordsRule(BaseRule):
     """
     rule_type = "tidy"
     order = 10
+    supports_token_objects = True  # Use Token-based API
     
     # Self-describing configuration
     config_fields = {
@@ -48,7 +49,7 @@ class UppercaseKeywordsRule(BaseRule):
         'sqlite': False,      # SQLite convention: lowercase
     }
     
-    def _should_uppercase(self, ctx) -> bool:
+    def _should_uppercase(self, ctx: FormatterContext) -> bool:
         """Determine if keywords should be uppercase based on config and dialect."""
         # Check if user explicitly set uppercase_keywords
         uppercase = getattr(ctx.config, "uppercase_keywords", None)
@@ -61,13 +62,32 @@ class UppercaseKeywordsRule(BaseRule):
         dialect = ctx.config.dialect
         return self.DIALECT_DEFAULTS.get(dialect, True)  # Default to True for unknown dialects
     
-    def apply(self, tokens, ctx):
+    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
+        """Apply keyword casing using Token objects."""
         should_uppercase = self._should_uppercase(ctx)
         dialect = ctx.config.dialect
         
-        if should_uppercase:
-            return [t.upper() if is_keyword(t, dialect) else t for t in tokens]
-        else:
-            return [t.lower() if is_keyword(t, dialect) else t for t in tokens]
+        return self._process_tokens(tokens, should_uppercase, dialect)
+    
+    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]], should_uppercase: bool, dialect: str) -> List[Union[Token, TokenGroup]]:
+        """Recursively process tokens and convert keyword case."""
+        result = []
+        
+        for token in tokens:
+            if isinstance(token, Token):
+                if token.type == TokenType.KEYWORD:
+                    # Convert keyword case
+                    new_value = token.value.upper() if should_uppercase else token.value.lower()
+                    result.append(Token(new_value, token.type))
+                else:
+                    result.append(token)
+            elif isinstance(token, TokenGroup):
+                # Recursively process group contents
+                processed_tokens = self._process_tokens(token.tokens, should_uppercase, dialect)
+                result.append(TokenGroup(token.group_type, processed_tokens, token.name, token.metadata))
+            else:
+                result.append(token)
+        
+        return result
 
 

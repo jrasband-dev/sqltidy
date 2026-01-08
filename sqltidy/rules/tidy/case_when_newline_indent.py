@@ -2,10 +2,12 @@
 CASE WHEN newline and indent formatting rule.
 
 This rule formats CASE expressions with proper newlines and indentation.
+Now uses Token-based API for better composability.
 """
 
-from typing import List
+from typing import List, Union
 from ..base import BaseRule, ConfigField, FormatterContext
+from sqltidy.tokenizer import Token, TokenGroup, TokenType, GroupType
 
 
 class CaseWhenNewlineIndentRule(BaseRule):
@@ -28,6 +30,7 @@ class CaseWhenNewlineIndentRule(BaseRule):
     """
     rule_type = "tidy"
     order = 46  # After leading_commas (45) which re-tokenizes
+    supports_token_objects = True  # Use new Token-based API
     
     config_fields = {
         "case_when_newline_indent": ConfigField(
@@ -38,111 +41,94 @@ class CaseWhenNewlineIndentRule(BaseRule):
         )
     }
     
-    def apply(self, tokens: List[str], ctx: FormatterContext) -> List[str]:
-        """Apply CASE WHEN formatting working directly with string tokens."""
+    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
+        """Apply CASE WHEN formatting using Token objects."""
         enabled = getattr(ctx.config, "case_when_newline_indent", False)
         
         if not enabled:
             return tokens
         
-        # Work directly with string tokens to preserve formatting from earlier rules
+        # Process tokens recursively to find and format CASE expressions
+        return self._process_tokens(tokens)
+    
+    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]], indent_str: str = "    ") -> List[Union[Token, TokenGroup]]:
+        """Recursively process tokens to format CASE expressions."""
         result = []
         i = 0
         in_case = False
         case_depth = 0
-        case_position_stack = []  # Track the column position of each CASE keyword
         
         while i < len(tokens):
             token = tokens[i]
             
+            # Handle TokenGroup - process recursively
+            if isinstance(token, TokenGroup):
+                # Process tokens within the group
+                processed_group = TokenGroup(
+                    token.group_type,
+                    self._process_tokens(token.tokens),
+                    token.name,
+                    token.metadata
+                )
+                result.append(processed_group)
+                i += 1
+                continue
+            
             # Detect CASE keyword
-            if token.upper() == 'CASE':
+            if isinstance(token, Token) and token.type == TokenType.KEYWORD and token.value.upper() == 'CASE':
                 case_depth += 1
                 in_case = True
-                
-                # Calculate position of CASE on current line BEFORE adding newline
-                case_position = 0
-                for j in range(len(result) - 1, -1, -1):
-                    if result[j] == '\n':
-                        # Found newline, count from there
-                        for k in range(j + 1, len(result)):
-                            case_position += len(result[k])
-                        break
-                else:
-                    # No newline found, we're on the first line
-                    for token_str in result:
-                        case_position += len(token_str)
-                
-                # Add length of CASE itself
-                case_position += len(token)
-                case_position_stack.append(case_position)
                 
                 result.append(token)
                 i += 1
                 
-                # Skip whitespace after CASE
-                while i < len(tokens) and tokens[i] in (' ', '\t', '\n'):
-                    i += 1
-                
                 # Add newline after CASE
-                result.append('\n')
+                result.append(Token('\n', TokenType.NEWLINE))
+                
+                # Skip any existing whitespace/newlines after CASE
+                while i < len(tokens) and isinstance(tokens[i], Token) and tokens[i].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                    i += 1
                 continue
             
             # Detect WHEN keyword in CASE expression
-            if in_case and token.upper() == 'WHEN':
-                # Remove trailing spaces/tabs (but keep newlines)
-                while result and result[-1] in (' ', '\t'):
+            if in_case and isinstance(token, Token) and token.type == TokenType.KEYWORD and token.value.upper() == 'WHEN':
+                # Remove trailing whitespace/newlines before WHEN
+                while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
                     result.pop()
                 
-                # Calculate indentation: CASE position + 4 for relative indent
-                # Subtract 4 because indent_select_columns (order 50) will add 4 spaces after newlines
-                base_indent = case_position_stack[-1] + 4 if case_position_stack else 4
-                indent_for_when = max(0, base_indent - 4)
-                
                 # Add newline and indentation before WHEN
-                result.append('\n')
-                result.append(' ' * indent_for_when)
+                result.append(Token('\n', TokenType.NEWLINE))
+                result.append(Token(indent_str, TokenType.WHITESPACE))  # Base indent - indent_select_columns will add more
                 result.append(token)
                 i += 1
                 continue
             
             # Detect ELSE keyword in CASE expression
-            if in_case and token.upper() == 'ELSE':
-                # Remove trailing spaces/tabs (but keep newlines)
-                while result and result[-1] in (' ', '\t'):
+            if in_case and isinstance(token, Token) and token.type == TokenType.KEYWORD and token.value.upper() == 'ELSE':
+                # Remove trailing whitespace/newlines before ELSE
+                while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
                     result.pop()
                 
-                # Calculate indentation: same as WHEN
-                # Subtract 4 because indent_select_columns (order 50) will add 4 spaces after newlines
-                base_indent = case_position_stack[-1] + 4 if case_position_stack else 4
-                indent_for_else = max(0, base_indent - 4)
-                
                 # Add newline and indentation before ELSE
-                result.append('\n')
-                result.append(' ' * indent_for_else)
+                result.append(Token('\n', TokenType.NEWLINE))
+                result.append(Token(indent_str, TokenType.WHITESPACE))  # Same indentation as WHEN
                 result.append(token)
                 i += 1
                 continue
             
-            # Detect END keyword
-            if token.upper() == 'END':
+            # Detect END keyword - could end CASE expression
+            if isinstance(token, Token) and token.type == TokenType.KEYWORD and token.value.upper() == 'END':
                 if case_depth > 0:
                     case_depth -= 1
-                    if case_position_stack:
-                        case_position_stack.pop()
                     if case_depth == 0:
                         in_case = False
                     
-                    # Remove trailing whitespace before END
-                    while result and result[-1] in (' ', '\t', '\n'):
+                    # Remove trailing whitespace/newlines before END
+                    while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
                         result.pop()
                     
                     # Add space before END
-                    result.append(' ')
-                    result.append(token)
-                    i += 1
-                    continue
-                else:
+                    result.append(Token(' ', TokenType.WHITESPACE))
                     result.append(token)
                     i += 1
                     continue

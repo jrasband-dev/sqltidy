@@ -5,8 +5,9 @@ This rule demonstrates dialect-specific behavior where different databases
 use different quoting characters for identifiers.
 """
 
-from ..base import BaseRule, ConfigField
-from sqltidy.tokenizer import is_keyword
+from typing import List, Union
+from ..base import BaseRule, ConfigField, FormatterContext
+from sqltidy.tokenizer import Token, TokenGroup, TokenType, is_keyword
 
 
 class QuoteIdentifiersRule(BaseRule):
@@ -24,6 +25,7 @@ class QuoteIdentifiersRule(BaseRule):
     """
     rule_type = "tidy"
     order = 11
+    supports_token_objects = True  # Use Token-based API
     
     config_fields = {
         "quote_identifiers": ConfigField(
@@ -47,46 +49,24 @@ class QuoteIdentifiersRule(BaseRule):
         """Get opening and closing quote characters for dialect."""
         return self.QUOTE_CHARS.get(dialect, ('"', '"'))
     
-    def _is_identifier(self, token: str, dialect: str) -> bool:
-        """
-        Check if a token is an identifier that should be quoted.
-        
-        Simple heuristic:
-        - Not a keyword
-        - Not a number
-        - Not already quoted
-        - Not punctuation
-        - Alphanumeric/underscore
-        """
-        if not token:
+    def _is_already_quoted(self, value: str) -> bool:
+        """Check if identifier is already quoted."""
+        if not value or len(value) < 2:
             return False
-        
-        # Already quoted?
-        if token[0] in ('"', "'", '[', '`') and token[-1] in ('"', "'", ']', '`'):
-            return False
-        
-        # Is it a keyword?
-        if is_keyword(token, dialect):
-            return False
-        
-        # Is it a number?
-        try:
-            float(token)
-            return False
-        except ValueError:
-            pass
-        
-        # Is it punctuation?
-        if token in (',', ';', '(', ')', '.', '+', '-', '*', '/', '=', '<', '>', '!'):
-            return False
-        
-        # Is it alphanumeric with underscores?
-        if token.replace('_', '').replace('.', '').isalnum():
-            return True
-        
-        return False
+        return (value[0] in ('"', "'", '[', '`') and 
+                value[-1] in ('"', "'", ']', '`'))
     
-    def apply(self, tokens, ctx):
+    def _quote_identifier(self, value: str, open_quote: str, close_quote: str) -> str:
+        """Quote an identifier, handling qualified names like schema.table."""
+        if '.' in value:
+            parts = value.split('.')
+            quoted_parts = [f"{open_quote}{part}{close_quote}" for part in parts]
+            return '.'.join(quoted_parts)
+        else:
+            return f"{open_quote}{value}{close_quote}"
+    
+    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
+        """Apply identifier quoting using Token objects."""
         # Check if quoting is enabled in config
         if not getattr(ctx.config, "quote_identifiers", False):
             return tokens
@@ -94,16 +74,26 @@ class QuoteIdentifiersRule(BaseRule):
         dialect = ctx.config.dialect
         open_quote, close_quote = self._get_quote_chars(dialect)
         
+        return self._process_tokens(tokens, dialect, open_quote, close_quote)
+    
+    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]], dialect: str, 
+                       open_quote: str, close_quote: str) -> List[Union[Token, TokenGroup]]:
+        """Recursively process tokens to quote identifiers."""
         result = []
+        
         for token in tokens:
-            if self._is_identifier(token, dialect):
-                # Handle qualified identifiers like schema.table
-                if '.' in token:
-                    parts = token.split('.')
-                    quoted_parts = [f"{open_quote}{part}{close_quote}" for part in parts]
-                    result.append('.'.join(quoted_parts))
+            if isinstance(token, Token):
+                if token.type == TokenType.IDENTIFIER and not self._is_already_quoted(token.value):
+                    # Quote the identifier
+                    quoted_value = self._quote_identifier(token.value, open_quote, close_quote)
+                    result.append(Token(quoted_value, token.type))
                 else:
-                    result.append(f"{open_quote}{token}{close_quote}")
+                    result.append(token)
+                    
+            elif isinstance(token, TokenGroup):
+                # Recursively process group contents
+                processed_tokens = self._process_tokens(token.tokens, dialect, open_quote, close_quote)
+                result.append(TokenGroup(token.group_type, processed_tokens, token.name, token.metadata))
             else:
                 result.append(token)
         
