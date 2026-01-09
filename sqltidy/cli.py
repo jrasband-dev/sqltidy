@@ -1049,23 +1049,23 @@ def main():
         help="Dialect name (e.g., 'postgresql'), rulebook filename to reset, or 'all' to reset all rulebooks"
     )
     
-    # rulebook update
-    update_parser = rulebook_subparsers.add_parser(
-        "update",
-        help="Update rulebook with new rules",
+    # rulebook sync
+    sync_parser = rulebook_subparsers.add_parser(
+        "sync",
+        help="Sync rulebook with new rules",
         description="Sync existing rulebook with newly registered rules (preserves existing settings)"
     )
-    update_parser.add_argument(
+    sync_parser.add_argument(
         "rulebook",
         nargs="?",
-        help="Dialect name (e.g., 'postgresql'), rulebook filename to update, or 'all' to update all rulebooks"
+        help="Dialect name (e.g., 'postgresql'), rulebook filename to sync, or 'all' to sync all rulebooks"
     )
-    update_parser.add_argument(
+    sync_parser.add_argument(
         "--no-plugins",
         dest="include_plugins",
         action="store_false",
         default=True,
-        help="Exclude user plugin rules from the update (by default, plugins are included)"
+        help="Exclude user plugin rules from the sync (by default, plugins are included)"
     )
 
 
@@ -1299,7 +1299,7 @@ def main():
             edit_rulebook(rulebook_name=args.rulebook)
         elif args.rulebook_command == "reset":
             reset_rulebook(rulebook_name=args.rulebook)
-        elif args.rulebook_command == "update":
+        elif args.rulebook_command == "sync":
             include_plugins = args.include_plugins
             update_rulebook(rulebook_name=args.rulebook, include_plugins=include_plugins)
         return

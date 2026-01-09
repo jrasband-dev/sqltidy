@@ -91,151 +91,8 @@ def get_bundled_rulebook_path(dialect: str) -> Path:
     return get_bundled_rulebooks_dir() / f"sqltidy_{dialect}.json"
 
 
-# Field descriptions for interactive prompts
-FIELD_DESCRIPTIONS = {
-    # Tidy/Formatting rules
-    "uppercase_keywords": "Convert SQL keywords to uppercase? (e.g., SELECT, FROM, WHERE)",
-    "newline_after_select": "Add newline after SELECT keyword?",
-    "compact": "Use compact formatting (reduce unnecessary whitespace)?",
-    "leading_commas": "Use leading commas in column lists? (e.g., col1\\n  , col2\\n  , col3)",
-    "indent_select_columns": "Indent SELECT columns on separate lines?",
-    "quote_identifiers": "Quote all identifiers (table/column names)?",
-    
-    # Rewrite/Transformation rules
-    "enable_subquery_to_cte": "Convert subqueries to Common Table Expressions (CTEs)?",
-    "enable_alias_style_abc": "Apply uppercase A, B, C ... table aliases?",
-    "enable_alias_style_t_numeric": "Apply uppercase T1, T2, T3 ... table aliases?",
-}
 
 
-def prompt_yes_no(question: str, default: Optional[bool] = True) -> Optional[bool]:
-    """
-    Prompt user for a yes/no question.
-    
-    Args:
-        question: The question to ask
-        default: The default value if user just presses enter (can be None)
-    
-    Returns:
-        bool or None: The user's choice
-    """
-    if default is None:
-        default_str = "[y/n]"
-    else:
-        default_str = "[Y/n]" if default else "[y/N]"
-    
-    while True:
-        response = input(f"{question} {default_str}: ").strip().lower()
-        if not response:
-            return default
-        if response in ("y", "yes"):
-            return True
-        if response in ("n", "no"):
-            return False
-        print("Please enter 'y' or 'n'")
-
-
-def select_dialect() -> str:
-    """
-    Prompt user to select a SQL dialect.
-    
-    Returns:
-        str: Selected dialect name
-    """
-    from rich.table import Table
-    
-    console.print()
-    table = Table(title="Select SQL Dialect", box=box.ROUNDED, border_style="cyan")
-    table.add_column("#", justify="center", style="yellow", no_wrap=True)
-    table.add_column("Dialect", style="cyan bold")
-    
-    for i, dialect in enumerate(SUPPORTED_DIALECTS, 1):
-        table.add_row(str(i), dialect)
-    
-    console.print(table)
-    console.print()
-    
-    while True:
-        choice = input(f"Enter your choice (1-{len(SUPPORTED_DIALECTS)}): ").strip()
-        try:
-            idx = int(choice) - 1
-            if 0 <= idx < len(SUPPORTED_DIALECTS):
-                return SUPPORTED_DIALECTS[idx]
-        except ValueError:
-            pass
-        console.print(f"[yellow]Please enter a number between 1 and {len(SUPPORTED_DIALECTS)}[/yellow]")
-
-
-def generate_rulebook_interactive(dialect: str, existing_config: Optional[SQLTidyConfig] = None) -> SQLTidyConfig:
-    """
-    Interactively generate or update a SQLTidyConfig.
-    
-    Args:
-        dialect: SQL dialect for the configuration
-        existing_config: Existing config to update (if None, creates new from defaults)
-    
-    Returns:
-        SQLTidyConfig: The generated or updated configuration
-    """
-    print("\n" + "=" * 70)
-    print(f"CONFIGURATION GENERATOR - {dialect.upper()}")
-    print("=" * 70)
-    
-    if existing_config:
-        print("Updating existing configuration. Press Enter to keep current value.\n")
-        config = existing_config
-    else:
-        print("Creating new configuration with dialect defaults.\n")
-        config = SQLTidyConfig.get_dialect_defaults(dialect)
-    
-    # Get current values as dict
-    config_dict = config.to_dict()
-    
-    # Prompt for each field (except dialect)
-    print("=" * 70)
-    print("FORMATTING RULES (TIDY)")
-    print("=" * 70 + "\n")
-    
-    tidy_fields = ['uppercase_keywords', 'newline_after_select', 'compact', 
-                   'leading_commas', 'indent_select_columns', 'quote_identifiers']
-    
-    for field_name in tidy_fields:
-        if field_name not in config_dict:
-            continue
-        
-        current_value = config_dict[field_name]
-        question = FIELD_DESCRIPTIONS.get(
-            field_name,
-            f"Enable {field_name.replace('_', ' ')}?"
-        )
-        
-        new_value = prompt_yes_no(question, default=current_value)
-        config_dict[field_name] = new_value
-    
-    print("\n" + "=" * 70)
-    print("TRANSFORMATION RULES (REWRITE)")
-    print("=" * 70 + "\n")
-    
-    rewrite_fields = ['enable_subquery_to_cte', 'enable_alias_style_abc', 
-                      'enable_alias_style_t_numeric']
-    
-    for field_name in rewrite_fields:
-        if field_name not in config_dict:
-            continue
-        
-        current_value = config_dict[field_name]
-        question = FIELD_DESCRIPTIONS.get(
-            field_name,
-            f"Enable {field_name.replace('_', ' ')}?"
-        )
-        
-        new_value = prompt_yes_no(question, default=current_value)
-        config_dict[field_name] = new_value
-    
-    # Update dialect to ensure it's set correctly
-    config_dict['dialect'] = dialect
-    
-    return SQLTidyConfig.from_dict(config_dict)
 
 
 def get_default_filename(dialect: str) -> str:
@@ -250,120 +107,94 @@ def create_rulebook(dialect: Optional[str] = None, template_file: Optional[str] 
     **Auto-loads user plugins:** Automatically includes custom rules from ~/.sqltidy/rules/
     when include_plugins=True (default).
     
-    With Option 2, this function now:
-    1. Generates config from rule metadata (includes all registered rules)
-    2. Auto-loads user plugins from ~/.sqltidy/rules/
-    3. Saves to ~/.sqltidy/rulebooks/ by default
+    Auto-generates config from rule metadata and saves to ~/.sqltidy/rulebooks/
     
     Args:
-        dialect: SQL dialect (if None, will prompt)
+        dialect: SQL dialect (if None, will prompt user to select)
         template_file: Optional template rulebook file to copy from
         include_plugins: If True, include plugin rules in the config (default: True)
     """
     try:
-        # Select dialect if not provided
+        # Prompt for dialect if not provided
         if dialect is None:
-            dialect = select_dialect()
+            console.print()
+            table = Table(title="Select SQL Dialect", box=box.ROUNDED, border_style="cyan")
+            table.add_column("#", justify="center", style="yellow", no_wrap=True)
+            table.add_column("Dialect", style="cyan bold")
+            
+            for i, d in enumerate(SUPPORTED_DIALECTS, 1):
+                table.add_row(str(i), d)
+            
+            console.print(table)
+            console.print()
+            
+            while True:
+                choice = input(f"Enter your choice (1-{len(SUPPORTED_DIALECTS)}): ").strip()
+                try:
+                    idx = int(choice) - 1
+                    if 0 <= idx < len(SUPPORTED_DIALECTS):
+                        dialect = SUPPORTED_DIALECTS[idx]
+                        break
+                except ValueError:
+                    pass
+                console.print(f"[yellow]Please enter a number between 1 and {len(SUPPORTED_DIALECTS)}[/yellow]")
         elif dialect not in SUPPORTED_DIALECTS:
             console.print(f"\n[red]✗ Error:[/red] Unsupported dialect '{dialect}'")
             console.print(f"[yellow]Supported dialects:[/yellow] {', '.join(SUPPORTED_DIALECTS)}\n")
             return
         
         # Load template if provided
-        base_config = None
         if template_file:
             try:
                 console.print(f"\n[cyan]Loading template from:[/cyan] {template_file}")
-                base_config = SQLTidyConfig.from_file(template_file)
-                base_config.dialect = dialect  # Override dialect
+                config = SQLTidyConfig.from_file(template_file)
+                config.dialect = dialect  # Override dialect
             except Exception as e:
                 console.print(f"[yellow]⚠ Warning:[/yellow] Could not load template file: {e}")
                 console.print("[dim]Proceeding with auto-generation from rules...[/dim]\n")
-        
-        # If no template, generate from rules (Option 2!)
-        if base_config is None:
+                from .config_schema import generate_dialect_config
+                config_dict = generate_dialect_config(dialect, include_plugins=include_plugins)
+                config = SQLTidyConfig.from_dict(config_dict)
+        else:
+            # Auto-generate from rules
             from .config_schema import generate_dialect_config
             console.print(f"\n[cyan]Auto-generating config from rule metadata...[/cyan]")
             if include_plugins:
                 console.print("[dim]Including plugin rules in configuration...[/dim]")
             config_dict = generate_dialect_config(dialect, include_plugins=include_plugins)
-            base_config = SQLTidyConfig.from_dict(config_dict)
-            console.print("[green]✓[/green] Config generated from rules")
+            config = SQLTidyConfig.from_dict(config_dict)
         
-        # Generate rulebook interactively (allows user to customize)
-        config = generate_rulebook_interactive(dialect, base_config)
-        
-        # Get output location - default to user's rulebook directory
+        # Save to user's rulebook directory
         user_dir = get_user_rulebooks_dir()
         user_dir.mkdir(parents=True, exist_ok=True)
+        output_path = user_dir / f"sqltidy_{dialect}.json"
         
-        default_path = user_dir / f"sqltidy_{dialect}.json"
-        console.print(f"\n[cyan]Default location:[/cyan] [dim]{default_path}[/dim]")
+        # Warn if rulebook already exists
+        if output_path.exists():
+            console.print()
+            console.print(f"[yellow]⚠ Warning:[/yellow] Rulebook already exists: [cyan]{output_path}[/cyan]")
+            confirm = input("Overwrite existing rulebook? [y/N]: ").strip().lower()
+            if confirm not in ('y', 'yes'):
+                console.print("[yellow]Rulebook creation cancelled.[/yellow]")
+                return
         
-        filename = input(f"Output filename (or path) [{default_path}]: ").strip()
-        if not filename:
-            filename = str(default_path)
-        
-        # Expand to absolute path
-        output_path = Path(filename).expanduser().absolute()
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        # Save rulebook
         config.save(str(output_path))
         
-        from rich.panel import Panel
         console.print()
         console.print(Panel(
-            f"[green]✓ Rulebook saved successfully![/green]\n\n"
+            f"[green]✓ Rulebook created successfully![/green]\n\n"
             f"[cyan]File:[/cyan] {output_path}\n"
-            f"{'[dim]Note: Plugin rules included in configuration[/dim]' if include_plugins else ''}",
+            f"{'[dim]Plugin rules included in configuration[/dim]' if include_plugins else ''}",
             title="[bold green]Success",
             border_style="green",
             box=box.ROUNDED
         ))
-        console.print()
-        console.print("[bold]Usage:[/bold]")
-        console.print(f"  [cyan]sqltidy tidy <input_file> -d {dialect}[/cyan]")
-        console.print(f"  [cyan]sqltidy tidy <input_file> -cfg {output_path}[/cyan]")
         console.print()
         
     except KeyboardInterrupt:
         console.print("\n\n[yellow]Rulebook creation cancelled.[/yellow]")
     except Exception as e:
         console.print(f"\n[red]✗ Error:[/red] {e}")
-        raise
-
-
-def update_rulebook(rulebook_file: str) -> None:
-    """
-    Update an existing rulebook file interactively.
-    
-    Args:
-        rulebook_file: Path to existing rulebook file
-    """
-    try:
-        # Load existing rulebook
-        print(f"Loading rulebook from: {rulebook_file}")
-        existing_config = SQLTidyConfig.from_file(rulebook_file)
-        dialect = existing_config.dialect
-        
-        # Update interactively
-        updated_config = generate_rulebook_interactive(dialect, existing_config)
-        
-        # Save back to same file
-        updated_config.save(rulebook_file)
-        
-        print("\n" + "=" * 70)
-        print("✓ Rulebook updated successfully!")
-        print(f"File: {Path(rulebook_file).absolute()}")
-        print("=" * 70)
-        
-    except FileNotFoundError:
-        print(f"\nError: Rulebook file not found: {rulebook_file}")
-    except KeyboardInterrupt:
-        print("\n\nRulebook update cancelled.")
-    except Exception as e:
-        print(f"\nError: {e}")
         raise
 
 
