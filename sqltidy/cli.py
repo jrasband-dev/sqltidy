@@ -7,7 +7,6 @@ from .api import format_sql, format_sql_folder
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 from .generator import create_rulebook, list_rulebooks, edit_rulebook, reset_rulebook, update_rulebook, load_rulebook_file, get_bundled_rulebook_path, get_user_rulebooks_dir, add_rule, list_rules, remove_rule
 from .tokenizer import tokenize_with_types, TokenType, is_keyword
-from .plugins import load_rule_file, load_rules_from_directory, load_rules_module
 from .dialects.registry import list_dialects, get_dialect, is_dialect_available
 
 from rich.console import Console
@@ -125,49 +124,10 @@ def create_rulebook_from_file(rulebook_file: str) -> SQLTidyConfig:
         sys.exit(1)
 
 
-def load_plugin_rules(args):
-    """
-    Load plugin rules from command line arguments.
-    
-    Args:
-        args: Parsed command line arguments with rule_files, rule_dirs, rule_modules
-        
-    Returns:
-        list: List of instantiated plugin rule objects
-    """
-    plugin_rules = []
-    
-    if hasattr(args, 'rule_files') and args.rule_files:
-        for rule_file in args.rule_files:
-            try:
-                rules = load_rule_file(rule_file)
-                plugin_rules.extend([r() for r in rules])
-            except Exception as e:
-                print(f"Warning: Could not load rule {rule_file}: {e}", file=sys.stderr)
-    
-    if hasattr(args, 'rule_dirs') and args.rule_dirs:
-        for rule_dir in args.rule_dirs:
-            try:
-                rules = load_rules_from_directory(rule_dir)
-                plugin_rules.extend([r() for r in rules])
-            except Exception as e:
-                print(f"Warning: Could not load rules from {rule_dir}: {e}", file=sys.stderr)
-    
-    if hasattr(args, 'rule_modules') and args.rule_modules:
-        for rule_module in args.rule_modules:
-            try:
-                rules = load_rules_module(rule_module)
-                plugin_rules.extend([r() for r in rules])
-            except Exception as e:
-                print(f"Warning: Could not load rule module {rule_module}: {e}", file=sys.stderr)
-    
-    return plugin_rules
-
 def handle_tidy_command(args):
     """Handle the tidy command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else 'sqlserver'
     config = create_rulebook_from_file(dialect)
-    plugin_rules = load_plugin_rules(args)
     
     if args.input:
         input_path = Path(args.input)
@@ -177,7 +137,7 @@ def handle_tidy_command(args):
             with console.status(f"[cyan]Processing {input_path.name}...", spinner="dots"):
                 with open(args.input, "r", encoding="utf-8") as f:
                     sql = f.read()
-                formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
+                formatted_sql = format_sql(sql, config=config, rule_type='tidy')
             
             console.print(f"[green]✓[/green] Formatted {input_path.name}")
             
@@ -231,7 +191,7 @@ def handle_tidy_command(args):
                             with open(file_path, "r", encoding="utf-8") as f:
                                 sql = f.read()
                             
-                            result = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy', return_metadata=True)
+                            result = format_sql(sql, config=config, rule_type='tidy', return_metadata=True)
                             formatted_sql = result['sql'] if isinstance(result, dict) else result
                             
                             # Track applied rules by type
@@ -350,7 +310,6 @@ def handle_rewrite_command(args):
     """Handle the rewrite command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else 'sqlserver'
     config = create_rulebook_from_file(dialect)
-    plugin_rules = load_plugin_rules(args)
     
     if args.input:
         input_path = Path(args.input)
@@ -360,7 +319,7 @@ def handle_rewrite_command(args):
             with console.status(f"[cyan]Rewriting {input_path.name}...", spinner="dots"):
                 with open(args.input, "r", encoding="utf-8") as f:
                     sql = f.read()
-                formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
+                formatted_sql = format_sql(sql, config=config, rule_type='rewrite')
                 
                 if args.tidy:
                     formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
@@ -419,7 +378,7 @@ def handle_rewrite_command(args):
                             with open(file_path, "r", encoding="utf-8") as f:
                                 sql = f.read()
                             
-                            result = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite', return_metadata=True)
+                            result = format_sql(sql, config=config, rule_type='rewrite', return_metadata=True)
                             formatted_sql = result['sql'] if isinstance(result, dict) else result
                             
                             # Track applied rewrite rules
@@ -990,16 +949,6 @@ def main():
     tidy_parameter_group.add_argument("--no-in-place", action="store_true",
                                      help="Don't modify files in place (requires --output)")
     
-    tidy_rule_group = tidy_parser.add_argument_group('rules')
-    tidy_rule_group.add_argument("--rule", action="append", dest="rule_files",
-                                   help="Load rule from Python file (can be used multiple times)")
-    tidy_rule_group.add_argument("--rule-dir", action="append", dest="rule_dirs",
-                                   help="Load all rules from directory (can be used multiple times)")
-    tidy_rule_group.add_argument("--rule-module", action="append", dest="rule_modules",
-                                   help="Import rule module (can be used multiple times)")
-
-
-
     # -------------------
     # rewrite Command
     # -------------------
@@ -1010,14 +959,6 @@ def main():
         description="Rewrite SQL queries according to specified rules"
     )
     
-    
-    rewrite_rule_group = rewrite_parser.add_argument_group('rules')
-    rewrite_rule_group.add_argument("--rule", action="append", dest="rule_files",
-                                      help="Load rule from Python file (can be used multiple times)")
-    rewrite_rule_group.add_argument("--rule-dir", action="append", dest="rule_dirs",
-                                      help="Load all rules from directory (can be used multiple times)")
-    rewrite_rule_group.add_argument("--rule-module", action="append", dest="rule_modules",
-                                      help="Import rule module (can be used multiple times)")
     rewrite_input_group = rewrite_parser.add_argument_group(title='Input')
     rewrite_input_group.add_argument("input", nargs="?", help="SQL file or folder to rewrite")
     
