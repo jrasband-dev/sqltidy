@@ -142,19 +142,28 @@ def select_dialect() -> str:
     Returns:
         str: Selected dialect name
     """
-    print("\nSelect SQL dialect:\n")
+    from rich.table import Table
+    
+    console.print()
+    table = Table(title="Select SQL Dialect", box=box.ROUNDED, border_style="cyan")
+    table.add_column("#", justify="center", style="yellow", no_wrap=True)
+    table.add_column("Dialect", style="cyan bold")
+    
     for i, dialect in enumerate(SUPPORTED_DIALECTS, 1):
-        print(f"{i}. {dialect}")
+        table.add_row(str(i), dialect)
+    
+    console.print(table)
+    console.print()
     
     while True:
-        choice = input(f"\nEnter your choice (1-{len(SUPPORTED_DIALECTS)}): ").strip()
+        choice = input(f"Enter your choice (1-{len(SUPPORTED_DIALECTS)}): ").strip()
         try:
             idx = int(choice) - 1
             if 0 <= idx < len(SUPPORTED_DIALECTS):
                 return SUPPORTED_DIALECTS[idx]
         except ValueError:
             pass
-        print(f"Please enter a number between 1 and {len(SUPPORTED_DIALECTS)}")
+        console.print(f"[yellow]Please enter a number between 1 and {len(SUPPORTED_DIALECTS)}[/yellow]")
 
 
 def generate_rulebook_interactive(dialect: str, existing_config: Optional[SQLTidyConfig] = None) -> SQLTidyConfig:
@@ -256,29 +265,30 @@ def create_rulebook(dialect: Optional[str] = None, template_file: Optional[str] 
         if dialect is None:
             dialect = select_dialect()
         elif dialect not in SUPPORTED_DIALECTS:
-            print(f"Error: Unsupported dialect '{dialect}'. Must be one of: {', '.join(SUPPORTED_DIALECTS)}")
+            console.print(f"\n[red]✗ Error:[/red] Unsupported dialect '{dialect}'")
+            console.print(f"[yellow]Supported dialects:[/yellow] {', '.join(SUPPORTED_DIALECTS)}\n")
             return
         
         # Load template if provided
         base_config = None
         if template_file:
             try:
-                print(f"\nLoading template from: {template_file}")
+                console.print(f"\n[cyan]Loading template from:[/cyan] {template_file}")
                 base_config = SQLTidyConfig.from_file(template_file)
                 base_config.dialect = dialect  # Override dialect
             except Exception as e:
-                print(f"Warning: Could not load template file: {e}")
-                print("Proceeding with auto-generation from rules...\n")
+                console.print(f"[yellow]⚠ Warning:[/yellow] Could not load template file: {e}")
+                console.print("[dim]Proceeding with auto-generation from rules...[/dim]\n")
         
         # If no template, generate from rules (Option 2!)
         if base_config is None:
             from .config_schema import generate_dialect_config
-            print(f"\nAuto-generating config from rule metadata...")
+            console.print(f"\n[cyan]Auto-generating config from rule metadata...[/cyan]")
             if include_plugins:
-                print("Including plugin rules in configuration...")
+                console.print("[dim]Including plugin rules in configuration...[/dim]")
             config_dict = generate_dialect_config(dialect, include_plugins=include_plugins)
             base_config = SQLTidyConfig.from_dict(config_dict)
-            print("✓ Config generated from rules")
+            console.print("[green]✓[/green] Config generated from rules")
         
         # Generate rulebook interactively (allows user to customize)
         config = generate_rulebook_interactive(dialect, base_config)
@@ -288,7 +298,7 @@ def create_rulebook(dialect: Optional[str] = None, template_file: Optional[str] 
         user_dir.mkdir(parents=True, exist_ok=True)
         
         default_path = user_dir / f"sqltidy_{dialect}.json"
-        print(f"\nDefault location: {default_path}")
+        console.print(f"\n[cyan]Default location:[/cyan] [dim]{default_path}[/dim]")
         
         filename = input(f"Output filename (or path) [{default_path}]: ").strip()
         if not filename:
@@ -301,21 +311,26 @@ def create_rulebook(dialect: Optional[str] = None, template_file: Optional[str] 
         # Save rulebook
         config.save(str(output_path))
         
-        print("\n" + "=" * 70)
-        print("✓ Rulebook saved successfully!")
-        print(f"File: {output_path}")
-        if include_plugins:
-            print("Note: Plugin rules included in configuration")
-        print("=" * 70)
-        print("\nUsage:")
-        print(f"  sqltidy tidy <input_file> -d {dialect}")
-        print(f"  sqltidy tidy <input_file> -cfg {output_path}")
-        print()
+        from rich.panel import Panel
+        console.print()
+        console.print(Panel(
+            f"[green]✓ Rulebook saved successfully![/green]\n\n"
+            f"[cyan]File:[/cyan] {output_path}\n"
+            f"{'[dim]Note: Plugin rules included in configuration[/dim]' if include_plugins else ''}",
+            title="[bold green]Success",
+            border_style="green",
+            box=box.ROUNDED
+        ))
+        console.print()
+        console.print("[bold]Usage:[/bold]")
+        console.print(f"  [cyan]sqltidy tidy <input_file> -d {dialect}[/cyan]")
+        console.print(f"  [cyan]sqltidy tidy <input_file> -cfg {output_path}[/cyan]")
+        console.print()
         
     except KeyboardInterrupt:
-        print("\n\nRulebook creation cancelled.")
+        console.print("\n\n[yellow]Rulebook creation cancelled.[/yellow]")
     except Exception as e:
-        print(f"\nError: {e}")
+        console.print(f"\n[red]✗ Error:[/red] {e}")
         raise
 
 
@@ -359,42 +374,97 @@ def list_rulebooks(directory: str = ".") -> None:
     Args:
         directory: Directory to search (default: current directory)
     """
+    from rich.tree import Tree
+    from rich.panel import Panel
+    
     user_dir = get_user_rulebooks_dir()
     
-    print(f"\nUser rulebook directory: {user_dir}\n")
+    console.print()
+    console.print(Panel(
+        f"[cyan]{user_dir}[/cyan]",
+        title="[bold]User Rulebook Directory",
+        border_style="cyan",
+        box=box.ROUNDED
+    ))
+    console.print()
     
     # Check if directory exists
     if not user_dir.exists():
-        print("Directory does not exist yet.")
-        print(f"\nTip: Create a rulebook with 'sqltidy rulebooks create -d <dialect>'")
+        console.print(Panel(
+            "[yellow]Directory does not exist yet.[/yellow]\n\n"
+            "[dim]Tip: Create a rulebook with[/dim]\n"
+            "[cyan]sqltidy rulebooks create -d <dialect>[/cyan]",
+            title="[bold yellow]No Rulebooks Found",
+            border_style="yellow",
+            box=box.ROUNDED
+        ))
         return
     
     # List all files in the user rulebook directory
     all_files = list(user_dir.glob("*"))
     
     if not all_files:
-        print("Directory is empty.")
-        print(f"\nTip: Create a rulebook with 'sqltidy rulebooks create -d <dialect>'")
+        console.print(Panel(
+            "[yellow]Directory is empty.[/yellow]\n\n"
+            "[dim]Tip: Create a rulebook with[/dim]\n"
+            "[cyan]sqltidy rulebooks create -d <dialect>[/cyan]",
+            title="[bold yellow]No Rulebooks Found",
+            border_style="yellow",
+            box=box.ROUNDED
+        ))
         return
     
     # Separate rulebook files from other files
     rulebook_files = [f for f in all_files if f.name.startswith("sqltidy_") and f.name.endswith(".json")]
     other_files = [f for f in all_files if f not in rulebook_files]
     
+    # Create tree for rulebooks
+    tree = Tree(
+        f"[bold cyan]📚 Rulebooks ({len(rulebook_files)} found)[/bold cyan]",
+        guide_style="cyan"
+    )
+    
     if rulebook_files:
-        print("Rulebook files:\n")
         for rulebook_file in sorted(rulebook_files):
             try:
                 cfg = SQLTidyConfig.from_file(str(rulebook_file))
-                print(f"  • {rulebook_file.name} (dialect: {cfg.dialect})")
+                # Count enabled rules
+                tidy_rules = sum(1 for v in cfg.tidy.values() if v) if hasattr(cfg, 'tidy') and cfg.tidy else 0
+                rewrite_rules = sum(1 for v in cfg.rewrite.values() if v) if hasattr(cfg, 'rewrite') and cfg.rewrite else 0
+                total_rules = tidy_rules + rewrite_rules
+                
+                # Get file size
+                file_size = rulebook_file.stat().st_size
+                size_kb = file_size / 1024
+                
+                # Create tree entry
+                file_branch = tree.add(f"[green]📄 {rulebook_file.name}[/green]")
+                file_branch.add(f"[yellow]Dialect:[/yellow] [cyan]{cfg.dialect}[/cyan]")
+                file_branch.add(f"[yellow]Rules enabled:[/yellow] {total_rules} ([cyan]{tidy_rules} tidy[/cyan], [magenta]{rewrite_rules} rewrite[/magenta])")
+                file_branch.add(f"[yellow]Size:[/yellow] {size_kb:.1f} KB")
             except Exception as e:
-                print(f"  • {rulebook_file.name} (invalid/unreadable: {e})")
+                file_branch = tree.add(f"[red]📄 {rulebook_file.name}[/red]")
+                file_branch.add(f"[red]Error: {e}[/red]")
+    else:
+        tree.add("[yellow]No rulebook files found[/yellow]")
     
+    console.print(tree)
+    
+    # Show other files if any
     if other_files:
-        print("\nOther files:\n")
+        console.print()
+        other_tree = Tree(
+            f"[bold yellow]📁 Other Files ({len(other_files)})[/bold yellow]",
+            guide_style="yellow"
+        )
         for file in sorted(other_files):
-            file_type = "directory" if file.is_dir() else "file"
-            print(f"  • {file.name} ({file_type})")
+            if file.is_dir():
+                other_tree.add(f"[blue]📁 {file.name}[/blue] [dim](directory)[/dim]")
+            else:
+                other_tree.add(f"[dim]📄 {file.name}[/dim] [dim](file)[/dim]")
+        console.print(other_tree)
+    
+    console.print()
 
 
 def edit_rulebook(rulebook_name: Optional[str] = None) -> None:
@@ -407,21 +477,38 @@ def edit_rulebook(rulebook_name: Optional[str] = None) -> None:
     Args:
         rulebook_name: Name of the rulebook file or dialect (e.g., 'postgresql' or 'sqltidy_postgresql.json')
     """
+    from rich.panel import Panel
+    from rich.table import Table
+    
     user_dir = get_user_rulebooks_dir()
     
     # Check if user directory exists
     if not user_dir.exists():
-        print("\nNo user rulebooks found.")
-        print(f"\nTip: Create a rulebook with 'sqltidy rulebooks create -d <dialect>'")
+        console.print()
+        console.print(Panel(
+            "[yellow]No user rulebooks found.[/yellow]\n\n"
+            "[dim]Tip: Create a rulebook with[/dim]\n"
+            "[cyan]sqltidy rulebooks create -d <dialect>[/cyan]",
+            title="[bold yellow]No Rulebooks",
+            border_style="yellow",
+            box=box.ROUNDED
+        ))
         return
     
     # Get all existing user rulebooks
     existing_user_rulebooks = list(user_dir.glob("sqltidy_*.json"))
     
     if not existing_user_rulebooks:
-        print("\nNo user rulebooks found.")
-        print(f"\nUser rulebook directory: {user_dir}")
-        print(f"\nTip: Create a rulebook with 'sqltidy rulebooks create -d <dialect>'")
+        console.print()
+        console.print(Panel(
+            f"[yellow]No user rulebooks found.[/yellow]\n\n"
+            f"[dim]User rulebook directory: {user_dir}[/dim]\n\n"
+            f"[dim]Tip: Create a rulebook with[/dim]\n"
+            f"[cyan]sqltidy rulebooks create -d <dialect>[/cyan]",
+            title="[bold yellow]No Rulebooks",
+            border_style="yellow",
+            box=box.ROUNDED
+        ))
         return
     
     # Build list of existing rulebooks
@@ -439,10 +526,18 @@ def edit_rulebook(rulebook_name: Optional[str] = None) -> None:
     
     # If no rulebook specified, let user choose
     if rulebook_name is None:
-        print("\nExisting user rulebooks:\n")
+        console.print()
+        table = Table(title="Available Rulebooks", box=box.ROUNDED, border_style="cyan")
+        table.add_column("#", justify="center", style="yellow", no_wrap=True)
+        table.add_column("Dialect", style="cyan bold")
+        table.add_column("File", style="dim")
+        
         sorted_options = sorted(available_options.items())
         for i, (name, filepath) in enumerate(sorted_options, 1):
-            print(f"{i}. {name}")
+            table.add_row(str(i), name, filepath.name)
+        
+        console.print(table)
+        console.print()
         
         while True:
             choice = input(f"\nSelect rulebook to edit (1-{len(sorted_options)}): ").strip()
@@ -473,12 +568,20 @@ def edit_rulebook(rulebook_name: Optional[str] = None) -> None:
                 selected_file = potential_file
         
         if selected_file is None:
-            print(f"\nRulebook '{rulebook_name}' not found in user directory.")
-            print(f"\nExisting rulebooks: {', '.join(sorted(available_options.keys()))}")
-            print(f"\nTip: Create with 'sqltidy rulebooks create -d {rulebook_name}'")
+            console.print()
+            console.print(Panel(
+                f"[red]Rulebook '{rulebook_name}' not found.[/red]\n\n"
+                f"[yellow]Existing rulebooks:[/yellow] {', '.join(sorted(available_options.keys()))}\n\n"
+                f"[dim]Tip: Create with[/dim]\n"
+                f"[cyan]sqltidy rulebooks create -d {rulebook_name}[/cyan]",
+                title="[bold red]Not Found",
+                border_style="red",
+                box=box.ROUNDED
+            ))
             return
     
-    print(f"\n✓ Opening user rulebook: {selected_file}")
+    console.print()
+    console.print(f"[green]✓[/green] Opening user rulebook: [cyan]{selected_file.name}[/cyan]")
     
     # Open in default editor
     try:
@@ -488,11 +591,18 @@ def edit_rulebook(rulebook_name: Optional[str] = None) -> None:
             opener = "open" if os.uname().sysname == "Darwin" else "xdg-open"
             subprocess.run([opener, str(selected_file)])
         
-        print(f"\nTip: This file overrides auto-generated defaults.")
-        print(f"To revert to auto-generated config, delete: {selected_file}")
+        console.print()
+        console.print(Panel(
+            f"[dim]This file overrides auto-generated defaults.[/dim]\n\n"
+            f"[yellow]To revert to auto-generated config, delete:[/yellow]\n"
+            f"[cyan]{selected_file}[/cyan]",
+            title="[bold]💡 Tip",
+            border_style="blue",
+            box=box.ROUNDED
+        ))
     except Exception as e:
-        print(f"\nCouldn't open editor automatically: {e}")
-        print(f"Please manually edit: {selected_file}")
+        console.print(f"\n[yellow]⚠ Warning:[/yellow] Couldn't open editor automatically: {e}")
+        console.print(f"[dim]Please manually edit:[/dim] [cyan]{selected_file}[/cyan]")
 
 
 def reset_rulebook(rulebook_name: Optional[str] = None) -> None:
@@ -502,48 +612,82 @@ def reset_rulebook(rulebook_name: Optional[str] = None) -> None:
     Args:
         rulebook_name: Name of the rulebook file or dialect to reset, or 'all' to reset all
     """
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich.tree import Tree
+    
     user_dir = get_user_rulebooks_dir()
     
     if not user_dir.exists():
-        print("\nNo user rulebooks to reset.")
+        console.print()
+        console.print(Panel(
+            "[yellow]No user rulebooks to reset.[/yellow]",
+            border_style="yellow",
+            box=box.ROUNDED
+        ))
         return
     
     user_rulebooks = list(user_dir.glob("sqltidy_*.json"))
     
     if not user_rulebooks:
-        print("\nNo user rulebooks to reset.")
+        console.print()
+        console.print(Panel(
+            "[yellow]No user rulebooks to reset.[/yellow]",
+            border_style="yellow",
+            box=box.ROUNDED
+        ))
         return
     
     # Handle 'all' option to reset all rulebooks
     if rulebook_name == 'all':
-        print(f"\nFound {len(user_rulebooks)} customized rulebook(s):\n")
+        console.print()
+        table = Table(title=f"Rulebooks to Reset ({len(user_rulebooks)} found)", box=box.ROUNDED, border_style="yellow")
+        table.add_column("Dialect", style="cyan bold")
+        table.add_column("File", style="dim")
+        
         for rulebook_file in sorted(user_rulebooks):
             try:
                 cfg = SQLTidyConfig.from_file(str(rulebook_file))
-                print(f"  • {cfg.dialect}")
+                table.add_row(cfg.dialect, rulebook_file.name)
             except Exception:
-                print(f"  • {rulebook_file.name}")
+                table.add_row("?", rulebook_file.name)
         
-        confirm = input(f"\nReset all {len(user_rulebooks)} rulebook(s) to bundled defaults? [y/N]: ").strip().lower()
+        console.print(table)
+        console.print()
+        
+        confirm = input(f"Reset all {len(user_rulebooks)} rulebook(s) to bundled defaults? [y/N]: ").strip().lower()
         if confirm in ('y', 'yes'):
             count = 0
             for rulebook_file in user_rulebooks:
                 rulebook_file.unlink()
                 count += 1
-            print(f"\n✓ Reset {count} rulebook(s) to bundled defaults.")
+            console.print()
+            console.print(Panel(
+                f"[green]✓ Reset {count} rulebook(s) to bundled defaults.[/green]",
+                border_style="green",
+                box=box.ROUNDED
+            ))
         else:
-            print("\nReset cancelled.")
+            console.print("\n[yellow]Reset cancelled.[/yellow]")
         return
     
     # If no rulebook specified, let user choose
     if rulebook_name is None:
-        print("\nCustomized rulebooks:\n")
+        console.print()
+        table = Table(title="Customized Rulebooks", box=box.ROUNDED, border_style="cyan")
+        table.add_column("#", justify="center", style="yellow", no_wrap=True)
+        table.add_column("Dialect", style="cyan bold")
+        table.add_column("File", style="dim")
+        
         for i, rulebook_file in enumerate(sorted(user_rulebooks), 1):
             try:
                 cfg = SQLTidyConfig.from_file(str(rulebook_file))
-                print(f"{i}. {cfg.dialect}")
+                table.add_row(str(i), cfg.dialect, rulebook_file.name)
             except Exception:
-                print(f"{i}. {rulebook_file.name}")
+                table.add_row(str(i), "?", rulebook_file.name)
+        
+        console.print(table)
+        console.print()
         
         while True:
             choice = input(f"\nSelect rulebook to reset (1-{len(user_rulebooks)}): ").strip()
@@ -565,16 +709,26 @@ def reset_rulebook(rulebook_name: Optional[str] = None) -> None:
             rulebook_file = user_dir / f"sqltidy_{rulebook_name}.json"
         
         if not rulebook_file.exists():
-            print(f"\nNo user customization found for '{rulebook_name}'.")
+            console.print()
+            console.print(Panel(
+                f"[yellow]No user customization found for '{rulebook_name}'.[/yellow]",
+                border_style="yellow",
+                box=box.ROUNDED
+            ))
             return
     
     # Confirm deletion
     confirm = input(f"\nReset {rulebook_file.name} to bundled default? [y/N]: ").strip().lower()
     if confirm in ('y', 'yes'):
         rulebook_file.unlink()
-        print(f"\n✓ Reset {rulebook_file.name} to bundled default.")
+        console.print()
+        console.print(Panel(
+            f"[green]✓ Reset {rulebook_file.name} to bundled default.[/green]",
+            border_style="green",
+            box=box.ROUNDED
+        ))
     else:
-        print("\nReset cancelled.")
+        console.print("\n[yellow]Reset cancelled.[/yellow]")
 
 
 def update_rulebook(rulebook_name: Optional[str] = None, include_plugins: bool = True) -> None:
@@ -590,36 +744,57 @@ def update_rulebook(rulebook_name: Optional[str] = None, include_plugins: bool =
         include_plugins: Whether to include plugin rules in the update (default: True)
     """
     from .config_schema import generate_dialect_config
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich.tree import Tree
     
     user_dir = get_user_rulebooks_dir()
     
     if not user_dir.exists():
-        print("\nNo user rulebooks to update.")
-        print("Tip: Use 'sqltidy rulebooks create' to create a new rulebook.")
+        console.print()
+        console.print(Panel(
+            "[yellow]No user rulebooks to update.[/yellow]\n\n"
+            "[dim]Tip: Use[/dim] [cyan]sqltidy rulebooks create[/cyan] [dim]to create a new rulebook.[/dim]",
+            border_style="yellow",
+            box=box.ROUNDED
+        ))
         return
     
     user_rulebooks = list(user_dir.glob("sqltidy_*.json"))
     
     if not user_rulebooks:
-        print("\nNo user rulebooks to update.")
-        print("Tip: Use 'sqltidy rulebooks create' to create a new rulebook.")
+        console.print()
+        console.print(Panel(
+            "[yellow]No user rulebooks to update.[/yellow]\n\n"
+            "[dim]Tip: Use[/dim] [cyan]sqltidy rulebooks create[/cyan] [dim]to create a new rulebook.[/dim]",
+            border_style="yellow",
+            box=box.ROUNDED
+        ))
         return
     
     # Handle 'all' option to update all rulebooks
     if rulebook_name == 'all':
-        print(f"\nFound {len(user_rulebooks)} user rulebook(s) to update:\n")
+        console.print()
+        table = Table(title=f"Rulebooks to Update ({len(user_rulebooks)} found)", box=box.ROUNDED, border_style="cyan")
+        table.add_column("Dialect", style="cyan bold")
+        table.add_column("File", style="dim")
+        
         for rulebook_file in sorted(user_rulebooks):
             try:
                 cfg = SQLTidyConfig.from_file(str(rulebook_file))
-                print(f"  • {cfg.dialect}")
+                table.add_row(cfg.dialect, rulebook_file.name)
             except Exception:
-                print(f"  • {rulebook_file.name}")
+                table.add_row("?", rulebook_file.name)
         
-        confirm = input(f"\nUpdate all {len(user_rulebooks)} rulebook(s) with new rules? [y/N]: ").strip().lower()
+        console.print(table)
+        console.print()
+        
+        confirm = input(f"Update all {len(user_rulebooks)} rulebook(s) with new rules? [y/N]: ").strip().lower()
         if confirm not in ('y', 'yes'):
-            print("\nUpdate cancelled.")
+            console.print("\n[yellow]Update cancelled.[/yellow]")
             return
         
+        console.print()
         updated_count = 0
         for rulebook_file in sorted(user_rulebooks):
             try:
@@ -658,36 +833,53 @@ def update_rulebook(rulebook_name: Optional[str] = None, include_plugins: bool =
                     # Save updated config
                     with open(rulebook_file, 'w', encoding='utf-8') as f:
                         json.dump(merged_config, f, indent=2)
-                    print(f"  ✓ Updated {dialect}: Added {len(new_fields)} new field(s)")
+                    console.print(f"  [green]✓[/green] Updated [cyan]{dialect}[/cyan]: Added {len(new_fields)} new field(s)")
                     if new_tidy_fields:
-                        print(f"    Tidy rules:")
+                        console.print(f"    [yellow]Tidy rules:[/yellow]")
                         for field in sorted(new_tidy_fields):
-                            print(f"      + {field}")
+                            console.print(f"      [green]+[/green] {field}")
                     if new_rewrite_fields:
-                        print(f"    Rewrite rules:")
+                        console.print(f"    [magenta]Rewrite rules:[/magenta]")
                         for field in sorted(new_rewrite_fields):
-                            print(f"      + {field}")
+                            console.print(f"      [green]+[/green] {field}")
                     updated_count += 1
                 else:
-                    print(f"  • {dialect}: Already up-to-date")
+                    console.print(f"  [dim]• {dialect}: Already up-to-date[/dim]")
             except Exception as e:
-                print(f"  ✗ Error updating {rulebook_file.name}: {e}")
+                console.print(f"  [red]✗[/red] Error updating {rulebook_file.name}: {e}")
         
+        console.print()
         if updated_count > 0:
-            print(f"\n✓ Updated {updated_count} rulebook(s).")
+            console.print(Panel(
+                f"[green]✓ Updated {updated_count} rulebook(s).[/green]",
+                border_style="green",
+                box=box.ROUNDED
+            ))
         else:
-            print(f"\nAll rulebooks are already up-to-date!")
+            console.print(Panel(
+                "[yellow]All rulebooks are already up-to-date![/yellow]",
+                border_style="yellow",
+                box=box.ROUNDED
+            ))
         return
     
     # Handle single rulebook update
     if rulebook_name is None:
-        print("\nAvailable rulebooks to update:\n")
+        console.print()
+        table = Table(title="Available Rulebooks to Update", box=box.ROUNDED, border_style="cyan")
+        table.add_column("#", justify="center", style="yellow", no_wrap=True)
+        table.add_column("Dialect", style="cyan bold")
+        table.add_column("File", style="dim")
+        
         for i, rulebook_file in enumerate(sorted(user_rulebooks), 1):
             try:
                 cfg = SQLTidyConfig.from_file(str(rulebook_file))
-                print(f"{i}. {cfg.dialect}")
+                table.add_row(str(i), cfg.dialect, rulebook_file.name)
             except Exception:
-                print(f"{i}. {rulebook_file.name}")
+                table.add_row(str(i), "?", rulebook_file.name)
+        
+        console.print(table)
+        console.print()
         
         while True:
             choice = input(f"\nSelect rulebook to update (1-{len(user_rulebooks)}): ").strip()
@@ -709,8 +901,13 @@ def update_rulebook(rulebook_name: Optional[str] = None, include_plugins: bool =
             rulebook_file = user_dir / f"sqltidy_{rulebook_name}.json"
         
         if not rulebook_file.exists():
-            print(f"\nNo user customization found for '{rulebook_name}'.")
-            print(f"Tip: Use 'sqltidy rulebooks create -d {rulebook_name}' to create one.")
+            console.print()
+            console.print(Panel(
+                f"[yellow]No user customization found for '{rulebook_name}'.[/yellow]\n\n"
+                f"[dim]Tip: Use[/dim] [cyan]sqltidy rulebooks create -d {rulebook_name}[/cyan] [dim]to create one.[/dim]",
+                border_style="yellow",
+                box=box.ROUNDED
+            ))
             return
     
     # Load existing config
@@ -718,14 +915,24 @@ def update_rulebook(rulebook_name: Optional[str] = None, include_plugins: bool =
         existing_config = load_rulebook_file(str(rulebook_file))
         dialect = existing_config.get('dialect', 'postgresql')
     except Exception as e:
-        print(f"\nError loading {rulebook_file.name}: {e}")
+        console.print()
+        console.print(Panel(
+            f"[red]Error loading {rulebook_file.name}:[/red] {e}",
+            border_style="red",
+            box=box.ROUNDED
+        ))
         return
     
     # Generate fresh config from current rules
     try:
         fresh_config = generate_dialect_config(dialect, include_plugins=include_plugins)
     except Exception as e:
-        print(f"\nError generating config for {dialect}: {e}")
+        console.print()
+        console.print(Panel(
+            f"[red]Error generating config for {dialect}:[/red] {e}",
+            border_style="red",
+            box=box.ROUNDED
+        ))
         return
     
     # Merge nested structure: keep existing values, add new fields
@@ -753,29 +960,49 @@ def update_rulebook(rulebook_name: Optional[str] = None, include_plugins: bool =
     new_fields = new_tidy_fields | new_rewrite_fields
     
     if not new_fields:
-        print(f"\n✓ {dialect} rulebook is already up-to-date!")
+        console.print()
+        console.print(Panel(
+            f"[green]✓ {dialect} rulebook is already up-to-date![/green]",
+            border_style="green",
+            box=box.ROUNDED
+        ))
         return
     
-    print(f"\nFound {len(new_fields)} new field(s) to add to {dialect} rulebook:")
+    # Show what will be added
+    console.print()
+    tree = Tree(
+        f"[bold cyan]New Fields for {dialect} Rulebook ({len(new_fields)} found)[/bold cyan]",
+        guide_style="cyan"
+    )
+    
     if new_tidy_fields:
-        print(f"\n  Tidy rules:")
+        tidy_branch = tree.add("[yellow]Tidy Rules[/yellow]")
         for field in sorted(new_tidy_fields):
             default_value = fresh_tidy[field]
-            print(f"    + {field} = {default_value}")
+            tidy_branch.add(f"[green]+[/green] {field} = [dim]{default_value}[/dim]")
+    
     if new_rewrite_fields:
-        print(f"\n  Rewrite rules:")
+        rewrite_branch = tree.add("[magenta]Rewrite Rules[/magenta]")
         for field in sorted(new_rewrite_fields):
             default_value = fresh_rewrite[field]
-            print(f"    + {field} = {default_value}")
+            rewrite_branch.add(f"[green]+[/green] {field} = [dim]{default_value}[/dim]")
     
-    confirm = input(f"\nUpdate {rulebook_file.name} with new fields? [Y/n]: ").strip().lower()
+    console.print(tree)
+    console.print()
+    
+    confirm = input(f"Update {rulebook_file.name} with new fields? [Y/n]: ").strip().lower()
     if confirm in ('', 'y', 'yes'):
         # Save updated config
         with open(rulebook_file, 'w', encoding='utf-8') as f:
             json.dump(merged_config, f, indent=2)
-        print(f"\n✓ Updated {rulebook_file.name} with {len(new_fields)} new field(s).")
+        console.print()
+        console.print(Panel(
+            f"[green]✓ Updated {rulebook_file.name} with {len(new_fields)} new field(s).[/green]",
+            border_style="green",
+            box=box.ROUNDED
+        ))
     else:
-        print("\nUpdate cancelled.")
+        console.print("\n[yellow]Update cancelled.[/yellow]")
 
 
 def load_rulebook_file(filepath: str) -> Dict[str, Any]:
