@@ -3,7 +3,7 @@ import sys
 import json
 from pathlib import Path
 from . import __version__
-from .api import format_sql, format_sql_folder
+from .api import tidy_sql, rewrite_sql, format_sql_folder, _format_sql
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 from .generator import create_rulebook, list_rulebooks, edit_rulebook, reset_rulebook, update_rulebook, load_rulebook_file, get_bundled_rulebook_path, get_user_rulebooks_dir, add_rule, list_rules, remove_rule
 from .tokenizer import tokenize_with_types, TokenType, is_keyword
@@ -137,26 +137,43 @@ def handle_tidy_command(args):
             with console.status(f"[cyan]Processing {input_path.name}...", spinner="dots"):
                 with open(args.input, "r", encoding="utf-8") as f:
                     sql = f.read()
-                formatted_sql = format_sql(sql, config=config, rule_type='tidy')
+                formatted_sql = tidy_sql(sql, config=config, rule_type='tidy')
             
             console.print(f"[green]✓[/green] Formatted {input_path.name}")
             
             if args.output:
-                with open(args.output, "w", encoding="utf-8") as f:
+                output_path = Path(args.output)
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(output_path, "w", encoding="utf-8") as f:
                     f.write(formatted_sql)
-            elif not args.no_in_place:
-                with open(args.input, "w", encoding="utf-8") as f:
-                    f.write(formatted_sql)
-            else:
+                console.print(f"[dim]Saved to:[/dim] [cyan]{output_path}[/cyan]")
+            elif args.no_in_place:
                 print(formatted_sql)
+            else:
+                # Default: output to Cleaned folder
+                output_path = input_path.parent / "Cleaned" / input_path.name
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(output_path, "w", encoding="utf-8") as f:
+                    f.write(formatted_sql)
+                console.print(f"[dim]Saved to:[/dim] [cyan]{output_path}[/cyan]")
                 
         elif input_path.is_dir():
             # Folder processing
+            # Determine output location
+            if args.output:
+                output_dir = Path(args.output)
+            elif args.no_in_place:
+                output_dir = None  # Print to stdout
+            else:
+                # Default: output to Cleaned subfolder
+                output_dir = input_path / "Cleaned"
+            
             console.print(Panel(
                 f"[cyan]Path:[/cyan] {input_path}\n"
                 f"[cyan]Mode:[/cyan] {'Recursive' if args.recursive else 'Non-recursive'}\n"
                 f"[cyan]Pattern:[/cyan] {args.pattern}\n"
-                f"[cyan]Dialect:[/cyan] {dialect}",
+                f"[cyan]Dialect:[/cyan] {dialect}\n"
+                f"[cyan]Output:[/cyan] {output_dir if output_dir else 'stdout'}",
                 title="[bold cyan]Processing SQL Files",
                 border_style="cyan"
             ))
@@ -191,7 +208,7 @@ def handle_tidy_command(args):
                             with open(file_path, "r", encoding="utf-8") as f:
                                 sql = f.read()
                             
-                            result = format_sql(sql, config=config, rule_type='tidy', return_metadata=True)
+                            result = _format_sql(sql, config=config, rule_type='tidy', return_metadata=True)
                             formatted_sql = result['sql'] if isinstance(result, dict) else result
                             
                             # Track applied rules by type
@@ -212,14 +229,13 @@ def handle_tidy_command(args):
                                     elif rule_type == 'rewrite':
                                         results['all_rewrite_rules'].add(rule['name'])
                             
-                            if args.output:
-                                output_path = Path(args.output) / file_path.relative_to(input_path)
+                            if output_dir:
+                                output_path = output_dir / file_path.relative_to(input_path)
                                 output_path.parent.mkdir(parents=True, exist_ok=True)
                                 with open(output_path, "w", encoding="utf-8") as f:
                                     f.write(formatted_sql)
-                            elif not args.no_in_place:
-                                with open(file_path, "w", encoding="utf-8") as f:
-                                    f.write(formatted_sql)
+                            elif args.no_in_place:
+                                print(formatted_sql)
                             
                             results['success'] += 1
                             progress.update(task, advance=1, description=f"[cyan]Formatting files...")
@@ -302,7 +318,7 @@ def handle_tidy_command(args):
             sys.exit(1)
         
         sql = sys.stdin.read()
-        formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
+        formatted_sql = tidy_sql(sql, config=config)
         print(formatted_sql)
 
 
@@ -319,31 +335,48 @@ def handle_rewrite_command(args):
             with console.status(f"[cyan]Rewriting {input_path.name}...", spinner="dots"):
                 with open(args.input, "r", encoding="utf-8") as f:
                     sql = f.read()
-                formatted_sql = format_sql(sql, config=config, rule_type='rewrite')
+                formatted_sql = rewrite_sql(sql, config=config)
                 
                 if args.tidy:
-                    formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
+                    formatted_sql = tidy_sql(formatted_sql, config=config)
             
             console.print(f"[green]✓[/green] Rewritten {input_path.name}")
             
             if args.output:
-                with open(args.output, "w", encoding="utf-8") as f:
+                output_path = Path(args.output)
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(output_path, "w", encoding="utf-8") as f:
                     f.write(formatted_sql)
-            elif not args.no_in_place:
-                with open(args.input, "w", encoding="utf-8") as f:
-                    f.write(formatted_sql)
-            else:
+                console.print(f"[dim]Saved to:[/dim] [cyan]{output_path}[/cyan]")
+            elif args.no_in_place:
                 print(formatted_sql)
+            else:
+                # Default: output to Cleaned folder
+                output_path = input_path.parent / "Cleaned" / input_path.name
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(output_path, "w", encoding="utf-8") as f:
+                    f.write(formatted_sql)
+                console.print(f"[dim]Saved to:[/dim] [cyan]{output_path}[/cyan]")
                 
         elif input_path.is_dir():
             # Folder processing
             mode_text = "Rewrite + Tidy" if args.tidy else "Rewrite"
             
+            # Determine output location
+            if args.output:
+                output_dir = Path(args.output)
+            elif args.no_in_place:
+                output_dir = None  # Print to stdout
+            else:
+                # Default: output to Cleaned subfolder
+                output_dir = input_path / "Cleaned"
+            
             console.print(Panel(
                 f"[cyan]Path:[/cyan] {input_path}\n"
                 f"[cyan]Mode:[/cyan] {mode_text} ({'Recursive' if args.recursive else 'Non-recursive'})\n"
                 f"[cyan]Pattern:[/cyan] {args.pattern}\n"
-                f"[cyan]Dialect:[/cyan] {dialect}",
+                f"[cyan]Dialect:[/cyan] {dialect}\n"
+                f"[cyan]Output:[/cyan] {output_dir if output_dir else 'stdout'}",
                 title="[bold cyan]Processing SQL Files",
                 border_style="cyan"
             ))
@@ -378,7 +411,7 @@ def handle_rewrite_command(args):
                             with open(file_path, "r", encoding="utf-8") as f:
                                 sql = f.read()
                             
-                            result = format_sql(sql, config=config, rule_type='rewrite', return_metadata=True)
+                            result = _format_sql(sql, config=config, rule_type='rewrite', return_metadata=True)
                             formatted_sql = result['sql'] if isinstance(result, dict) else result
                             
                             # Track applied rewrite rules
@@ -396,7 +429,7 @@ def handle_rewrite_command(args):
                                         results['all_rewrite_rules'].add(rule['name'])
                             
                             if args.tidy:
-                                tidy_result = format_sql(formatted_sql, config=config, rule_type='tidy', return_metadata=True)
+                                tidy_result = _format_sql(formatted_sql, config=config, rule_type='tidy', return_metadata=True)
                                 formatted_sql = tidy_result['sql'] if isinstance(tidy_result, dict) else tidy_result
                                 
                                 # Track applied tidy rules
@@ -413,14 +446,13 @@ def handle_rewrite_command(args):
                                         if rule_type == 'tidy':
                                             results['all_tidy_rules'].add(rule['name'])
                             
-                            if args.output:
-                                output_path = Path(args.output) / file_path.relative_to(input_path)
+                            if output_dir:
+                                output_path = output_dir / file_path.relative_to(input_path)
                                 output_path.parent.mkdir(parents=True, exist_ok=True)
                                 with open(output_path, "w", encoding="utf-8") as f:
                                     f.write(formatted_sql)
-                            elif not args.no_in_place:
-                                with open(file_path, "w", encoding="utf-8") as f:
-                                    f.write(formatted_sql)
+                            elif args.no_in_place:
+                                print(formatted_sql)
                             
                             results['success'] += 1
                             progress.update(task, advance=1, description=f"[cyan]{mode_text}...")
@@ -496,8 +528,6 @@ def handle_rewrite_command(args):
                         folder_path=input_path,
                         output_folder=args.output,
                         config=config,
-                        custom_rules=plugin_rules,
-                        rule_type='rewrite',
                         pattern=args.pattern,
                         recursive=args.recursive,
                         in_place=not args.no_in_place
@@ -509,8 +539,6 @@ def handle_rewrite_command(args):
                             folder_path=target_folder,
                             output_folder=None,
                             config=config,
-                            custom_rules=[],
-                            rule_type='tidy',
                             pattern=args.pattern,
                             recursive=args.recursive,
                             in_place=True
@@ -522,8 +550,6 @@ def handle_rewrite_command(args):
                         folder_path=input_path,
                         output_folder=args.output,
                         config=config,
-                        custom_rules=plugin_rules,
-                        rule_type='rewrite',
                         pattern=args.pattern,
                         recursive=args.recursive,
                         in_place=not args.no_in_place
@@ -553,10 +579,10 @@ def handle_rewrite_command(args):
             sys.exit(1)
         
         sql = sys.stdin.read()
-        formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
+        formatted_sql = rewrite_sql(sql, config=config)
         
         if args.tidy:
-            formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
+            formatted_sql = tidy_sql(formatted_sql, config=config)
         
         print(formatted_sql)
 

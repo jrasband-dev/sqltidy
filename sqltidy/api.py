@@ -1,74 +1,29 @@
-from typing import List, Optional, Union
-from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
-from .rules.base import BaseRule
-from .core import SQLFormatter
-from .plugins import load_rule_file, load_rules_from_directory
-from .generator import get_user_rules_dir, get_bundled_rulebook_path, load_rulebook_file, get_user_rulebooks_dir
+from typing import Optional, Union
 from pathlib import Path
+from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
+from .core import SQLFormatter
+from .generator import get_bundled_rulebook_path, load_rulebook_file, get_user_rulebooks_dir
 
-# In-memory list to hold extra rule rules registered at runtime
-_extra_rules = []
 
+"""API utilities for formatting SQL.
 
-def _load_config_for_dialect(dialect: str) -> SQLTidyConfig:
-    """
-    Load configuration for a specific dialect.
-    
-    Priority order:
-    1. User's custom rulebook (~/.sqltidy/rulebooks/sqltidy_{dialect}.json)
-    2. Bundled rulebook (sqltidy/rulebooks/sqltidy_{dialect}.json) if exists
-    3. Auto-generate from rule metadata (fallback)
-    
-    Args:
-        dialect: SQL dialect name
-        
-    Returns:
-        SQLTidyConfig: Loaded configuration
-    """
-    # Check for user's custom rulebook first
-    user_rulebook_path = get_user_rulebooks_dir() / f"sqltidy_{dialect}.json"
-    if user_rulebook_path.exists():
-        rulebook_data = load_rulebook_file(str(user_rulebook_path))
-        return SQLTidyConfig.from_dict(rulebook_data)
-    
-    # Check for bundled rulebook
-    bundled_path = get_bundled_rulebook_path(dialect)
-    if bundled_path.exists():
-        rulebook_data = load_rulebook_file(str(bundled_path))
-        return SQLTidyConfig.from_dict(rulebook_data)
-    
-    # No JSON file found - generate from rules (Option 2!)
-    from .config_schema import generate_dialect_config
-    config_dict = generate_dialect_config(dialect, include_plugins=False)
-    return SQLTidyConfig.from_dict(config_dict)
+The CLI constructs and passes `SQLTidyConfig` explicitly. For library users
+calling these functions without a config, `_format_sql` will resolve a config
+by checking the user's rulebook, bundled rulebook, or generating defaults.
+"""
 
-def register_rule(rule: BaseRule):
-    """
-    Register a rule at runtime.
+# Removed runtime rule registration from API. Plugins are loaded automatically
+# from the user's rules directory via the plugins system.
 
-    Args:
-        rule (BaseRule): An instance of a rule to apply.
-    """
-    if not isinstance(rule, BaseRule):
-        raise TypeError("Rule must be an instance of BaseRule")
-    _extra_rules.append(rule)
-
-def clear_rules():
-    """
-    Clear all runtime-registered rules.
-    """
-    _extra_rules.clear()
-
-def format_sql(
+def _format_sql(
     sql: str,
     config: Optional[SQLTidyConfig] = None,
     dialect: Optional[str] = None,
-    custom_rules: Optional[List[BaseRule]] = None,
     rule_type: Optional[str] = None,
     return_metadata: bool = False
 ) -> Union[str, dict]:
     """
-    Format a SQL string using all registered rules, including custom rules.
+    Internal function to format SQL with specified rule type.
 
     Args:
         sql (str): The SQL string to format.
@@ -76,7 +31,6 @@ def format_sql(
             will use dialect parameter or default configuration.
         dialect (str, optional): SQL dialect shorthand. One of: 'sqlserver', 'postgresql',
             'mysql', 'oracle', 'sqlite'. Ignored if config is provided.
-        custom_rules (List[BaseRule], optional): Additional custom rules to apply.
         rule_type (str, optional): Filter rules by type ('tidy' or 'rewrite'). None loads all.
         return_metadata (bool, optional): If True, return dict with 'sql' and 'applied_rules'.
 
@@ -88,25 +42,46 @@ def format_sql(
     """
     # Resolve config from dialect if provided
     if config is None:
-        if dialect is not None:
-            if dialect not in SUPPORTED_DIALECTS:
-                raise ValueError(
-                    f"Unsupported dialect: '{dialect}'. "
-                    f"Must be one of: {', '.join(SUPPORTED_DIALECTS)}"
-                )
-            config = _load_config_for_dialect(dialect)
+        # Default dialect
+        dialect = dialect or 'sqlserver'
+        if dialect not in SUPPORTED_DIALECTS:
+            raise ValueError(
+                f"Unsupported dialect: '{dialect}'. "
+                f"Must be one of: {', '.join(SUPPORTED_DIALECTS)}"
+            )
+
+        # Priority order:
+        # 1. User's custom rulebook (~/.sqltidy/rulebooks/sqltidy_{dialect}.json)
+        # 2. Bundled rulebook (sqltidy/rulebooks/sqltidy_{dialect}.json) if exists
+        # 3. Auto-generate from rule metadata (fallback)
+        user_rulebook_path = get_user_rulebooks_dir() / f"sqltidy_{dialect}.json"
+        if user_rulebook_path.exists():
+            rulebook_data = load_rulebook_file(str(user_rulebook_path))
+            config = SQLTidyConfig.from_dict(rulebook_data)
         else:
-            # Default to sqlserver
-            config = _load_config_for_dialect('sqlserver')
+            bundled_path = get_bundled_rulebook_path(dialect)
+            if bundled_path.exists():
+                rulebook_data = load_rulebook_file(str(bundled_path))
+                config = SQLTidyConfig.from_dict(rulebook_data)
+            else:
+                from .config_schema import generate_dialect_config
+                config_dict = generate_dialect_config(dialect, include_plugins=False)
+                config = SQLTidyConfig.from_dict(config_dict)
     
     formatter = SQLFormatter(config=config, rule_type=rule_type)
 
-    # Inject runtime rules into the formatter
-    formatter.rules.extend(_extra_rules)
-    
-    # Inject custom rules if provided
-    if custom_rules:
-        formatter.rules.extend(custom_rules)
+    # Auto-load user plugin rules and inject them into the formatter
+    # so CLI "rules add" continues to work without API runtime registration.
+    try:
+        from .plugins import auto_load_user_rules, get_registered_rules
+        auto_load_user_rules()
+        for rule_cls in get_registered_rules():
+            rule = rule_cls()
+            if rule_type is None or getattr(rule, 'rule_type', None) == rule_type:
+                formatter.rules.append(rule)
+    except Exception:
+        # Be resilient: if plugin loading fails, continue with built-in rules
+        pass
 
     return formatter.format(sql, return_metadata=return_metadata)
 
@@ -132,7 +107,7 @@ def tidy_sql(sql: str, dialect: str = 'sqlserver', config: Optional[SQLTidyConfi
         >>> tidy_sql(sql, dialect='postgresql')
         'select\n    name\n    ,email\nfrom users\nwhere active=1'
     """
-    return format_sql(sql, config=config, dialect=dialect, rule_type='tidy')
+    return _format_sql(sql, config=config, dialect=dialect, rule_type='tidy')
 
 
 def rewrite_sql(sql: str, dialect: str = 'sqlserver', config: Optional[SQLTidyConfig] = None) -> str:
@@ -156,7 +131,7 @@ def rewrite_sql(sql: str, dialect: str = 'sqlserver', config: Optional[SQLTidyCo
         >>> rewrite_sql(sql)
         'WITH cte_1 AS (SELECT COUNT(*) FROM users) SELECT total FROM orders'
     """
-    return format_sql(sql, config=config, dialect=dialect, rule_type='rewrite')
+    return _format_sql(sql, config=config, dialect=dialect, rule_type='rewrite')
 
 
 def tidy_and_rewrite_sql(
@@ -186,48 +161,10 @@ def tidy_and_rewrite_sql(
         'with cte_1 as (\n    select count(*)\n    from users\n)\nselect\n    total\nfrom orders'
     """
     # First apply rewrite rules
-    sql = format_sql(sql, config=config, dialect=dialect, rule_type='rewrite')
+    sql = _format_sql(sql, config=config, dialect=dialect, rule_type='rewrite')
     # Then apply tidy rules
-    sql = format_sql(sql, config=config, dialect=dialect, rule_type='tidy')
+    sql = _format_sql(sql, config=config, dialect=dialect, rule_type='tidy')
     return sql
-
-
-def load_user_rules() -> List[type]:
-    """
-    Load all rules from the user's rule plugin directory (~/.sqltidy/rules/).
-    
-    Returns:
-        List[type]: List of rule classes found in user rules.
-        
-    Example:
-        >>> rules = load_user_rules()
-        >>> for rule_cls in rules:
-        ...     register_rule(rule_cls())
-    """
-    rules_dir = get_user_rules_dir()
-    
-    if not rules_dir.exists():
-        return []
-    
-    return load_rules_from_directory(str(rules_dir))
-
-
-def load_rule(filepath: str) -> List[type]:
-    """
-    Load rules from a Python file.
-    
-    Args:
-        filepath (str): Path to the rule Python file.
-        
-    Returns:
-        List[type]: List of rule classes found in the rule file.
-        
-    Example:
-        >>> rules = load_rule('my_custom_rules.py')
-        >>> for rule_cls in rules:
-        ...     register_rule(rule_cls())
-    """
-    return load_rule_file(filepath)
 
 
 def format_sql_file(
@@ -235,8 +172,6 @@ def format_sql_file(
     output_path: Optional[Union[str, Path]] = None,
     config: Optional[SQLTidyConfig] = None,
     dialect: Optional[str] = None,
-    custom_rules: Optional[List[BaseRule]] = None,
-    rule_type: Optional[str] = None,
     in_place: bool = True
 ) -> None:
     """
@@ -248,8 +183,6 @@ def format_sql_file(
             overwrites input file. If None and in_place=False, does nothing.
         config (SQLTidyConfig, optional): Formatter configuration.
         dialect (str, optional): SQL dialect shorthand.
-        custom_rules (List[BaseRule], optional): Additional custom rules to apply.
-        rule_type (str, optional): Filter rules by type ('tidy' or 'rewrite'). None loads all.
         in_place (bool): If True and output_path is None, overwrites input file. Default True.
         
     Raises:
@@ -266,12 +199,10 @@ def format_sql_file(
         sql = f.read()
     
     # Format the SQL
-    formatted_sql = format_sql(
+    formatted_sql = _format_sql(
         sql,
         config=config,
-        dialect=dialect,
-        custom_rules=custom_rules,
-        rule_type=rule_type
+        dialect=dialect
     )
     
     # Determine output path
@@ -293,8 +224,6 @@ def format_sql_folder(
     output_folder: Optional[Union[str, Path]] = None,
     config: Optional[SQLTidyConfig] = None,
     dialect: Optional[str] = None,
-    custom_rules: Optional[List[BaseRule]] = None,
-    rule_type: Optional[str] = None,
     pattern: str = "*.sql",
     recursive: bool = False,
     in_place: bool = True
@@ -308,8 +237,6 @@ def format_sql_folder(
             overwrites original files. If None and in_place=False, skips writing.
         config (SQLTidyConfig, optional): Formatter configuration.
         dialect (str, optional): SQL dialect shorthand.
-        custom_rules (List[BaseRule], optional): Additional custom rules to apply.
-        rule_type (str, optional): Filter rules by type ('tidy' or 'rewrite'). None loads all.
         pattern (str): Glob pattern for matching SQL files. Default "*.sql".
         recursive (bool): If True, search subdirectories recursively. Default False.
         in_place (bool): If True and output_folder is None, overwrites files. Default True.
@@ -367,8 +294,6 @@ def format_sql_folder(
                 output_path=out_path,
                 config=config,
                 dialect=dialect,
-                custom_rules=custom_rules,
-                rule_type=rule_type,
                 in_place=in_place
             )
             

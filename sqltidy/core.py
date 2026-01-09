@@ -1,8 +1,7 @@
 # sqltidy/core.py
-import re
 from typing import List, Dict, Any, Union
 from .rulebook import SQLTidyConfig
-from .tokenizer import TOKEN_RE, tokenize_with_types, Token, TokenGroup, SemanticLevel
+from .tokenizer import tokenize_with_types, Token, TokenGroup, SemanticLevel
 
 class SQLFormatter:
     """Main SQL formatting engine."""
@@ -19,30 +18,6 @@ class SQLFormatter:
         self.ctx = FormatterContext(config or SQLTidyConfig())
         self.rules = load_rules(rule_type=rule_type)
         self.applied_rules = []  # Track which rules were actually applied
-
-    def tokenize(self, sql: str) -> List[str]:
-        """Convert raw SQL into proper tokens without external dependencies.
-        
-        DEPRECATED: This method is kept for backward compatibility.
-        New code should use tokenize_with_types() instead.
-        """
-        tokens = []
-        for groups in TOKEN_RE.findall(sql):
-            # Find the first non-empty capturing group
-            for t in groups:
-                if t == "":
-                    continue
-                # normalize whitespace
-                if t.isspace():
-                    if "\n" in t:
-                        tokens.append("\n")
-                    else:
-                        tokens.append(" ")
-                else:
-                    tokens.append(t)
-                break
-
-        return tokens
 
     def flatten_tokens(self, tokens: List[Union[Token, TokenGroup]]) -> str:
         """Convert Token/TokenGroup objects back to SQL string.
@@ -162,10 +137,3 @@ class SQLFormatter:
         result: List[str] = []
         emit_from(tokens, result)
         return result
-
-    def join_tokens(self, tokens: List[str]) -> str:
-        """Reassemble tokens into formatted SQL text.
-        
-        DEPRECATED: Use flatten_tokens() instead.
-        """
-        return "".join(tokens).strip()
