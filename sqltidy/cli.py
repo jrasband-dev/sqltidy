@@ -10,28 +10,21 @@ from .tokenizer import tokenize_with_types, TokenType, is_keyword
 from .plugins import load_rule_file, load_rules_from_directory, load_rules_module
 from .dialects.registry import list_dialects, get_dialect, is_dialect_available
 
-try:
-    from rich.console import Console
-    from rich.text import Text
-    from rich.panel import Panel
-    from rich.table import Table
-    from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeElapsedColumn
-    from rich.syntax import Syntax
-    from rich.tree import Tree
-    from rich import box
-    HAS_RICH = True
-except ImportError:
-    HAS_RICH = False
+from rich.console import Console
+from rich.text import Text
+from rich.panel import Panel
+from rich.table import Table
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeElapsedColumn
+from rich.syntax import Syntax
+from rich.tree import Tree
+from rich import box
 
 # Create a global console instance
-console = Console() if HAS_RICH else None
+console = Console()
 
 
 def print_logo():
     """Print the sqltidy ASCII art logo."""
-    if not HAS_RICH:
-        return
-    
     logo = Text("""
 ███████╗ ██████╗ ██╗  ████████╗██╗██████╗ ██╗   ██╗
 ██╔════╝██╔═══██╗██║  ╚══██╔══╝██║██╔══██╗╚██╗ ██╔╝
@@ -181,17 +174,12 @@ def handle_tidy_command(args):
         
         if input_path.is_file():
             # Single file processing
-            if HAS_RICH:
-                with console.status(f"[cyan]Processing {input_path.name}...", spinner="dots"):
-                    with open(args.input, "r", encoding="utf-8") as f:
-                        sql = f.read()
-                    formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
-                
-                console.print(f"[green]✓[/green] Formatted {input_path.name}")
-            else:
+            with console.status(f"[cyan]Processing {input_path.name}...", spinner="dots"):
                 with open(args.input, "r", encoding="utf-8") as f:
                     sql = f.read()
                 formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='tidy')
+            
+            console.print(f"[green]✓[/green] Formatted {input_path.name}")
             
             if args.output:
                 with open(args.output, "w", encoding="utf-8") as f:
@@ -204,21 +192,14 @@ def handle_tidy_command(args):
                 
         elif input_path.is_dir():
             # Folder processing
-            if HAS_RICH:
-                console.print(Panel(
-                    f"[cyan]Path:[/cyan] {input_path}\n"
-                    f"[cyan]Mode:[/cyan] {'Recursive' if args.recursive else 'Non-recursive'}\n"
-                    f"[cyan]Pattern:[/cyan] {args.pattern}\n"
-                    f"[cyan]Dialect:[/cyan] {dialect}",
-                    title="[bold cyan]Processing SQL Files",
-                    border_style="cyan"
-                ))
-            else:
-                print(f"Processing SQL files in: {input_path}")
-                if args.recursive:
-                    print(f"  Mode: Recursive")
-                print(f"  Pattern: {args.pattern}")
-                print(f"  Dialect: {dialect}")
+            console.print(Panel(
+                f"[cyan]Path:[/cyan] {input_path}\n"
+                f"[cyan]Mode:[/cyan] {'Recursive' if args.recursive else 'Non-recursive'}\n"
+                f"[cyan]Pattern:[/cyan] {args.pattern}\n"
+                f"[cyan]Dialect:[/cyan] {dialect}",
+                title="[bold cyan]Processing SQL Files",
+                border_style="cyan"
+            ))
             
             # Get list of files to process
             if args.recursive:
@@ -227,7 +208,7 @@ def handle_tidy_command(args):
                 files = list(input_path.glob(args.pattern))
             
             # Process with progress bar
-            if HAS_RICH and files:
+            if files:
                 results = {
                     'total': 0, 'success': 0, 'failed': 0, 'errors': [],
                     'tidy_rules': set(), 'rewrite_rules': set(),
@@ -348,30 +329,7 @@ def handle_tidy_command(args):
                 if results['failed'] > 0:
                     sys.exit(1)
             else:
-                # Fallback to original implementation
-                results = format_sql_folder(
-                    folder_path=input_path,
-                    output_folder=args.output,
-                    config=config,
-                    custom_rules=plugin_rules,
-                    rule_type='tidy',
-                    pattern=args.pattern,
-                    recursive=args.recursive,
-                    in_place=not args.no_in_place
-                )
-                
-                print(f"\nResults:")
-                print(f"  Total files: {results['total']}")
-                print(f"  Successful: {results['success']}")
-                print(f"  Failed: {results['failed']}")
-                
-                if results['errors']:
-                    print(f"\nErrors:")
-                    for error in results['errors']:
-                        print(f"  {error['file']}: {error['error']}")
-                
-                if results['failed'] > 0:
-                    sys.exit(1)
+                console.print("[yellow]No files found matching pattern[/yellow]")
         else:
             print(f"Error: Input path does not exist: {args.input}", file=sys.stderr)
             sys.exit(1)
@@ -399,23 +357,15 @@ def handle_rewrite_command(args):
         
         if input_path.is_file():
             # Single file processing
-            if HAS_RICH:
-                with console.status(f"[cyan]Rewriting {input_path.name}...", spinner="dots"):
-                    with open(args.input, "r", encoding="utf-8") as f:
-                        sql = f.read()
-                    formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
-                    
-                    if args.tidy:
-                        formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
-                
-                console.print(f"[green]✓[/green] Rewritten {input_path.name}")
-            else:
+            with console.status(f"[cyan]Rewriting {input_path.name}...", spinner="dots"):
                 with open(args.input, "r", encoding="utf-8") as f:
                     sql = f.read()
                 formatted_sql = format_sql(sql, config=config, custom_rules=plugin_rules, rule_type='rewrite')
                 
                 if args.tidy:
                     formatted_sql = format_sql(formatted_sql, config=config, rule_type='tidy')
+            
+            console.print(f"[green]✓[/green] Rewritten {input_path.name}")
             
             if args.output:
                 with open(args.output, "w", encoding="utf-8") as f:
@@ -430,23 +380,14 @@ def handle_rewrite_command(args):
             # Folder processing
             mode_text = "Rewrite + Tidy" if args.tidy else "Rewrite"
             
-            if HAS_RICH:
-                console.print(Panel(
-                    f"[cyan]Path:[/cyan] {input_path}\n"
-                    f"[cyan]Mode:[/cyan] {mode_text} ({'Recursive' if args.recursive else 'Non-recursive'})\n"
-                    f"[cyan]Pattern:[/cyan] {args.pattern}\n"
-                    f"[cyan]Dialect:[/cyan] {dialect}",
-                    title="[bold cyan]Processing SQL Files",
-                    border_style="cyan"
-                ))
-            else:
-                print(f"Processing SQL files in: {input_path}")
-                if args.recursive:
-                    print(f"  Mode: Recursive")
-                print(f"  Pattern: {args.pattern}")
-                print(f"  Dialect: {dialect}")
-                if args.tidy:
-                    print("  Mode: Rewrite + Tidy")
+            console.print(Panel(
+                f"[cyan]Path:[/cyan] {input_path}\n"
+                f"[cyan]Mode:[/cyan] {mode_text} ({'Recursive' if args.recursive else 'Non-recursive'})\n"
+                f"[cyan]Pattern:[/cyan] {args.pattern}\n"
+                f"[cyan]Dialect:[/cyan] {dialect}",
+                title="[bold cyan]Processing SQL Files",
+                border_style="cyan"
+            ))
             
             # Get list of files to process
             if args.recursive:
@@ -455,7 +396,7 @@ def handle_rewrite_command(args):
                 files = list(input_path.glob(args.pattern))
             
             # Process with progress bar
-            if HAS_RICH and files:
+            if files:
                 results = {
                     'total': 0, 'success': 0, 'failed': 0, 'errors': [],
                     'tidy_rules': set(), 'rewrite_rules': set(),
@@ -661,6 +602,225 @@ def handle_rewrite_command(args):
         print(formatted_sql)
 
 
+def handle_pattern_command(args):
+    """Handle the pattern command to show information about SQL patterns."""
+    from .patterns import get_all_patterns
+    from .dialects import get_dialect
+    # Import pattern_tokenizer to ensure patterns are registered
+    from . import pattern_tokenizer
+    
+    # List subcommand
+    if args.patterns_command == "list":
+        # Get dialect if specified
+        dialect_obj = None
+        if hasattr(args, 'dialect') and args.dialect:
+            try:
+                dialect_obj = get_dialect(args.dialect)
+            except ValueError as e:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(1)
+        
+        # Get all patterns
+        global_patterns = get_all_patterns()
+        
+        # Get dialect-specific patterns
+        dialect_patterns = []
+        dialect_patterns_by_dialect = {}
+        
+        if dialect_obj:
+            # Get patterns for specific dialect
+            dialect_patterns = dialect_obj.get_patterns()
+            all_patterns = global_patterns + dialect_patterns
+            title = f"Patterns for {dialect_obj.name.upper()}"
+        else:
+            # Get patterns for ALL dialects
+            from .dialects.registry import list_dialects
+            for dialect_name in list_dialects():
+                try:
+                    d = get_dialect(dialect_name)
+                    d_patterns = d.get_patterns()
+                    if d_patterns:
+                        dialect_patterns_by_dialect[dialect_name] = d_patterns
+                        dialect_patterns.extend(d_patterns)
+                except:
+                    pass
+            
+            all_patterns = global_patterns + dialect_patterns
+            title = "All SQL Patterns"
+        
+        if args.format == "json":
+            import json
+            pattern_info = []
+            for pattern in all_patterns:
+                # Determine if pattern is global or dialect-specific
+                is_global = pattern in global_patterns
+                
+                if is_global:
+                    scope = "Global"
+                elif dialect_obj:
+                    scope = dialect_obj.name
+                else:
+                    # Find which dialect this pattern belongs to
+                    scope = "Unknown"
+                    for dname, dpatterns in dialect_patterns_by_dialect.items():
+                        if pattern in dpatterns:
+                            scope = dname
+                            break
+                
+                pattern_info.append({
+                    "name": pattern.name,
+                    "scope": scope,
+                    "class": pattern.__class__.__name__
+                })
+            print(json.dumps(pattern_info, indent=2))
+        else:
+            table = Table(title=title, box=box.ROUNDED, border_style="cyan")
+            table.add_column("Pattern Name", style="cyan bold", no_wrap=True)
+            table.add_column("Scope", style="yellow")
+            table.add_column("Type", style="green")
+            
+            for pattern in all_patterns:
+                # Determine if pattern is global or dialect-specific
+                is_global = pattern in global_patterns
+                
+                if is_global:
+                    scope = "Global"
+                elif dialect_obj:
+                    scope = dialect_obj.name
+                else:
+                    # Find which dialect this pattern belongs to
+                    scope = "Unknown"
+                    for dname, dpatterns in dialect_patterns_by_dialect.items():
+                        if pattern in dpatterns:
+                            scope = dname
+                            break
+                
+                pattern_type = pattern.__class__.__name__.replace("Pattern", "")
+                
+                table.add_row(
+                    pattern.name,
+                    scope,
+                    pattern_type
+                )
+            
+            console.print()
+            console.print(table)
+            
+            # Show summary
+            if dialect_obj:
+                global_count = len([p for p in all_patterns if p in global_patterns])
+                dialect_count = len(dialect_patterns)
+                console.print(f"\n[cyan]Total:[/cyan] {len(all_patterns)} patterns ({global_count} global + {dialect_count} {dialect_obj.name})\n")
+            else:
+                # Count patterns by dialect
+                global_count = len(global_patterns)
+                dialect_counts = {dname: len(dpatterns) for dname, dpatterns in dialect_patterns_by_dialect.items()}
+                dialect_summary = " + ".join([f"{count} {dname}" for dname, count in dialect_counts.items()])
+                if dialect_summary:
+                    console.print(f"\n[cyan]Total:[/cyan] {len(all_patterns)} patterns ({global_count} global + {dialect_summary})\n")
+                else:
+                    console.print(f"\n[cyan]Total:[/cyan] {len(all_patterns)} patterns ({global_count} global)\n")
+    
+    # Show subcommand - analyze SQL file for patterns
+    elif args.patterns_command == "show":
+        sql_file = Path(args.file)
+        
+        if not sql_file.exists():
+            print(f"Error: File '{sql_file}' not found", file=sys.stderr)
+            sys.exit(1)
+        
+        # Read SQL file
+        sql_content = sql_file.read_text()
+        
+        # Get dialect
+        try:
+            dialect = get_dialect(args.dialect)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+        
+        # Tokenize and apply patterns
+        from .tokenizer import tokenize_with_types
+        from .pattern_tokenizer import apply_patterns
+        
+        tokens = tokenize_with_types(sql_content, dialect)
+        tokens_with_patterns = apply_patterns(tokens, dialect)
+        
+        # Collect detected patterns
+        from .tokenizer import TokenGroup, GroupType
+        detected_patterns = []
+        
+        # Map GroupType to pattern names
+        pattern_type_map = {
+            GroupType.JOIN_CLAUSE: 'JoinClause',
+            GroupType.CASE_EXPRESSION: 'CaseExpression',
+            GroupType.CTE: 'CTE',
+            GroupType.WINDOW_FUNCTION: 'WindowFunction',
+            GroupType.SUBQUERY: 'Subquery',
+        }
+        
+        def extract_patterns(tokens, depth=0):
+            for token in tokens:
+                if isinstance(token, TokenGroup):
+                    # Check if this is a pattern we recognize
+                    pattern_name = pattern_type_map.get(token.group_type)
+                    if pattern_name:
+                        # Get the text content of this pattern
+                        pattern_text = token.get_text() if hasattr(token, 'get_text') else ''
+                        detected_patterns.append({
+                            'name': pattern_name,
+                            'type': token.group_type.name if hasattr(token.group_type, 'name') else str(token.group_type),
+                            'group_name': token.name,
+                            'metadata': token.metadata or {},
+                            'text': pattern_text
+                        })
+                    # Recursively check children
+                    extract_patterns(token.tokens, depth + 1)
+        
+        extract_patterns(tokens_with_patterns)
+        
+        # Display results
+        if args.format == "json":
+            import json
+            print(json.dumps({
+                'file': str(sql_file),
+                'dialect': args.dialect,
+                'patterns_detected': detected_patterns
+            }, indent=2))
+        else:
+            console.print()
+            console.print(Panel(
+                f"[bold cyan]{sql_file.name}[/bold cyan]",
+                subtitle=f"[yellow]Dialect: {args.dialect}[/yellow]",
+                border_style="cyan",
+                box=box.ROUNDED
+            ))
+            
+            if detected_patterns:
+                table = Table(title="Detected Patterns", box=box.ROUNDED, border_style="cyan")
+                table.add_column("Pattern", style="cyan bold", no_wrap=True)
+                table.add_column("Text Snippet", style="green")
+                
+                for pattern_info in detected_patterns:
+                    # Truncate text if too long
+                    text = pattern_info.get('text', '')
+                    # Clean up whitespace and newlines
+                    text = ' '.join(text.split())
+                    if len(text) > 100:
+                        text = text[:97] + "..."
+                    
+                    table.add_row(
+                        pattern_info['name'],
+                        text
+                    )
+                
+                console.print()
+                console.print(table)
+                console.print(f"\n[cyan]Total patterns detected:[/cyan] {len(detected_patterns)}\n")
+            else:
+                console.print("\n[yellow]No patterns detected in this file.[/yellow]\n")
+
+
 def handle_dialects_command(args):
     """Handle the dialects command to show information about SQL dialects."""
     
@@ -681,37 +841,24 @@ def handle_dialects_command(args):
                 })
             print(json.dumps(dialect_info, indent=2))
         else:
-            if HAS_RICH:
-                table = Table(title="Available SQL Dialects", box=box.ROUNDED, border_style="cyan")
-                table.add_column("Dialect", style="cyan bold", no_wrap=True)
-                table.add_column("Keywords", justify="right", style="yellow")
-                table.add_column("Data Types", justify="right", style="green")
-                table.add_column("Functions", justify="right", style="magenta")
-                
-                for dialect_name in dialects:
-                    dialect = get_dialect(dialect_name)
-                    table.add_row(
-                        dialect_name,
-                        str(len(dialect.keywords)),
-                        str(len(dialect.data_types)),
-                        str(len(dialect.functions))
-                    )
-                
-                console.print()
-                console.print(table)
-                console.print(f"\n[cyan]Total:[/cyan] {len(dialects)} dialects\n")
-            else:
-                print(f"\n{'='*60}")
-                print(f"Available SQL Dialects")
-                print(f"{'='*60}\n")
-                
-                for dialect_name in dialects:
-                    dialect = get_dialect(dialect_name)
-                    print(f"  {dialect_name:<15} - {len(dialect.keywords):>3} keywords, "
-                          f"{len(dialect.data_types):>2} types, {len(dialect.functions):>2} functions")
-                
-                print(f"\n{'='*60}")
-                print(f"Total: {len(dialects)} dialects\n")
+            table = Table(title="Available SQL Dialects", box=box.ROUNDED, border_style="cyan")
+            table.add_column("Dialect", style="cyan bold", no_wrap=True)
+            table.add_column("Keywords", justify="right", style="yellow")
+            table.add_column("Data Types", justify="right", style="green")
+            table.add_column("Functions", justify="right", style="magenta")
+            
+            for dialect_name in dialects:
+                dialect = get_dialect(dialect_name)
+                table.add_row(
+                    dialect_name,
+                    str(len(dialect.keywords)),
+                    str(len(dialect.data_types)),
+                    str(len(dialect.functions))
+                )
+            
+            console.print()
+            console.print(table)
+            console.print(f"\n[cyan]Total:[/cyan] {len(dialects)} dialects\n")
     
     # Keywords subcommand
     elif args.dialects_command == "keywords":
@@ -723,29 +870,15 @@ def handle_dialects_command(args):
                 import json
                 print(json.dumps(keywords, indent=2))
             else:
-                if HAS_RICH:
-                    panel = Panel(
-                        "\n".join([f"  {k}" for k in keywords]),
-                        title=f"[bold cyan]Keywords for {dialect.name.upper()} ({len(keywords)} total)",
-                        border_style="cyan",
-                        box=box.ROUNDED
-                    )
-                    console.print()
-                    console.print(panel)
-                    console.print()
-                else:
-                    print(f"\n{'='*60}")
-                    print(f"Keywords for {dialect.name.upper()} ({len(keywords)} total)")
-                    print(f"{'='*60}\n")
-                    
-                    # Display keywords in columns
-                    cols = 5
-                    max_len = max(len(k) for k in keywords) + 2 if keywords else 10
-                    for i in range(0, len(keywords), cols):
-                        row = keywords[i:i+cols]
-                        print("  " + "".join(f"{k:<{max_len}}" for k in row))
-                    
-                    print(f"\n{'='*60}\n")
+                panel = Panel(
+                    "\n".join([f"  {k}" for k in keywords]),
+                    title=f"[bold cyan]Keywords for {dialect.name.upper()} ({len(keywords)} total)",
+                    border_style="cyan",
+                    box=box.ROUNDED
+                )
+                console.print()
+                console.print(panel)
+                console.print()
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)
@@ -760,42 +893,24 @@ def handle_dialects_command(args):
                 import json
                 print(json.dumps(types, indent=2))
             else:
-                if HAS_RICH:
-                    if types:
-                        panel = Panel(
-                            "\n".join([f"  {t}" for t in types]),
-                            title=f"[bold cyan]Data Types for {dialect.name.upper()} ({len(types)} total)",
-                            border_style="cyan",
-                            box=box.ROUNDED
-                        )
-                    else:
-                        panel = Panel(
-                            "No data types categorized separately for this dialect.\n"
-                            "Data types may be included in the general keywords list.",
-                            title=f"[bold cyan]Data Types for {dialect.name.upper()}",
-                            border_style="yellow",
-                            box=box.ROUNDED
-                        )
-                    console.print()
-                    console.print(panel)
-                    console.print()
+                if types:
+                    panel = Panel(
+                        "\n".join([f"  {t}" for t in types]),
+                        title=f"[bold cyan]Data Types for {dialect.name.upper()} ({len(types)} total)",
+                        border_style="cyan",
+                        box=box.ROUNDED
+                    )
                 else:
-                    print(f"\n{'='*60}")
-                    print(f"Data Types for {dialect.name.upper()} ({len(types)} total)")
-                    print(f"{'='*60}\n")
-                    
-                    if types:
-                        # Display types in columns
-                        cols = 5
-                        max_len = max(len(t) for t in types) + 2
-                        for i in range(0, len(types), cols):
-                            row = types[i:i+cols]
-                            print("  " + "".join(f"{t:<{max_len}}" for t in row))
-                    else:
-                        print("  No data types categorized separately for this dialect.")
-                        print("  Data types may be included in the general keywords list.")
-                    
-                    print(f"\n{'='*60}\n")
+                    panel = Panel(
+                        "No data types categorized separately for this dialect.\n"
+                        "Data types may be included in the general keywords list.",
+                        title=f"[bold cyan]Data Types for {dialect.name.upper()}",
+                        border_style="yellow",
+                        box=box.ROUNDED
+                    )
+                console.print()
+                console.print(panel)
+                console.print()
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)
@@ -810,42 +925,24 @@ def handle_dialects_command(args):
                 import json
                 print(json.dumps(functions, indent=2))
             else:
-                if HAS_RICH:
-                    if functions:
-                        panel = Panel(
-                            "\n".join([f"  {f}" for f in functions]),
-                            title=f"[bold cyan]Built-in Functions for {dialect.name.upper()} ({len(functions)} total)",
-                            border_style="cyan",
-                            box=box.ROUNDED
-                        )
-                    else:
-                        panel = Panel(
-                            "No functions categorized separately for this dialect.\n"
-                            "Functions may be included in the general keywords list.",
-                            title=f"[bold cyan]Built-in Functions for {dialect.name.upper()}",
-                            border_style="yellow",
-                            box=box.ROUNDED
-                        )
-                    console.print()
-                    console.print(panel)
-                    console.print()
+                if functions:
+                    panel = Panel(
+                        "\n".join([f"  {f}" for f in functions]),
+                        title=f"[bold cyan]Built-in Functions for {dialect.name.upper()} ({len(functions)} total)",
+                        border_style="cyan",
+                        box=box.ROUNDED
+                    )
                 else:
-                    print(f"\n{'='*60}")
-                    print(f"Built-in Functions for {dialect.name.upper()} ({len(functions)} total)")
-                    print(f"{'='*60}\n")
-                    
-                    if functions:
-                        # Display functions in columns
-                        cols = 5
-                        max_len = max(len(f) for f in functions) + 2
-                        for i in range(0, len(functions), cols):
-                            row = functions[i:i+cols]
-                            print("  " + "".join(f"{f:<{max_len}}" for f in row))
-                    else:
-                        print("  No functions categorized separately for this dialect.")
-                        print("  Functions may be included in the general keywords list.")
-                    
-                    print(f"\n{'='*60}\n")
+                    panel = Panel(
+                        "No functions categorized separately for this dialect.\n"
+                        "Functions may be included in the general keywords list.",
+                        title=f"[bold cyan]Built-in Functions for {dialect.name.upper()}",
+                        border_style="yellow",
+                        box=box.ROUNDED
+                    )
+                console.print()
+                console.print(panel)
+                console.print()
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)
@@ -1085,21 +1182,72 @@ def main():
     parse_input_group.add_argument("input", nargs="?", help="SQL file to parse")
     
     parse_parameter_group = parse_parser.add_argument_group('Parameters')
-    parse_parameter_group.add_argument("-o", "--output", help="Output file for token analysis")
-    parse_parameter_group.add_argument("--format", choices=["table", "json", "simple", "tree"], default="table",
-                                       help="Output format (default: table)")
-    parse_parameter_group.add_argument("--level", choices=["basic", "grouped", "structured", "semantic"], default="semantic",
-                                       help="Tokenization level: basic (tokens only), grouped (+functions), structured (+clauses), semantic (full analysis)")
+    parse_parameter_group.add_argument("-o", "--output", help="Output file for analysis")
     parse_parameter_group.add_argument("--dialect", choices=SUPPORTED_DIALECTS, default="sqlserver",
-                                       help="SQL dialect for tokenization (default: sqlserver)")
-    parse_parameter_group.add_argument("--show-whitespace", action="store_true",
-                                      help="Include whitespace tokens in output")
-    parse_parameter_group.add_argument("--keywords-only", action="store_true",
-                                      help="Show only SQL keywords")
-    parse_parameter_group.add_argument("--show-tokens", action="store_true",
-                                      help="Show detailed token table (hidden by default when semantic analysis shown)")
-    parse_parameter_group.add_argument("--no-semantic", action="store_true",
-                                      help="Skip semantic SQL analysis (use with --show-tokens)")
+                                       help="SQL dialect (default: sqlserver)")
+    parse_parameter_group.add_argument("--format", choices=["table", "json"], default="table",
+                                       help="Output format (default: table)")
+    parse_parameter_group.add_argument("--tokens-only", action="store_true",
+                                      help="Show only token list without semantic analysis")
+    parse_parameter_group.add_argument("--show-tree", action="store_true",
+                                      help="Show hierarchical token tree structure")
+
+    # -------------------
+    # patterns Command
+    # -------------------
+    patterns_parser = subparsers.add_parser(
+        "patterns",
+        help="Show SQL pattern information",
+        description="Display information about SQL patterns used for parsing"
+    )
+    
+    patterns_subparsers = patterns_parser.add_subparsers(
+        title='Pattern Commands',
+        dest="patterns_command",
+        required=True
+    )
+    
+    # patterns list
+    patterns_list_parser = patterns_subparsers.add_parser(
+        "list",
+        help="List all available patterns",
+        description="Display a list of all SQL patterns (global and dialect-specific)"
+    )
+    patterns_list_parser.add_argument(
+        "dialect",
+        nargs="?",
+        choices=SUPPORTED_DIALECTS,
+        help="SQL dialect to show patterns for (e.g., sqlserver, postgresql). If omitted, shows global patterns only."
+    )
+    patterns_list_parser.add_argument(
+        "--format",
+        choices=["table", "json"],
+        default="table",
+        help="Output format (default: table)"
+    )
+
+    # patterns show
+    patterns_show_parser = patterns_subparsers.add_parser(
+        "show",
+        help="Show patterns detected in a SQL file",
+        description="Analyze a SQL file and display which patterns were detected"
+    )
+    patterns_show_parser.add_argument(
+        "file",
+        help="Path to the SQL file to analyze"
+    )
+    patterns_show_parser.add_argument(
+        "--dialect",
+        choices=SUPPORTED_DIALECTS,
+        default="sqlserver",
+        help="SQL dialect to use for parsing (default: sqlserver)"
+    )
+    patterns_show_parser.add_argument(
+        "--format",
+        choices=["table", "json"],
+        default="table",
+        help="Output format (default: table)"
+    )
 
     # -------------------
     # dialects Command
@@ -1242,19 +1390,58 @@ def main():
         # Import semantic tokenizer components
         from sqltidy.tokenizer import SemanticLevel, TokenGroup, GroupType, Token
         
-        # Tokenize the SQL with semantic analysis
-        level = SemanticLevel(args.level)
-        if HAS_RICH:
-            with console.status(f"[cyan]Tokenizing SQL at {args.level} level...", spinner="dots"):
-                tokens = tokenize_with_types(sql, dialect=args.dialect, level=level)
-        else:
+        # Always use semantic level unless tokens-only flag is set
+        level = SemanticLevel.BASIC if args.tokens_only else SemanticLevel.SEMANTIC
+        
+        with console.status(f"[cyan]Analyzing SQL...", spinner="dots"):
             tokens = tokenize_with_types(sql, dialect=args.dialect, level=level)
         
         # Generate output
         output_lines = []
         
-        # Show semantic analysis (unless disabled)
-        if not args.no_semantic and level != SemanticLevel.BASIC:
+        # ============================================================
+        # SECTION 1: PATTERNS
+        # ============================================================
+        if not args.tokens_only and level == SemanticLevel.SEMANTIC:
+            # Show patterns detected
+            from sqltidy.patterns import get_all_patterns
+            from sqltidy.dialects import get_dialect as get_dialect_obj
+            
+            dialect_obj = get_dialect_obj(args.dialect)
+            global_patterns = get_all_patterns()
+            dialect_patterns = dialect_obj.get_patterns()
+            all_patterns = global_patterns + dialect_patterns
+            applicable_patterns = [p for p in all_patterns if p.is_applicable(dialect_obj)]
+            
+            use_rich = not args.output
+            
+            if use_rich:
+                console.print("\n[bold magenta]═══ PATTERNS ═══[/bold magenta]")
+                console.print()
+                pattern_table = Table(title="Pattern Detection", box=box.ROUNDED, border_style="magenta")
+                pattern_table.add_column("Pattern", style="cyan")
+                pattern_table.add_column("Dialect", style="yellow")
+                pattern_table.add_column("Status", justify="center", style="green")
+                
+                for pattern in all_patterns:
+                    if pattern.is_applicable(dialect_obj):
+                        scope = "Global" if pattern in global_patterns else args.dialect
+                        pattern_table.add_row(pattern.name, scope, "✓")
+                
+                console.print(pattern_table)
+                console.print(f"\n[dim]{len(applicable_patterns)} patterns active ({len(global_patterns)} global + {len(dialect_patterns)} {args.dialect})[/dim]")
+            else:
+                output_lines.append("\n" + "=" * 60)
+                output_lines.append("PATTERNS")
+                output_lines.append("=" * 60)
+                output_lines.append("\n=== Pattern Detection ===")
+                for pattern in all_patterns:
+                    if pattern.is_applicable(dialect_obj):
+                        scope = "Global" if pattern in global_patterns else args.dialect
+                        output_lines.append(f"  ✓ {pattern.name} ({scope})")
+                output_lines.append(f"\n{len(applicable_patterns)} patterns active ({len(global_patterns)} global + {len(dialect_patterns)} {args.dialect})")
+        
+        if not args.tokens_only and level != SemanticLevel.BASIC:
             # Helper function to find all groups recursively
             def find_all_groups(items, target_type):
                 results = []
@@ -1266,7 +1453,7 @@ def main():
                 return results
             
             # Use Rich only if not outputting to file
-            use_rich = HAS_RICH and not args.output
+            use_rich = not args.output
             
             
             # Find semantic groups
@@ -1575,186 +1762,111 @@ def main():
             
             if total_groups == 0:
                 if use_rich:
-                    console.print("\n[yellow]No semantic SQL structures detected at this level[/yellow]")
-                    console.print(f"[dim]Try using --level=semantic for full analysis[/dim]")
+                    console.print("\n[yellow]No semantic SQL structures detected[/yellow]")
                 else:
-                    output_lines.append("\nNo semantic SQL structures detected at this level")
-                    output_lines.append(f"Try using --level=semantic for full analysis")
-            else:
-                if use_rich:
-                    console.print(f"\n[bold green]Total semantic groups found: {total_groups}[/bold green]")
-                else:
-                    output_lines.append(f"\nTotal semantic groups found: {total_groups}")
-        
-        # Show token table only if explicitly requested or if semantic analysis is disabled
-        show_token_table = args.show_tokens or args.no_semantic or args.format != "table"
-        
-        if show_token_table:
-            # For grouped/structured/semantic levels, show hierarchy by default
-            # Use tree format unless explicitly requesting flat view
-            show_hierarchy = level != SemanticLevel.BASIC and args.format in ("table", "tree")
+                    output_lines.append("\nNo semantic SQL structures detected")
             
-            if show_hierarchy:
-                # Display hierarchical structure
-                def build_tree(items, parent_tree=None, show_ws=False):
-                    """Build a Rich Tree showing token groups and tokens"""
-                    if parent_tree is None and HAS_RICH:
-                        parent_tree = Tree(f"[bold cyan]SQL Structure ({level.value.upper()} level)[/bold cyan]")
-                    
-                    for item in items:
-                        if isinstance(item, TokenGroup):
-                            # Create node for group
-                            group_label = f"[yellow]{item.group_type.value}[/yellow]"
-                            if item.name:
-                                group_label += f" [cyan]'{item.name}'[/cyan]"
-                            if item.metadata:
-                                meta_str = ", ".join(f"{k}={v}" for k, v in list(item.metadata.items())[:3])
-                                if len(item.metadata) > 3:
-                                    meta_str += "..."
-                                group_label += f" [dim]({meta_str})[/dim]"
-                            
-                            if HAS_RICH:
-                                branch = parent_tree.add(group_label)
-                                build_tree(item.tokens, branch, show_ws)
-                            else:
-                                # Text-based tree (for non-rich output)
-                                print(f"  {group_label}")
-                        else:
-                            # Token
-                            if not show_ws and item.type in (TokenType.WHITESPACE, TokenType.NEWLINE):
-                                continue
-                            
-                            token_label = f"[green]{item.type.value}[/green]: "
-                            value_str = repr(item.value)
-                            if len(value_str) > 40:
-                                value_str = value_str[:37] + "..."
-                            token_label += f"[white]{value_str}[/white]"
-                            
-                            if HAS_RICH:
-                                parent_tree.add(token_label)
-                            else:
-                                print(f"    {item.type.value}: {value_str}")
-                    
-                    return parent_tree
-                
-                if HAS_RICH and not args.output:
-                    # Display Rich tree
-                    tree = build_tree(tokens, show_ws=args.show_whitespace)
-                    console.print()
-                    console.print(tree)
-                else:
-                    # Text-based hierarchical output
-                    def print_structure(items, indent=0, show_ws=False):
-                        prefix = "  " * indent
-                        for item in items:
-                            if isinstance(item, TokenGroup):
-                                group_label = f"{item.group_type.value}"
-                                if item.name:
-                                    group_label += f" '{item.name}'"
-                                if item.metadata:
-                                    meta_items = list(item.metadata.items())[:2]
-                                    meta_str = ", ".join(f"{k}={v}" for k, v in meta_items)
-                                    group_label += f" ({meta_str})"
-                                output_lines.append(f"{prefix}[{group_label}]")
-                                print_structure(item.tokens, indent + 1, show_ws)
-                            else:
-                                if not show_ws and item.type in (TokenType.WHITESPACE, TokenType.NEWLINE):
-                                    continue
-                                value_str = repr(item.value)
-                                if len(value_str) > 50:
-                                    value_str = value_str[:47] + "..."
-                                output_lines.append(f"{prefix}  {item.type.value}: {value_str}")
-                    
-                    output_lines.append("")
-                    output_lines.append("=" * 80)
-                    output_lines.append(f"SQL Structure ({level.value.upper()} level)")
-                    output_lines.append("=" * 80)
-                    print_structure(tokens, show_ws=args.show_whitespace)
-            
+            # ============================================================
+            # SECTION 2: TOKENS
+            # ============================================================
+            if use_rich:
+                console.print("\n[bold blue]═══ TOKENS ═══[/bold blue]")
             else:
-                # Flatten tokens for basic level or when explicitly requested
-                def flatten_to_tokens(items):
-                    result = []
-                    for item in items:
-                        if isinstance(item, TokenGroup):
-                            result.extend(flatten_to_tokens(item.tokens))
-                        else:
-                            result.append(item)
-                    return result
-                
-                # Get flat token list
-                flat_tokens = flatten_to_tokens(tokens) if level != SemanticLevel.BASIC else tokens
-                
-                # Filter tokens based on options
-                display_tokens = flat_tokens
-                if not args.show_whitespace:
-                    display_tokens = [t for t in display_tokens if t.type not in (TokenType.WHITESPACE, TokenType.NEWLINE)]
-                
-                if args.keywords_only:
-                    display_tokens = [t for t in display_tokens if t.type == TokenType.KEYWORD]
-                
-                # Generate token output
-                if args.format == "json":
-                    # JSON format
-                    token_data = [{"value": t.value, "type": t.type.value} for t in display_tokens]
-                    output_lines.append(json.dumps(token_data, indent=2))
-                
-                elif args.format == "simple":
-                    # Simple format: one token per line
-                    for token in display_tokens:
-                        output_lines.append(f"{token.type.value}: {repr(token.value)}")
-                
-                else:  # table format
-                    if HAS_RICH and not args.output:
-                        # Use rich table
-                        table = Table(title="SQL Tokens", box=box.ROUNDED, border_style="cyan")
-                        table.add_column("Type", style="yellow", no_wrap=True)
-                        table.add_column("Value", style="white")
-                        table.add_column("Keyword", justify="center", style="green")
-                        
-                        for token in display_tokens:
-                            value_str = repr(token.value)
-                            if len(value_str) > 60:
-                                value_str = value_str[:57] + "..."
-                            
-                            is_kw = "✓" if is_keyword(token.value) else ""
-                            table.add_row(token.type.value, value_str, is_kw)
-                        
-                        console.print()
-                        console.print(table)
+                output_lines.append("\n" + "=" * 60)
+                output_lines.append("TOKENS")
+                output_lines.append("=" * 60)
+            
+            # Token Summary Section
+            def flatten_to_tokens(items):
+                result = []
+                for item in items:
+                    if isinstance(item, TokenGroup):
+                        result.extend(flatten_to_tokens(item.tokens))
                     else:
-                        # Calculate column widths
-                        max_type_len = max(len(t.type.value) for t in display_tokens) if display_tokens else 10
-                        max_value_len = max(len(repr(t.value)) for t in display_tokens) if display_tokens else 10
-                        max_type_len = max(max_type_len, 10)
-                        max_value_len = min(max_value_len, 60)  # Cap at 60 chars
-                        
-                        # Header
-                        output_lines.append("=" * (max_type_len + max_value_len + 10))
-                        output_lines.append(f"{'Type':<{max_type_len}} | {'Value':<{max_value_len}} | Keyword")
-                        output_lines.append("-" * (max_type_len + max_value_len + 10))
-                        
-                        # Tokens
-                        for token in display_tokens:
-                            value_str = repr(token.value)
-                            if len(value_str) > max_value_len:
-                                value_str = value_str[:max_value_len-3] + "..."
-                            
-                            is_kw = "✓" if is_keyword(token.value) else ""
-                            output_lines.append(f"{token.type.value:<{max_type_len}} | {value_str:<{max_value_len}} | {is_kw}")
-                        
-                        output_lines.append("=" * (max_type_len + max_value_len + 10))
-        
-        # Write output
-        if not HAS_RICH or args.output or args.format != "table":
-            result = "\n".join(output_lines)
-            if args.output:
-                with open(args.output, "w", encoding="utf-8") as f:
-                    f.write(result)
+                        result.append(item)
+                return result
+            
+            flat_tokens = flatten_to_tokens(tokens)
+            
+            # Count tokens by type
+            from collections import Counter
+            token_counts = Counter(t.type.value for t in flat_tokens)
+            
+            if use_rich:
+                console.print()
+                token_table = Table(title="Token Summary", box=box.ROUNDED, border_style="blue")
+                token_table.add_column("Token Type", style="cyan")
+                token_table.add_column("Count", justify="right", style="yellow")
+                
+                # Show in a logical order
+                order = ['keyword', 'identifier', 'operator', 'punctuation', 'number', 'string', 
+                        'comment', 'whitespace', 'newline']
+                for token_type in order:
+                    if token_counts.get(token_type, 0) > 0:
+                        token_table.add_row(token_type.upper(), str(token_counts[token_type]))
+                
+                # Add any other types not in the order list
+                for token_type, count in sorted(token_counts.items()):
+                    if token_type not in order:
+                        token_table.add_row(token_type.upper(), str(count))
+                
+                console.print(token_table)
+                console.print(f"\n[bold]Total tokens: {len(flat_tokens)}[/bold]")
             else:
-                if output_lines:
-                    print(result)
+                output_lines.append("\n=== Token Summary ===")
+                for token_type, count in sorted(token_counts.items()):
+                    output_lines.append(f"  {token_type.upper()}: {count}")
+                output_lines.append(f"\nTotal tokens: {len(flat_tokens)}")
         
+        # Show token list if in tokens-only mode
+        elif args.tokens_only:
+            # Flatten tokens
+            def flatten_to_tokens(items):
+                result = []
+                for item in items:
+                    if isinstance(item, TokenGroup):
+                        result.extend(flatten_to_tokens(item.tokens))
+                    else:
+                        result.append(item)
+                return result
+            
+            flat_tokens = flatten_to_tokens(tokens) if isinstance(tokens, list) and any(isinstance(t, TokenGroup) for t in tokens) else tokens
+            
+            if args.format == "json":
+                token_data = [{"type": t.type.value, "value": t.value} for t in flat_tokens 
+                             if t.type not in (TokenType.WHITESPACE, TokenType.NEWLINE)]
+                print(json.dumps(token_data, indent=2))
+            else:
+                if not args.output:
+                    table = Table(title="SQL Tokens", box=box.ROUNDED, border_style="cyan")
+                    table.add_column("Type", style="yellow")
+                    table.add_column("Value", style="white")
+                    
+                    for token in flat_tokens:
+                        if token.type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                            continue
+                        value_str = repr(token.value)
+                        if len(value_str) > 60:
+                            value_str = value_str[:57] + "..."
+                        table.add_row(token.type.value, value_str)
+                    
+                    console.print(table)
+                else:
+                    for token in flat_tokens:
+                        if token.type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                            continue
+                        print(f"{token.type.value}: {repr(token.value)}")
+        
+        # Write output to file if specified
+        if args.output and output_lines:
+            with open(args.output, "w", encoding="utf-8") as f:
+                f.write("\n".join(output_lines))
+        
+        return
+
+    # patterns command
+    if args.command == "patterns":
+        handle_pattern_command(args)
         return
 
     # dialects command
