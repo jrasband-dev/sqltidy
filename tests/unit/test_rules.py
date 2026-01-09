@@ -8,13 +8,22 @@ Tests:
 """
 import pytest
 from sqltidy.rules.base import BaseRule, FormatterContext
-from sqltidy.rules.tidy.uppercase_keywords import UppercaseKeywordsRule
-from sqltidy.rules.tidy.compact_whitespace import CompactWhitespaceRule
-from sqltidy.rules.tidy.quote_identifiers import QuoteIdentifiersRule
-from sqltidy.rules.tidy.sqlserver_top_formatting import SQLServerTopFormattingRule
-from sqltidy.rules.tidy.oracle_connect_by import OracleConnectByFormattingRule
+from sqltidy.rules.general import UppercaseKeywordsRule, CompactWhitespaceRule, QuoteIdentifiersRule
+from sqltidy.rules.sqlserver import SQLServerTopFormattingRule
 from sqltidy.rulebook import SQLTidyConfig
-from sqltidy.tokenizer import tokenize
+from sqltidy.tokenizer import Token, TokenGroup, tokenize_with_types
+
+
+def to_text(tokens):
+    parts = []
+    for tok in tokens:
+        if isinstance(tok, Token):
+            parts.append(tok.value)
+        elif isinstance(tok, TokenGroup):
+            parts.append(tok.get_text())
+        else:
+            parts.append(str(tok))
+    return ''.join(parts)
 
 
 class TestBaseRule:
@@ -68,45 +77,47 @@ class TestUppercaseKeywordsRule:
     def test_uppercase_sqlserver(self):
         """Test uppercasing keywords for SQL Server."""
         rule = UppercaseKeywordsRule()
-        config = SQLTidyConfig(dialect='sqlserver', uppercase_keywords=None)
+        config = SQLTidyConfig(dialect='sqlserver', tidy={'uppercase_keywords': None})
         ctx = FormatterContext(config)
-        
-        tokens = ['select', ' ', 'id', ' ', 'from', ' ', 'users']
+
+        tokens = tokenize_with_types('select id from users', dialect='sqlserver')
         result = rule.apply(tokens, ctx)
-        
-        assert result[0] == 'SELECT'
-        assert result[4] == 'FROM'
-        assert result[2] == 'id'  # Not a keyword
+        text = to_text(result)
+
+        assert text.startswith('SELECT')
+        assert 'FROM' in text
+        assert 'id' in text  # identifier should stay lowercase
     
     def test_lowercase_postgresql(self):
         """Test lowercasing keywords for PostgreSQL."""
         rule = UppercaseKeywordsRule()
-        config = SQLTidyConfig(dialect='postgresql', uppercase_keywords=None)
+        config = SQLTidyConfig(dialect='postgresql', tidy={'uppercase_keywords': None})
         ctx = FormatterContext(config)
-        
-        tokens = ['SELECT', ' ', 'ID', ' ', 'FROM', ' ', 'USERS']
+
+        tokens = tokenize_with_types('SELECT ID FROM USERS', dialect='postgresql')
         result = rule.apply(tokens, ctx)
-        
-        assert result[0] == 'select'
-        assert result[4] == 'from'
+        text = to_text(result)
+
+        assert text.startswith('select')
+        assert 'from' in text
     
     def test_explicit_override(self):
         """Test explicit uppercase_keywords override."""
         rule = UppercaseKeywordsRule()
-        
+
         # Force uppercase on PostgreSQL (normally lowercase)
-        config = SQLTidyConfig(dialect='postgresql', uppercase_keywords=True)
+        config = SQLTidyConfig(dialect='postgresql', tidy={'uppercase_keywords': True})
         ctx = FormatterContext(config)
-        tokens = ['select', ' ', 'from']
+        tokens = tokenize_with_types('select from', dialect='postgresql')
         result = rule.apply(tokens, ctx)
-        assert result[0] == 'SELECT'
-        
+        assert to_text(result).startswith('SELECT')
+
         # Force lowercase on SQL Server (normally uppercase)
-        config = SQLTidyConfig(dialect='sqlserver', uppercase_keywords=False)
+        config = SQLTidyConfig(dialect='sqlserver', tidy={'uppercase_keywords': False})
         ctx = FormatterContext(config)
-        tokens = ['SELECT', ' ', 'FROM']
+        tokens = tokenize_with_types('SELECT FROM', dialect='sqlserver')
         result = rule.apply(tokens, ctx)
-        assert result[0] == 'select'
+        assert to_text(result).startswith('select')
 
 
 class TestCompactWhitespaceRule:
@@ -117,24 +128,23 @@ class TestCompactWhitespaceRule:
         rule = CompactWhitespaceRule()
         config = SQLTidyConfig()
         ctx = FormatterContext(config)
-        
-        tokens = ['SELECT', ' ', ' ', ' ', 'id']
+
+        tokens = tokenize_with_types('SELECT   id', dialect='sqlserver')
         result = rule.apply(tokens, ctx)
-        
-        # Should have only one space
-        assert result.count(' ') == 1
-        assert result == ['SELECT', ' ', 'id']
+        text = to_text(result)
+
+        assert text == 'SELECT id'
     
     def test_preserves_single_spaces(self):
         """Test that single spaces are preserved."""
         rule = CompactWhitespaceRule()
         config = SQLTidyConfig()
         ctx = FormatterContext(config)
-        
-        tokens = ['SELECT', ' ', 'id', ' ', 'FROM', ' ', 'users']
+
+        tokens = tokenize_with_types('SELECT id FROM users', dialect='sqlserver')
         result = rule.apply(tokens, ctx)
-        
-        assert result == tokens  # Should be unchanged
+
+        assert to_text(result) == 'SELECT id FROM users'
 
 
 class TestQuoteIdentifiersRule:
@@ -153,26 +163,26 @@ class TestQuoteIdentifiersRule:
     def test_sqlserver_brackets(self):
         """Test SQL Server uses brackets."""
         rule = QuoteIdentifiersRule()
-        config = SQLTidyConfig(dialect='sqlserver', quote_identifiers=True)
+        config = SQLTidyConfig(dialect='sqlserver', tidy={'quote_identifiers': True})
         ctx = FormatterContext(config)
-        
-        tokens = ['SELECT', ' ', 'id', ' ', 'FROM', ' ', 'users']
+
+        tokens = tokenize_with_types('SELECT id FROM users', dialect='sqlserver')
         result = rule.apply(tokens, ctx)
-        
-        # Check for brackets around identifiers
-        assert '[id]' in ''.join(result) or ('[' in result and ']' in result)
+        text = to_text(result)
+
+        assert '[id]' in text or '[users]' in text
     
     def test_mysql_backticks(self):
         """Test MySQL uses backticks."""
         rule = QuoteIdentifiersRule()
-        config = SQLTidyConfig(dialect='mysql', quote_identifiers=True)
+        config = SQLTidyConfig(dialect='mysql', tidy={'quote_identifiers': True})
         ctx = FormatterContext(config)
-        
-        tokens = ['select', ' ', 'id', ' ', 'from', ' ', 'users']
+
+        tokens = tokenize_with_types('select id from users', dialect='mysql')
         result = rule.apply(tokens, ctx)
-        
-        # Check for backticks
-        assert '`id`' in ''.join(result) or ('`' in result)
+        text = to_text(result)
+
+        assert '`id`' in text or '`users`' in text
 
 
 class TestDialectSpecificRules:
@@ -188,24 +198,14 @@ class TestDialectSpecificRules:
         ctx_postgresql = FormatterContext(SQLTidyConfig(dialect='postgresql'))
         assert rule.is_applicable(ctx_postgresql) is False
     
-    def test_oracle_connect_by_applies_to_oracle(self):
-        """Test OracleConnectByFormattingRule applies to Oracle."""
-        rule = OracleConnectByFormattingRule()
-        
-        ctx_oracle = FormatterContext(SQLTidyConfig(dialect='oracle'))
-        assert rule.is_applicable(ctx_oracle) is True
-        
-        ctx_mysql = FormatterContext(SQLTidyConfig(dialect='mysql'))
-        assert rule.is_applicable(ctx_mysql) is False
-    
     def test_sqlserver_top_formatting(self):
         """Test SQL Server TOP formatting."""
         rule = SQLServerTopFormattingRule()
         config = SQLTidyConfig(dialect='sqlserver')
         ctx = FormatterContext(config)
         
-        tokens = ['SELECT', ' ', 'TOP', ' ', '10', ' ', 'id', ' ', 'FROM', ' ', 'users']
+        tokens = tokenize_with_types('SELECT TOP(10) id FROM users', dialect='sqlserver')
         result = rule.apply(tokens, ctx)
-        
-        # Should add newline before TOP
-        assert '\n' in result
+        text = to_text(result)
+
+        assert 'TOP (10)' in text

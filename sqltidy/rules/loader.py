@@ -1,3 +1,4 @@
+import importlib
 import importlib.util
 import sys
 from pathlib import Path
@@ -9,7 +10,7 @@ def _ensure_package_in_sys_modules(package_name):
     """Ensure a package and all parent packages are in sys.modules."""
     if package_name in sys.modules:
         return
-    
+
     parts = package_name.split('.')
     for i in range(len(parts)):
         partial = '.'.join(parts[:i+1])
@@ -19,76 +20,65 @@ def _ensure_package_in_sys_modules(package_name):
             sys.modules[partial] = mod
 
 
-def _load_modules_from_directory(dir_path, package_prefix):
-    """Helper to load all rule modules from a directory."""
+def _load_rule_module(module_name: str):
+    """Import a module and instantiate BaseRule subclasses."""
+    mod = importlib.import_module(module_name)
     rules = []
-    
-    if not dir_path.exists():
+    for attr in dir(mod):
+        cls = getattr(mod, attr)
+        if isinstance(cls, type) and issubclass(cls, BaseRule) and cls != BaseRule:
+            rules.append(cls())
+    return rules
+
+
+def _load_plugin_modules(plugin_dir: Path):
+    rules = []
+    if not plugin_dir.exists():
         return rules
-    
-    # Ensure the package hierarchy exists
-    _ensure_package_in_sys_modules(package_prefix)
-    
-    for file in dir_path.glob("*.py"):
+    _ensure_package_in_sys_modules("sqltidy.rules.plugins")
+    for file in plugin_dir.glob("*.py"):
         if file.name.startswith("_"):
             continue
-        
-        module_name = f"{package_prefix}.{file.stem}"
+        module_name = f"sqltidy.rules.plugins.{file.stem}"
         spec = importlib.util.spec_from_file_location(module_name, file)
         if spec is None or spec.loader is None:
             continue
-            
         mod = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = mod
-        
         spec.loader.exec_module(mod)
-        
         for attr in dir(mod):
             cls = getattr(mod, attr)
             if isinstance(cls, type) and issubclass(cls, BaseRule) and cls != BaseRule:
                 rules.append(cls())
-    
     return rules
 
 
 def load_rules(rule_type=None):
-    """Load all rules from tidy/ and rewrite/ directories, plus any plugins.
-    
+    """Load all rules from dialect modules and plugins.
+
     Args:
-        rule_type (str, optional): Filter rules by type ('tidy' or 'rewrite'). 
+        rule_type (str, optional): Filter rules by type ('tidy' or 'rewrite').
                                    None loads all rules.
     """
     rules = []
     rules_dir = Path(__file__).parent
 
-    # Load tidy rules if requested or no filter
-    if rule_type is None or rule_type == 'tidy':
-        tidy_dir = rules_dir / "tidy"
-        rules.extend(_load_modules_from_directory(tidy_dir, "sqltidy.rules.tidy"))
-
-    # Load rewrite rules if requested or no filter
-    if rule_type is None or rule_type == 'rewrite':
-        rewrite_dir = rules_dir / "rewrite"
-        rules.extend(_load_modules_from_directory(rewrite_dir, "sqltidy.rules.rewrite"))
+    # Core dialect modules (one file per dialect/general)
+    module_files = [
+        f for f in rules_dir.glob("*.py")
+        if f.stem not in {"__init__", "base", "loader"}
+    ]
+    for file in module_files:
+        module_name = f"sqltidy.rules.{file.stem}"
+        rules.extend(_load_rule_module(module_name))
 
     # Load plugin rules from rules/plugins/
     plugin_dir = rules_dir / "plugins"
-    if plugin_dir.exists():
-        _ensure_package_in_sys_modules("sqltidy.rules.plugins")
-        for file in plugin_dir.glob("*.py"):
-            if file.name.startswith("_"):
-                continue
-            module_name = f"sqltidy.rules.plugins.{file.stem}"
-            spec = importlib.util.spec_from_file_location(module_name, file)
-            if spec is None or spec.loader is None:
-                continue
-            mod = importlib.util.module_from_spec(spec)
-            sys.modules[module_name] = mod
-            spec.loader.exec_module(mod)
-            for attr in dir(mod):
-                cls = getattr(mod, attr)
-                if isinstance(cls, type) and issubclass(cls, BaseRule) and cls != BaseRule:
-                    rules.append(cls())
+    rules.extend(_load_plugin_modules(plugin_dir))
+
+    # Filter by rule_type if provided
+    if rule_type is not None:
+        rules = [r for r in rules if getattr(r, "rule_type", None) == rule_type]
 
     # Sort by order
     rules.sort(key=lambda r: getattr(r, "order", 100))
