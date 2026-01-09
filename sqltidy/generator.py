@@ -11,17 +11,13 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 
-try:
-    from rich.console import Console
-    from rich.table import Table
-    from rich.panel import Panel
-    from rich.tree import Tree
-    from rich import box
-    HAS_RICH = True
-    console = Console()
-except ImportError:
-    HAS_RICH = False
-    console = None
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from rich.tree import Tree
+from rich import box
+
+console = Console()
 
 
 def get_user_rulebooks_dir() -> Path:
@@ -75,8 +71,6 @@ def get_rulebook_path(dialect: str) -> Path:
         
     Returns:
         Path to the rulebook file (user rulebook if exists, otherwise bundled)
-        Note: May return a path that doesn't exist if bundled files are not present.
-              Callers should check existence or use _load_config_for_dialect() instead.
     """
     user_path = get_user_rulebooks_dir() / f"sqltidy_{dialect}.json"
     if user_path.exists():
@@ -870,191 +864,114 @@ def list_rules() -> None:
     rewrite_rules = [r for r in built_in_rules if getattr(r, 'rule_type', None) == 'rewrite']
     other_rules = [r for r in built_in_rules if getattr(r, 'rule_type', None) not in ['tidy', 'rewrite']]
     
-    if HAS_RICH:
-        # Rich formatted output
+    # Rich formatted output
+    console.print()
+    
+    # Built-in Tidy Rules
+    if tidy_rules:
+        tidy_table = Table(title="Built-in Tidy Rules (Formatting)", box=box.ROUNDED, border_style="cyan")
+        tidy_table.add_column("Rule Name", style="cyan bold", no_wrap=True)
+        tidy_table.add_column("Order", justify="center", style="yellow")
+        tidy_table.add_column("Dialects", style="green")
+        
+        for rule in sorted(tidy_rules, key=lambda r: getattr(r, 'order', 100)):
+            rule_name = rule.__class__.__name__
+            order = str(getattr(rule, 'order', '?'))
+            dialects = getattr(rule, 'supported_dialects', None)
+            dialect_info = ', '.join(sorted(dialects)) if dialects else 'all dialects'
+            tidy_table.add_row(rule_name, order, dialect_info)
+        
+        console.print(tidy_table)
         console.print()
+    
+    # Built-in Rewrite Rules
+    if rewrite_rules:
+        rewrite_table = Table(title="Built-in Rewrite Rules (Transformations)", box=box.ROUNDED, border_style="magenta")
+        rewrite_table.add_column("Rule Name", style="magenta bold", no_wrap=True)
+        rewrite_table.add_column("Order", justify="center", style="yellow")
+        rewrite_table.add_column("Dialects", style="green")
         
-        # Built-in Tidy Rules
-        if tidy_rules:
-            tidy_table = Table(title="Built-in Tidy Rules (Formatting)", box=box.ROUNDED, border_style="cyan")
-            tidy_table.add_column("Rule Name", style="cyan bold", no_wrap=True)
-            tidy_table.add_column("Order", justify="center", style="yellow")
-            tidy_table.add_column("Dialects", style="green")
-            
-            for rule in sorted(tidy_rules, key=lambda r: getattr(r, 'order', 100)):
-                rule_name = rule.__class__.__name__
-                order = str(getattr(rule, 'order', '?'))
-                dialects = getattr(rule, 'supported_dialects', None)
-                dialect_info = ', '.join(sorted(dialects)) if dialects else 'all dialects'
-                tidy_table.add_row(rule_name, order, dialect_info)
-            
-            console.print(tidy_table)
-            console.print()
+        for rule in sorted(rewrite_rules, key=lambda r: getattr(r, 'order', 100)):
+            rule_name = rule.__class__.__name__
+            order = str(getattr(rule, 'order', '?'))
+            dialects = getattr(rule, 'supported_dialects', None)
+            dialect_info = ', '.join(sorted(dialects)) if dialects else 'all dialects'
+            rewrite_table.add_row(rule_name, order, dialect_info)
         
-        # Built-in Rewrite Rules
-        if rewrite_rules:
-            rewrite_table = Table(title="Built-in Rewrite Rules (Transformations)", box=box.ROUNDED, border_style="magenta")
-            rewrite_table.add_column("Rule Name", style="magenta bold", no_wrap=True)
-            rewrite_table.add_column("Order", justify="center", style="yellow")
-            rewrite_table.add_column("Dialects", style="green")
-            
-            for rule in sorted(rewrite_rules, key=lambda r: getattr(r, 'order', 100)):
-                rule_name = rule.__class__.__name__
-                order = str(getattr(rule, 'order', '?'))
-                dialects = getattr(rule, 'supported_dialects', None)
-                dialect_info = ', '.join(sorted(dialects)) if dialects else 'all dialects'
-                rewrite_table.add_row(rule_name, order, dialect_info)
-            
-            console.print(rewrite_table)
-            console.print()
-        
-        # Other Rules
-        if other_rules:
-            other_table = Table(title="Other Built-in Rules", box=box.ROUNDED, border_style="blue")
-            other_table.add_column("Rule Name", style="blue bold", no_wrap=True)
-            other_table.add_column("Order", justify="center", style="yellow")
-            
-            for rule in sorted(other_rules, key=lambda r: getattr(r, 'order', 100)):
-                rule_name = rule.__class__.__name__
-                order = str(getattr(rule, 'order', '?'))
-                other_table.add_row(rule_name, order)
-            
-            console.print(other_table)
-            console.print()
-        
-        # Plugin Rules
-        rules_dir = get_user_rules_dir()
-        
-        if not rules_dir.exists() or not list(rules_dir.glob("*.py")):
-            console.print(Panel(
-                f"[yellow]No plugin rules installed.[/yellow]\n"
-                f"[dim]Plugin directory: {rules_dir}[/dim]",
-                title="[bold yellow]Plugin Rules",
-                border_style="yellow",
-                box=box.ROUNDED
-            ))
-        else:
-            rule_files = list(rules_dir.glob("*.py"))
-            
-            # Create a tree for plugin rules
-            tree = Tree(
-                f"[bold yellow]Plugin Rules ({len(rule_files)} files)[/bold yellow]",
-                guide_style="yellow"
-            )
-            tree.add(f"[dim]Location: {rules_dir}[/dim]")
-            
-            for rule_file in sorted(rule_files):
-                file_branch = tree.add(f"[yellow]📄 {rule_file.name}[/yellow]")
-                
-                # Try to load and show rules from the file
-                try:
-                    from .plugins import load_rule_file
-                    rules = load_rule_file(str(rule_file))
-                    if rules:
-                        for rule_cls in rules:
-                            rule = rule_cls()
-                            rule_type = getattr(rule, 'rule_type', 'unknown')
-                            order = getattr(rule, 'order', '?')
-                            dialects = getattr(rule, 'supported_dialects', None)
-                            dialect_info = f" ({', '.join(sorted(dialects))})" if dialects else " (all dialects)"
-                            
-                            type_color = "cyan" if rule_type == "tidy" else "magenta" if rule_type == "rewrite" else "white"
-                            file_branch.add(f"[{type_color}]{rule_cls.__name__}[/{type_color}] [dim]type={rule_type}, order={order}{dialect_info}[/dim]")
-                except Exception as e:
-                    file_branch.add(f"[red]Error loading: {e}[/red]")
-            
-            console.print()
-            console.print(tree)
-        
-        # Summary
+        console.print(rewrite_table)
         console.print()
-        summary_table = Table(box=box.SIMPLE, show_header=False, border_style="dim")
-        summary_table.add_column("Label", style="dim")
-        summary_table.add_column("Count", justify="right", style="bold")
+    
+    # Other Rules
+    if other_rules:
+        other_table = Table(title="Other Built-in Rules", box=box.ROUNDED, border_style="blue")
+        other_table.add_column("Rule Name", style="blue bold", no_wrap=True)
+        other_table.add_column("Order", justify="center", style="yellow")
         
-        summary_table.add_row("Built-in rules:", str(len(built_in_rules)))
-        if rules_dir.exists():
-            plugin_count = len(list(rules_dir.glob("*.py")))
-            summary_table.add_row("Plugin files:", str(plugin_count))
+        for rule in sorted(other_rules, key=lambda r: getattr(r, 'order', 100)):
+            rule_name = rule.__class__.__name__
+            order = str(getattr(rule, 'order', '?'))
+            other_table.add_row(rule_name, order)
+        
+        console.print(other_table)
+        console.print()
+    
+    # Plugin Rules
+    rules_dir = get_user_rules_dir()
+    
+    if not rules_dir.exists() or not list(rules_dir.glob("*.py")):
+        console.print(Panel(
+            f"[yellow]No plugin rules installed.[/yellow]\n"
+            f"[dim]Plugin directory: {rules_dir}[/dim]",
+            title="[bold yellow]Plugin Rules",
+            border_style="yellow",
+            box=box.ROUNDED
+        ))
+    else:
+        rule_files = list(rules_dir.glob("*.py"))
+        
+        # Create a tree for plugin rules
+        tree = Tree(
+            f"[bold yellow]Plugin Rules ({len(rule_files)} files)[/bold yellow]",
+            guide_style="yellow"
+        )
+        tree.add(f"[dim]Location: {rules_dir}[/dim]")
+        
+        for rule_file in sorted(rule_files):
+            file_branch = tree.add(f"[yellow]📄 {rule_file.name}[/yellow]")
+            
+            # Try to load and show rules from the file
+            try:
+                from .plugins import load_rule_file
+                rules = load_rule_file(str(rule_file))
+                if rules:
+                    for rule_cls in rules:
+                        rule = rule_cls()
+                        rule_type = getattr(rule, 'rule_type', 'unknown')
+                        order = getattr(rule, 'order', '?')
+                        dialects = getattr(rule, 'supported_dialects', None)
+                        dialect_info = f" ({', '.join(sorted(dialects))})" if dialects else " (all dialects)"
+                        
+                        type_color = "cyan" if rule_type == "tidy" else "magenta" if rule_type == "rewrite" else "white"
+                        file_branch.add(f"[{type_color}]{rule_cls.__name__}[/{type_color}] [dim]type={rule_type}, order={order}{dialect_info}[/dim]")
+            except Exception as e:
+                file_branch.add(f"[red]Error loading: {e}[/red]")
+        
+        console.print()
+        console.print(tree)
+    
+    # Summary
+    console.print()
+    summary_table = Table(box=box.SIMPLE, show_header=False, border_style="dim")
+    summary_table.add_column("Label", style="dim")
+    summary_table.add_column("Count", justify="right", style="bold")
+    
+    summary_table.add_row("Built-in rules:", str(len(built_in_rules)))
+    if rules_dir.exists():
+        plugin_count = len(list(rules_dir.glob("*.py")))
+        summary_table.add_row("Plugin files:", str(plugin_count))
         
         console.print(Panel(summary_table, title="[bold]Summary", border_style="cyan", box=box.ROUNDED))
         console.print()
-        
-    else:
-        # Fallback to plain text output
-        print("\n" + "=" * 70)
-        print("BUILT-IN RULES")
-        print("=" * 70)
-        
-        if tidy_rules:
-            print("\nTidy Rules (formatting):")
-            for rule in sorted(tidy_rules, key=lambda r: getattr(r, 'order', 100)):
-                rule_name = rule.__class__.__name__
-                order = getattr(rule, 'order', '?')
-                dialects = getattr(rule, 'supported_dialects', None)
-                dialect_info = f" [dialects: {', '.join(sorted(dialects))}]" if dialects else " [all dialects]"
-                print(f"  • {rule_name} (order={order}){dialect_info}")
-        
-        if rewrite_rules:
-            print("\nRewrite Rules (transformations):")
-            for rule in sorted(rewrite_rules, key=lambda r: getattr(r, 'order', 100)):
-                rule_name = rule.__class__.__name__
-                order = getattr(rule, 'order', '?')
-                dialects = getattr(rule, 'supported_dialects', None)
-                dialect_info = f" [dialects: {', '.join(sorted(dialects))}]" if dialects else " [all dialects]"
-                print(f"  • {rule_name} (order={order}){dialect_info}")
-        
-        if other_rules:
-            print("\nOther Rules:")
-            for rule in sorted(other_rules, key=lambda r: getattr(r, 'order', 100)):
-                rule_name = rule.__class__.__name__
-                order = getattr(rule, 'order', '?')
-                print(f"  • {rule_name} (order={order})")
-        
-        # Load plugin rules
-        print("\n" + "=" * 70)
-        print("PLUGIN RULES")
-        print("=" * 70)
-        
-        rules_dir = get_user_rules_dir()
-        
-        if not rules_dir.exists():
-            print("\nNo plugin rules installed.")
-            print(f"Plugin directory: {rules_dir}")
-        else:
-            rule_files = list(rules_dir.glob("*.py"))
-            
-            if not rule_files:
-                print("\nNo plugin rules installed.")
-                print(f"Plugin directory: {rules_dir}")
-            else:
-                print(f"\nInstalled plugin rules ({len(rule_files)}):")
-                print(f"Location: {rules_dir}\n")
-                
-                for rule_file in sorted(rule_files):
-                    print(f"  • {rule_file.name}")
-                    
-                    # Try to load and show rules from the file
-                    try:
-                        from .plugins import load_rule_file
-                        rules = load_rule_file(str(rule_file))
-                        if rules:
-                            for rule_cls in rules:
-                                rule = rule_cls()
-                                rule_type = getattr(rule, 'rule_type', 'unknown')
-                                order = getattr(rule, 'order', '?')
-                                dialects = getattr(rule, 'supported_dialects', None)
-                                dialect_info = f" [dialects: {', '.join(sorted(dialects))}]" if dialects else " [all dialects]"
-                                print(f"    - {rule_cls.__name__} (type={rule_type}, order={order}){dialect_info}")
-                    except Exception as e:
-                        print(f"    Error loading: {e}")
-        
-        print("\n" + "=" * 70)
-        print(f"Total: {len(built_in_rules)} built-in rules")
-        if rules_dir.exists():
-            plugin_count = len(list(rules_dir.glob("*.py")))
-            print(f"       {plugin_count} plugin file(s)")
-        print("=" * 70 + "\n")
 
 
 def remove_rule(rule_name: str) -> None:
