@@ -5,7 +5,10 @@ Each dialect defines its own keywords, data types, functions, and syntax rules.
 """
 
 from abc import ABC, abstractmethod
-from typing import Set, Dict, List
+from typing import Set, Dict, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..patterns import Pattern
 
 
 class SQLDialect(ABC):
@@ -24,7 +27,42 @@ class SQLDialect(ABC):
     
     def __init__(self):
         """Initialize the dialect."""
+        self._patterns: List['Pattern'] = []
         self._validate()
+        self._register_patterns()
+    
+    def _register_patterns(self):
+        """
+        Register dialect-specific patterns.
+        
+        Override this method to register patterns specific to this dialect.
+        Patterns are used during tokenization to identify dialect-specific constructs.
+        
+        Example:
+            def _register_patterns(self):
+                from ..patterns.tsql_patterns import TrycatchPattern, OutputClausePattern
+                self.register_pattern(TrycatchPattern())
+                self.register_pattern(OutputClausePattern())
+        """
+        pass
+    
+    def register_pattern(self, pattern: 'Pattern'):
+        """
+        Register a pattern for this dialect.
+        
+        Args:
+            pattern: The pattern to register
+        """
+        self._patterns.append(pattern)
+    
+    def get_patterns(self) -> List['Pattern']:
+        """
+        Get all patterns registered for this dialect.
+        
+        Returns:
+            List of Pattern objects
+        """
+        return self._patterns.copy()
     
     @property
     @abstractmethod

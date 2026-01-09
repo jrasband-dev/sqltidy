@@ -9,14 +9,6 @@ from .base import SQLDialect
 class SQLServerDialect(SQLDialect):
     """
     Microsoft SQL Server / T-SQL dialect.
-    
-    Includes comprehensive T-SQL keyword support with 279 keywords covering:
-    - DDL/DML operations
-    - Query syntax
-    - Data types
-    - Functions
-    - Control flow
-    - Advanced features (window functions, temporal tables, etc.)
     """
     
     @property
@@ -24,80 +16,143 @@ class SQLServerDialect(SQLDialect):
         return 'sqlserver'
     
     @property
-    def keywords(self) -> Set[str]:
-        """Comprehensive SQL Server keywords."""
+    def ddl_keywords(self) -> Set[str]:
+        """DDL (Data Definition Language) keywords."""
         return {
-            # DDL Keywords
             "add", "alter", "column", "constraint", "create", "database", "drop", 
             "index", "schema", "table", "view", "procedure", "function", "trigger",
             "default", "check", "unique", "primary", "foreign", "key", "references",
             "cascade", "set", "null", "not", "identity", "clustered", "nonclustered",
-            
-            # DML Keywords
+        }
+    
+    @property
+    def dml_keywords(self) -> Set[str]:
+        """DML (Data Manipulation Language) keywords."""
+        return {
             "select", "insert", "update", "delete", "merge", "truncate", "into", 
             "values", "output", "from", "where", "having", "group", "order", "by",
-            
-            # Query Keywords
+        }
+    
+    @property
+    def query_keywords(self) -> Set[str]:
+        """Query syntax keywords."""
+        return {
             "distinct", "top", "with", "as", "all", "any", "some", "exists",
             "in", "between", "like", "is", "and", "or", "not", "case", "when",
             "then", "else", "end", "over", "partition", "row_number", "rank",
             "dense_rank", "ntile", "lag", "lead", "first_value", "last_value",
-            
-            # Join Keywords
+        }
+    
+    @property
+    def join_keywords_category(self) -> Set[str]:
+        """Join operation keywords."""
+        return {
             "join", "inner", "left", "right", "full", "outer", "cross", "apply",
             "on", "using",
-            
-            # Set Operations
+        }
+    
+    @property
+    def set_operation_keywords(self) -> Set[str]:
+        """Set operation keywords."""
+        return {
             "union", "intersect", "except",
-            
-            # Transaction Keywords
+        }
+    
+    @property
+    def transaction_keywords(self) -> Set[str]:
+        """Transaction control keywords."""
+        return {
             "begin", "commit", "rollback", "transaction", "tran", "save", "savepoint",
-            
-            # Data Types
+        }
+    
+    @property
+    def data_type_keywords(self) -> Set[str]:
+        """Data type keywords."""
+        return {
             "int", "bigint", "smallint", "tinyint", "bit", "decimal", "numeric",
             "money", "smallmoney", "float", "real", "date", "time", "datetime",
             "datetime2", "smalldatetime", "datetimeoffset", "char", "varchar",
             "nchar", "nvarchar", "text", "ntext", "binary", "varbinary", "image",
             "uniqueidentifier", "xml", "json", "sql_variant", "cursor", "timestamp",
             "rowversion", "hierarchyid", "geometry", "geography",
-            
-            # Function Keywords
+        }
+    
+    @property
+    def function_keywords(self) -> Set[str]:
+        """Function-related keywords."""
+        return {
             "cast", "convert", "coalesce", "nullif", "isnull", "try_cast",
             "try_convert", "try_parse", "parse", "count", "sum", "avg", "min",
             "max", "stdev", "stdevp", "var", "varp", "count_big", "grouping",
             "grouping_id", "checksum", "checksum_agg", "string_agg",
-            
-            # Control Flow
+        }
+    
+    @property
+    def control_flow_keywords(self) -> Set[str]:
+        """Control flow keywords."""
+        return {
             "if", "else", "while", "break", "continue", "return", "goto",
             "waitfor", "try", "catch", "throw", "raiserror", "print",
-            
-            # Cursor Keywords
+        }
+    
+    @property
+    def cursor_keywords(self) -> Set[str]:
+        """Cursor operation keywords."""
+        return {
             "declare", "open", "fetch", "next", "prior", "first", "last",
             "absolute", "relative", "close", "deallocate",
-            
-            # Advanced Features
+        }
+    
+    @property
+    def advanced_feature_keywords(self) -> Set[str]:
+        """Advanced feature keywords."""
+        return {
             "pivot", "unpivot", "for", "offset", "fetch", "rows", "only",
             "option", "plan", "use", "exec", "execute", "sp_executesql",
-            
-            # Security & Permissions
+        }
+    
+    @property
+    def security_keywords(self) -> Set[str]:
+        """Security and permissions keywords."""
+        return {
             "grant", "deny", "revoke", "to", "public", "schema_name",
             "user", "login", "role", "authorization",
-            
-            # Backup & Restore
+        }
+    
+    @property
+    def backup_restore_keywords(self) -> Set[str]:
+        """Backup and restore keywords."""
+        return {
             "backup", "restore", "database", "log", "file", "filegroup",
-            
-            # Index & Statistics
+        }
+    
+    @property
+    def index_statistics_keywords(self) -> Set[str]:
+        """Index and statistics keywords."""
+        return {
             "statistics", "rebuild", "reorganize", "update_statistics",
             "disable", "enable", "resume", "pause",
-            
-            # Temporal Tables
+        }
+    
+    @property
+    def temporal_table_keywords(self) -> Set[str]:
+        """Temporal table keywords."""
+        return {
             "system_time", "period", "generated", "always", "start", "end",
             "hidden",
-            
-            # Window Functions
+        }
+    
+    @property
+    def window_function_keywords(self) -> Set[str]:
+        """Window function keywords."""
+        return {
             "rows", "range", "unbounded", "preceding", "following", "current",
-            
-            # Misc Keywords
+        }
+    
+    @property
+    def misc_keywords(self) -> Set[str]:
+        """Miscellaneous keywords."""
+        return {
             "go", "use", "set", "nocount", "on", "off", "quoted_identifier",
             "ansi_nulls", "ansi_padding", "ansi_warnings", "arithabort",
             "concat_null_yields_null", "numeric_roundabort", "xact_abort",
@@ -106,8 +161,12 @@ class SQLServerDialect(SQLDialect):
             "tablockx", "updlock", "xlock", "holdlock", "nowait", "readpast",
             "within", "contains", "freetext", "containstable", "freetexttable",
             "without", "encryption", "schemabinding", "returns", "language",
-            
-            # Additional T-SQL Keywords
+        }
+    
+    @property
+    def additional_tsql_keywords(self) -> Set[str]:
+        """Additional T-SQL specific keywords."""
+        return {
             "openxml", "openquery", "openrowset", "opendatasource", "bulk",
             "formatfile", "errorfile", "maxerrors", "firstrow", "lastrow",
             "fieldterminator", "rowterminator", "codepage", "datafiletype",
@@ -115,6 +174,30 @@ class SQLServerDialect(SQLDialect):
             "rows_per_batch", "order", "check_constraints", "fire_triggers",
             "tablock", "tabblock",
         }
+    
+    @property
+    def keywords(self) -> Set[str]:
+        """Comprehensive SQL Server keywords (combines all sub-categories)."""
+        return (
+            self.ddl_keywords |
+            self.dml_keywords |
+            self.query_keywords |
+            self.join_keywords_category |
+            self.set_operation_keywords |
+            self.transaction_keywords |
+            self.data_type_keywords |
+            self.function_keywords |
+            self.control_flow_keywords |
+            self.cursor_keywords |
+            self.advanced_feature_keywords |
+            self.security_keywords |
+            self.backup_restore_keywords |
+            self.index_statistics_keywords |
+            self.temporal_table_keywords |
+            self.window_function_keywords |
+            self.misc_keywords |
+            self.additional_tsql_keywords
+        )
     
     @property
     def data_types(self) -> Set[str]:
@@ -179,6 +262,14 @@ class SQLServerDialect(SQLDialect):
         }
     
     @property
+    def join_keywords(self) -> Set[str]:
+        """SQL Server JOIN keywords for various join types."""
+        return {
+            'join', 'inner', 'left', 'right', 'full', 'outer', 'cross', 
+            'apply', 'on', 'using'
+        }
+    
+    @property
     def identifier_chars(self) -> str:
         """SQL Server allows @, #, and $ in identifiers."""
         return '@#$'
@@ -195,3 +286,19 @@ class SQLServerDialect(SQLDialect):
     def comment_styles(self) -> list:
         """SQL Server supports -- and /* */ comments."""
         return ['--', '/*']
+    
+    def _register_patterns(self):
+        """Register T-SQL specific patterns."""
+        from ..patterns.tsql import (
+            JoinClausePattern,
+            CaseExpressionPattern,
+            TrycatchPattern,
+            PivotUnpivotPattern,
+            OutputClausePattern
+        )
+        
+        self.register_pattern(JoinClausePattern())
+        self.register_pattern(CaseExpressionPattern())
+        self.register_pattern(TrycatchPattern())
+        self.register_pattern(PivotUnpivotPattern())
+        self.register_pattern(OutputClausePattern())
