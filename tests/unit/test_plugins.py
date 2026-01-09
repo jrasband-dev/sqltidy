@@ -16,7 +16,7 @@ from sqltidy.plugins import (
 )
 from sqltidy.rules.base import BaseRule
 from sqltidy.rulebook import SQLTidyConfig
-from sqltidy.api import format_sql
+from sqltidy.api import tidy_sql
 
 
 @pytest.fixture(autouse=True)
@@ -265,7 +265,7 @@ class TestPluginIntegration:
         plugin_rules = [r() for r in get_registered_plugins()]
         
         # Format with plugin
-        result = format_sql("SELECT * FROM users;", custom_rules=plugin_rules)
+        result = tidy_sql("SELECT * FROM users;", custom_rules=plugin_rules)
         
         # Should have removed semicolon
         assert not result.strip().endswith(';')
@@ -309,7 +309,7 @@ class TestPluginIntegration:
         plugin_rules = [r() for r in get_registered_plugins()]
         
         # Test with PostgreSQL dialect
-        pg_result = format_sql(
+        pg_result = tidy_sql(
             "SELECT 1",
             config=SQLTidyConfig(dialect='postgresql'),
             custom_rules=plugin_rules
@@ -329,7 +329,7 @@ class TestPluginIntegration:
         
         plugin_rules = [r() for r in get_registered_plugins()]
         
-        mysql_result = format_sql(
+        mysql_result = tidy_sql(
             "SELECT 1",
             config=SQLTidyConfig(dialect='mysql'),
             custom_rules=plugin_rules
