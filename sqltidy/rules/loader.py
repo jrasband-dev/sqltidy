@@ -11,9 +11,9 @@ def _ensure_package_in_sys_modules(package_name):
     if package_name in sys.modules:
         return
 
-    parts = package_name.split('.')
+    parts = package_name.split(".")
     for i in range(len(parts)):
-        partial = '.'.join(parts[:i+1])
+        partial = ".".join(parts[: i + 1])
         if partial not in sys.modules:
             mod = ModuleType(partial)
             mod.__path__ = []
@@ -65,7 +65,8 @@ def load_rules(rule_type=None):
 
     # Core dialect modules (one file per dialect/general)
     module_files = [
-        f for f in rules_dir.glob("*.py")
+        f
+        for f in rules_dir.glob("*.py")
         if f.stem not in {"__init__", "base", "loader"}
     ]
     for file in module_files:

@@ -49,22 +49,30 @@ class UppercaseKeywordsRule(BaseRule):
             return explicit
         return self.DIALECT_DEFAULTS.get(ctx.config.dialect, True)
 
-    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
+    def apply(
+        self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext
+    ) -> List[Union[Token, TokenGroup]]:
         should_uppercase = self._should_uppercase(ctx)
         return self._process_tokens(tokens, should_uppercase)
 
-    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]], should_uppercase: bool) -> List[Union[Token, TokenGroup]]:
+    def _process_tokens(
+        self, tokens: List[Union[Token, TokenGroup]], should_uppercase: bool
+    ) -> List[Union[Token, TokenGroup]]:
         result: List[Union[Token, TokenGroup]] = []
         for token in tokens:
             if isinstance(token, Token):
                 if token.type == TokenType.KEYWORD:
-                    new_value = token.value.upper() if should_uppercase else token.value.lower()
+                    new_value = (
+                        token.value.upper() if should_uppercase else token.value.lower()
+                    )
                     result.append(Token(new_value, token.type))
                 else:
                     result.append(token)
             elif isinstance(token, TokenGroup):
                 processed = self._process_tokens(token.tokens, should_uppercase)
-                result.append(TokenGroup(token.group_type, processed, token.name, token.metadata))
+                result.append(
+                    TokenGroup(token.group_type, processed, token.name, token.metadata)
+                )
             else:
                 result.append(token)
         return result
@@ -86,23 +94,33 @@ class CompactWhitespaceRule(BaseRule):
         )
     }
 
-    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
+    def apply(
+        self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext
+    ) -> List[Union[Token, TokenGroup]]:
         if not getattr(ctx.config, "compact", True):
             return tokens
         return self._process_tokens(tokens)
 
-    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]]) -> List[Union[Token, TokenGroup]]:
+    def _process_tokens(
+        self, tokens: List[Union[Token, TokenGroup]]
+    ) -> List[Union[Token, TokenGroup]]:
         result: List[Union[Token, TokenGroup]] = []
         prev: Union[Token, TokenGroup, None] = None
         for token in tokens:
             if isinstance(token, Token):
-                if token.type == TokenType.WHITESPACE and isinstance(prev, Token) and prev.type == TokenType.WHITESPACE:
+                if (
+                    token.type == TokenType.WHITESPACE
+                    and isinstance(prev, Token)
+                    and prev.type == TokenType.WHITESPACE
+                ):
                     continue
                 result.append(token)
                 prev = token
             elif isinstance(token, TokenGroup):
                 processed = self._process_tokens(token.tokens)
-                new_group = TokenGroup(token.group_type, processed, token.name, token.metadata)
+                new_group = TokenGroup(
+                    token.group_type, processed, token.name, token.metadata
+                )
                 result.append(new_group)
                 prev = new_group
             else:
@@ -127,21 +145,40 @@ class NewlineJoinPatternRule(BaseRule):
         )
     }
 
-    JOIN_KEYWORDS = {"INNER", "LEFT", "RIGHT", "FULL", "CROSS", "OUTER", "JOIN", "APPLY"}
+    JOIN_KEYWORDS = {
+        "INNER",
+        "LEFT",
+        "RIGHT",
+        "FULL",
+        "CROSS",
+        "OUTER",
+        "JOIN",
+        "APPLY",
+    }
 
-    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
-        if not getattr(ctx.config, "join_newlines", self.config_fields["join_newlines"].default):
+    def apply(
+        self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext
+    ) -> List[Union[Token, TokenGroup]]:
+        if not getattr(
+            ctx.config, "join_newlines", self.config_fields["join_newlines"].default
+        ):
             return tokens
         return self._process_tokens(tokens, first_table_after_from=False)
 
-    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]], first_table_after_from: bool = False) -> List[Union[Token, TokenGroup]]:
+    def _process_tokens(
+        self,
+        tokens: List[Union[Token, TokenGroup]],
+        first_table_after_from: bool = False,
+    ) -> List[Union[Token, TokenGroup]]:
         result: List[Union[Token, TokenGroup]] = []
         i = 0
         while i < len(tokens):
             token = tokens[i]
             if isinstance(token, TokenGroup):
                 processed = self._process_tokens(token.tokens, first_table_after_from)
-                result.append(TokenGroup(token.group_type, processed, token.name, token.metadata))
+                result.append(
+                    TokenGroup(token.group_type, processed, token.name, token.metadata)
+                )
                 i += 1
                 continue
             if isinstance(token, Token):
@@ -152,19 +189,54 @@ class NewlineJoinPatternRule(BaseRule):
                     continue
                 if token.type == TokenType.KEYWORD and token.value.upper() == "JOIN":
                     if not first_table_after_from:
-                        while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                        while (
+                            result
+                            and isinstance(result[-1], Token)
+                            and result[-1].type
+                            in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                        ):
                             result.pop()
-                        if result and isinstance(result[-1], Token) and result[-1].type == TokenType.KEYWORD:
+                        if (
+                            result
+                            and isinstance(result[-1], Token)
+                            and result[-1].type == TokenType.KEYWORD
+                        ):
                             last_keyword = result[-1].value.upper()
-                            if last_keyword in ("INNER", "LEFT", "RIGHT", "FULL", "CROSS", "OUTER"):
+                            if last_keyword in (
+                                "INNER",
+                                "LEFT",
+                                "RIGHT",
+                                "FULL",
+                                "CROSS",
+                                "OUTER",
+                            ):
                                 modifiers = [result.pop()]
-                                while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                                while (
+                                    result
+                                    and isinstance(result[-1], Token)
+                                    and result[-1].type
+                                    in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                                ):
                                     result.pop()
-                                if result and isinstance(result[-1], Token) and result[-1].type == TokenType.KEYWORD:
+                                if (
+                                    result
+                                    and isinstance(result[-1], Token)
+                                    and result[-1].type == TokenType.KEYWORD
+                                ):
                                     second_keyword = result[-1].value.upper()
-                                    if second_keyword in ("LEFT", "RIGHT", "FULL", "OUTER"):
+                                    if second_keyword in (
+                                        "LEFT",
+                                        "RIGHT",
+                                        "FULL",
+                                        "OUTER",
+                                    ):
                                         modifiers.insert(0, result.pop())
-                                        while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                                        while (
+                                            result
+                                            and isinstance(result[-1], Token)
+                                            and result[-1].type
+                                            in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                                        ):
                                             result.pop()
                                 result.append(Token("\n", TokenType.NEWLINE))
                                 result.append(Token("\n", TokenType.NEWLINE))
@@ -178,7 +250,11 @@ class NewlineJoinPatternRule(BaseRule):
                     first_table_after_from = False
                     i += 1
                     continue
-                if first_table_after_from and token.type not in (TokenType.WHITESPACE, TokenType.NEWLINE, TokenType.KEYWORD):
+                if first_table_after_from and token.type not in (
+                    TokenType.WHITESPACE,
+                    TokenType.NEWLINE,
+                    TokenType.KEYWORD,
+                ):
                     first_table_after_from = False
                 result.append(token)
                 i += 1
@@ -204,52 +280,102 @@ class OnNewlinesRule(BaseRule):
         )
     }
 
-    JOIN_KEYWORDS = {"INNER", "LEFT", "RIGHT", "FULL", "CROSS", "OUTER", "JOIN", "APPLY"}
+    JOIN_KEYWORDS = {
+        "INNER",
+        "LEFT",
+        "RIGHT",
+        "FULL",
+        "CROSS",
+        "OUTER",
+        "JOIN",
+        "APPLY",
+    }
 
-    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
-        if not getattr(ctx.config, "on_newlines", self.config_fields["on_newlines"].default):
+    def apply(
+        self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext
+    ) -> List[Union[Token, TokenGroup]]:
+        if not getattr(
+            ctx.config, "on_newlines", self.config_fields["on_newlines"].default
+        ):
             return tokens
         return self._process_tokens(tokens, in_join=False)
 
-    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]], in_join: bool = False) -> List[Union[Token, TokenGroup]]:
+    def _process_tokens(
+        self, tokens: List[Union[Token, TokenGroup]], in_join: bool = False
+    ) -> List[Union[Token, TokenGroup]]:
         result: List[Union[Token, TokenGroup]] = []
         i = 0
         while i < len(tokens):
             token = tokens[i]
             if isinstance(token, TokenGroup):
                 if token.group_type == GroupType.ON_CONDITION:
-                    while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                    while (
+                        result
+                        and isinstance(result[-1], Token)
+                        and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                    ):
                         result.pop()
                     result.append(Token("\n", TokenType.NEWLINE))
                     processed = self._process_tokens(token.tokens, in_join)
-                    result.append(TokenGroup(token.group_type, processed, token.name, token.metadata))
+                    result.append(
+                        TokenGroup(
+                            token.group_type, processed, token.name, token.metadata
+                        )
+                    )
                     i += 1
                     continue
                 processed = self._process_tokens(token.tokens, in_join)
-                result.append(TokenGroup(token.group_type, processed, token.name, token.metadata))
+                result.append(
+                    TokenGroup(token.group_type, processed, token.name, token.metadata)
+                )
                 i += 1
                 continue
             if isinstance(token, Token):
-                if token.type == TokenType.KEYWORD and token.value.upper() in self.JOIN_KEYWORDS:
+                if (
+                    token.type == TokenType.KEYWORD
+                    and token.value.upper() in self.JOIN_KEYWORDS
+                ):
                     in_join = True
                     result.append(token)
                     i += 1
                     continue
-                if in_join and token.type == TokenType.KEYWORD and token.value.upper() == "ON":
-                    while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                if (
+                    in_join
+                    and token.type == TokenType.KEYWORD
+                    and token.value.upper() == "ON"
+                ):
+                    while (
+                        result
+                        and isinstance(result[-1], Token)
+                        and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                    ):
                         result.pop()
                     result.append(Token("\n", TokenType.NEWLINE))
                     result.append(token)
                     in_join = False
                     i += 1
-                    while i < len(tokens) and isinstance(tokens[i], Token) and tokens[i].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                    while (
+                        i < len(tokens)
+                        and isinstance(tokens[i], Token)
+                        and tokens[i].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                    ):
                         i += 1
                     if i < len(tokens):
                         result.append(Token(" ", TokenType.WHITESPACE))
                     continue
                 if in_join and token.type == TokenType.KEYWORD:
                     keyword = token.value.upper()
-                    if keyword in ("WHERE", "GROUP", "HAVING", "ORDER", "UNION", "EXCEPT", "INTERSECT", "SELECT", "FROM"):
+                    if keyword in (
+                        "WHERE",
+                        "GROUP",
+                        "HAVING",
+                        "ORDER",
+                        "UNION",
+                        "EXCEPT",
+                        "INTERSECT",
+                        "SELECT",
+                        "FROM",
+                    ):
                         in_join = False
                 result.append(token)
                 i += 1
@@ -287,7 +413,12 @@ class QuoteIdentifiersRule(BaseRule):
         return self.QUOTE_CHARS.get(dialect, ('"', '"'))
 
     def _is_already_quoted(self, value: str) -> bool:
-        return bool(value and len(value) >= 2 and value[0] in ('"', "'", "[", "`") and value[-1] in ('"', "'", "]", "`"))
+        return bool(
+            value
+            and len(value) >= 2
+            and value[0] in ('"', "'", "[", "`")
+            and value[-1] in ('"', "'", "]", "`")
+        )
 
     def _quote_identifier(self, value: str, open_quote: str, close_quote: str) -> str:
         if "." in value:
@@ -296,25 +427,35 @@ class QuoteIdentifiersRule(BaseRule):
             return ".".join(quoted_parts)
         return f"{open_quote}{value}{close_quote}"
 
-    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
+    def apply(
+        self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext
+    ) -> List[Union[Token, TokenGroup]]:
         if not getattr(ctx.config, "quote_identifiers", False):
             return tokens
         dialect = ctx.config.dialect
         open_quote, close_quote = self._get_quote_chars(dialect)
         return self._process_tokens(tokens, open_quote, close_quote)
 
-    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]], open_quote: str, close_quote: str) -> List[Union[Token, TokenGroup]]:
+    def _process_tokens(
+        self, tokens: List[Union[Token, TokenGroup]], open_quote: str, close_quote: str
+    ) -> List[Union[Token, TokenGroup]]:
         result: List[Union[Token, TokenGroup]] = []
         for token in tokens:
             if isinstance(token, Token):
-                if token.type == TokenType.IDENTIFIER and not self._is_already_quoted(token.value):
-                    quoted_value = self._quote_identifier(token.value, open_quote, close_quote)
+                if token.type == TokenType.IDENTIFIER and not self._is_already_quoted(
+                    token.value
+                ):
+                    quoted_value = self._quote_identifier(
+                        token.value, open_quote, close_quote
+                    )
                     result.append(Token(quoted_value, token.type))
                 else:
                     result.append(token)
             elif isinstance(token, TokenGroup):
                 processed = self._process_tokens(token.tokens, open_quote, close_quote)
-                result.append(TokenGroup(token.group_type, processed, token.name, token.metadata))
+                result.append(
+                    TokenGroup(token.group_type, processed, token.name, token.metadata)
+                )
             else:
                 result.append(token)
         return result
@@ -336,12 +477,18 @@ class SelectNewlineRule(BaseRule):
         )
     }
 
-    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
-        if not getattr(ctx.config, "select_newline", self.config_fields["select_newline"].default):
+    def apply(
+        self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext
+    ) -> List[Union[Token, TokenGroup]]:
+        if not getattr(
+            ctx.config, "select_newline", self.config_fields["select_newline"].default
+        ):
             return tokens
         return self._process_tokens(tokens)
 
-    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]]) -> List[Union[Token, TokenGroup]]:
+    def _process_tokens(
+        self, tokens: List[Union[Token, TokenGroup]]
+    ) -> List[Union[Token, TokenGroup]]:
         result: List[Union[Token, TokenGroup]] = []
 
         def first_token(group: TokenGroup):
@@ -362,18 +509,33 @@ class SelectNewlineRule(BaseRule):
                 next_token = tokens[i + 1] if i + 1 < len(tokens) else None
                 next_is_select = False
                 if next_token:
-                    if isinstance(next_token, Token) and next_token.type == TokenType.KEYWORD and next_token.value.upper() == "SELECT":
+                    if (
+                        isinstance(next_token, Token)
+                        and next_token.type == TokenType.KEYWORD
+                        and next_token.value.upper() == "SELECT"
+                    ):
                         next_is_select = True
                     elif isinstance(next_token, TokenGroup):
                         ft = first_token(next_token)
-                        if ft and ft.type == TokenType.KEYWORD and ft.value.upper() == "SELECT":
+                        if (
+                            ft
+                            and ft.type == TokenType.KEYWORD
+                            and ft.value.upper() == "SELECT"
+                        ):
                             next_is_select = True
                 if next_is_select and processed_tokens:
-                    while processed_tokens and isinstance(processed_tokens[-1], Token) and processed_tokens[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                    while (
+                        processed_tokens
+                        and isinstance(processed_tokens[-1], Token)
+                        and processed_tokens[-1].type
+                        in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                    ):
                         processed_tokens.pop()
                     processed_tokens.append(Token("\n", TokenType.NEWLINE))
                     processed_tokens.append(Token("\n", TokenType.NEWLINE))
-                group_out = TokenGroup(token.group_type, processed_tokens, token.name, token.metadata)
+                group_out = TokenGroup(
+                    token.group_type, processed_tokens, token.name, token.metadata
+                )
                 result.append(group_out)
                 i += 1
                 continue
@@ -398,13 +560,25 @@ class ColumnsNewlineRule(BaseRule):
         )
     }
 
-    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
-        enabled = getattr(ctx.config, "columns_newline", self.config_fields["columns_newline"].default)
+    def apply(
+        self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext
+    ) -> List[Union[Token, TokenGroup]]:
+        enabled = getattr(
+            ctx.config, "columns_newline", self.config_fields["columns_newline"].default
+        )
         if not enabled:
             return tokens
-        return self._process_tokens(tokens, in_select=False, in_group=False, first_column_seen=False)
+        return self._process_tokens(
+            tokens, in_select=False, in_group=False, first_column_seen=False
+        )
 
-    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]], in_select: bool = False, in_group: bool = False, first_column_seen: bool = False) -> List[Union[Token, TokenGroup]]:
+    def _process_tokens(
+        self,
+        tokens: List[Union[Token, TokenGroup]],
+        in_select: bool = False,
+        in_group: bool = False,
+        first_column_seen: bool = False,
+    ) -> List[Union[Token, TokenGroup]]:
         result: List[Union[Token, TokenGroup]] = []
         i = 0
         just_finished_select_clause = False
@@ -416,38 +590,108 @@ class ColumnsNewlineRule(BaseRule):
                 if token.group_type in (GroupType.SELECT_CLAUSE, GroupType.CLAUSE):
                     if token.tokens:
                         first_token = token.tokens[0]
-                        if isinstance(first_token, Token) and first_token.type == TokenType.KEYWORD and first_token.value.upper() == "SELECT":
+                        if (
+                            isinstance(first_token, Token)
+                            and first_token.type == TokenType.KEYWORD
+                            and first_token.value.upper() == "SELECT"
+                        ):
                             is_select_clause = True
-                
+
                 # Check if this is a FROM clause (generic CLAUSE that starts with FROM)
                 is_from_clause = False
                 if token.group_type in (GroupType.FROM_CLAUSE, GroupType.CLAUSE):
                     if token.tokens:
                         first_token = token.tokens[0]
-                        if isinstance(first_token, Token) and first_token.type == TokenType.KEYWORD and first_token.value.upper() in ("FROM", "INTO"):
+                        if (
+                            isinstance(first_token, Token)
+                            and first_token.type == TokenType.KEYWORD
+                            and first_token.value.upper() in ("FROM", "INTO")
+                        ):
                             is_from_clause = True
-                
+
                 if is_select_clause:
-                    processed_tokens = self._process_tokens(token.tokens, in_select=True, in_group=in_group, first_column_seen=False)
-                    if processed_tokens and isinstance(processed_tokens[-1], Token) and processed_tokens[-1].type != TokenType.NEWLINE:
-                        processed_tokens = processed_tokens + [Token("\n", TokenType.NEWLINE)]
-                    result.append(TokenGroup(token.group_type, processed_tokens, token.name, token.metadata))
+                    processed_tokens = self._process_tokens(
+                        token.tokens,
+                        in_select=True,
+                        in_group=in_group,
+                        first_column_seen=False,
+                    )
+                    if (
+                        processed_tokens
+                        and isinstance(processed_tokens[-1], Token)
+                        and processed_tokens[-1].type != TokenType.NEWLINE
+                    ):
+                        processed_tokens = processed_tokens + [
+                            Token("\n", TokenType.NEWLINE)
+                        ]
+                    result.append(
+                        TokenGroup(
+                            token.group_type,
+                            processed_tokens,
+                            token.name,
+                            token.metadata,
+                        )
+                    )
                     just_finished_select_clause = True
                 elif is_from_clause and just_finished_select_clause:
                     # Add blank line before FROM clause
-                    while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                    while (
+                        result
+                        and isinstance(result[-1], Token)
+                        and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                    ):
                         result.pop()
                     result.append(Token("\n", TokenType.NEWLINE))
-                    processed_tokens = self._process_tokens(token.tokens, in_select=in_select, in_group=in_group, first_column_seen=first_column_seen)
-                    result.append(TokenGroup(token.group_type, processed_tokens, token.name, token.metadata))
+                    processed_tokens = self._process_tokens(
+                        token.tokens,
+                        in_select=in_select,
+                        in_group=in_group,
+                        first_column_seen=first_column_seen,
+                    )
+                    result.append(
+                        TokenGroup(
+                            token.group_type,
+                            processed_tokens,
+                            token.name,
+                            token.metadata,
+                        )
+                    )
                     just_finished_select_clause = False
-                elif token.group_type in (GroupType.PARENTHESIS, GroupType.SUBQUERY, GroupType.FUNCTION):
-                    processed_tokens = self._process_tokens(token.tokens, in_select=in_select, in_group=True, first_column_seen=first_column_seen)
-                    result.append(TokenGroup(token.group_type, processed_tokens, token.name, token.metadata))
+                elif token.group_type in (
+                    GroupType.PARENTHESIS,
+                    GroupType.SUBQUERY,
+                    GroupType.FUNCTION,
+                ):
+                    processed_tokens = self._process_tokens(
+                        token.tokens,
+                        in_select=in_select,
+                        in_group=True,
+                        first_column_seen=first_column_seen,
+                    )
+                    result.append(
+                        TokenGroup(
+                            token.group_type,
+                            processed_tokens,
+                            token.name,
+                            token.metadata,
+                        )
+                    )
                     just_finished_select_clause = False
                 else:
-                    processed_tokens = self._process_tokens(token.tokens, in_select=in_select, in_group=in_group, first_column_seen=first_column_seen)
-                    result.append(TokenGroup(token.group_type, processed_tokens, token.name, token.metadata))
+                    processed_tokens = self._process_tokens(
+                        token.tokens,
+                        in_select=in_select,
+                        in_group=in_group,
+                        first_column_seen=first_column_seen,
+                    )
+                    result.append(
+                        TokenGroup(
+                            token.group_type,
+                            processed_tokens,
+                            token.name,
+                            token.metadata,
+                        )
+                    )
                     just_finished_select_clause = False
                 i += 1
                 continue
@@ -457,14 +701,26 @@ class ColumnsNewlineRule(BaseRule):
                     first_column_seen = False
                     result.append(token)
                     i += 1
-                    while i < len(tokens) and isinstance(tokens[i], Token) and tokens[i].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                    while (
+                        i < len(tokens)
+                        and isinstance(tokens[i], Token)
+                        and tokens[i].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                    ):
                         i += 1
                     result.append(Token("\n", TokenType.NEWLINE))
                     just_finished_select_clause = False
                     continue
                 # Handle FROM that comes after SELECT_CLAUSE group
-                if just_finished_select_clause and token.type == TokenType.KEYWORD and token.value.upper() in ("FROM", "INTO"):
-                    while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                if (
+                    just_finished_select_clause
+                    and token.type == TokenType.KEYWORD
+                    and token.value.upper() in ("FROM", "INTO")
+                ):
+                    while (
+                        result
+                        and isinstance(result[-1], Token)
+                        and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                    ):
                         result.pop()
                     result.append(Token("\n", TokenType.NEWLINE))
                     result.append(token)
@@ -473,10 +729,25 @@ class ColumnsNewlineRule(BaseRule):
                     continue
                 if in_select and not in_group and token.type == TokenType.KEYWORD:
                     keyword = token.value.upper()
-                    if keyword in ("FROM", "INTO", "WHERE", "GROUP", "ORDER", "HAVING", "UNION", "EXCEPT", "INTERSECT"):
+                    if keyword in (
+                        "FROM",
+                        "INTO",
+                        "WHERE",
+                        "GROUP",
+                        "ORDER",
+                        "HAVING",
+                        "UNION",
+                        "EXCEPT",
+                        "INTERSECT",
+                    ):
                         in_select = False
                         first_column_seen = False
-                        while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                        while (
+                            result
+                            and isinstance(result[-1], Token)
+                            and result[-1].type
+                            in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                        ):
                             result.pop()
                         result.append(Token("\n", TokenType.NEWLINE))
                         result.append(Token("\n", TokenType.NEWLINE))
@@ -488,22 +759,42 @@ class ColumnsNewlineRule(BaseRule):
                 if in_select and in_group and token.type == TokenType.KEYWORD:
                     keyword = token.value.upper()
                     if keyword in ("FROM", "INTO"):
-                        while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                        while (
+                            result
+                            and isinstance(result[-1], Token)
+                            and result[-1].type
+                            in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                        ):
                             result.pop()
                         result.append(Token("\n", TokenType.NEWLINE))
                         result.append(Token("\n", TokenType.NEWLINE))
                         result.append(token)
                         i += 1
                         continue
-                if in_select and not in_group and token.type == TokenType.PUNCTUATION and token.value == ",":
+                if (
+                    in_select
+                    and not in_group
+                    and token.type == TokenType.PUNCTUATION
+                    and token.value == ","
+                ):
                     result.append(token)
                     i += 1
-                    while i < len(tokens) and isinstance(tokens[i], Token) and tokens[i].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                    while (
+                        i < len(tokens)
+                        and isinstance(tokens[i], Token)
+                        and tokens[i].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                    ):
                         i += 1
                     result.append(Token("\n", TokenType.NEWLINE))
                     first_column_seen = True
                     continue
-                if in_select and not first_column_seen and not in_group and token.type not in (TokenType.WHITESPACE, TokenType.NEWLINE, TokenType.COMMENT):
+                if (
+                    in_select
+                    and not first_column_seen
+                    and not in_group
+                    and token.type
+                    not in (TokenType.WHITESPACE, TokenType.NEWLINE, TokenType.COMMENT)
+                ):
                     first_column_seen = True
                     result.append(token)
                     i += 1
@@ -536,14 +827,35 @@ class WhereNewlinesRule(BaseRule):
     }
 
     LOGICAL_OPERATORS = {"AND", "OR"}
-    CLAUSE_TERMINATORS = {"GROUP", "HAVING", "ORDER", "UNION", "EXCEPT", "INTERSECT", "LIMIT", "OFFSET", "FETCH", "FOR", "OPTION"}
+    CLAUSE_TERMINATORS = {
+        "GROUP",
+        "HAVING",
+        "ORDER",
+        "UNION",
+        "EXCEPT",
+        "INTERSECT",
+        "LIMIT",
+        "OFFSET",
+        "FETCH",
+        "FOR",
+        "OPTION",
+    }
 
-    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
-        if not getattr(ctx.config, "where_newlines", self.config_fields["where_newlines"].default):
+    def apply(
+        self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext
+    ) -> List[Union[Token, TokenGroup]]:
+        if not getattr(
+            ctx.config, "where_newlines", self.config_fields["where_newlines"].default
+        ):
             return tokens
         return self._process_tokens(tokens, in_where=False, in_group=False)
 
-    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]], in_where: bool = False, in_group: bool = False) -> List[Union[Token, TokenGroup]]:
+    def _process_tokens(
+        self,
+        tokens: List[Union[Token, TokenGroup]],
+        in_where: bool = False,
+        in_group: bool = False,
+    ) -> List[Union[Token, TokenGroup]]:
         result: List[Union[Token, TokenGroup]] = []
         i = 0
         while i < len(tokens):
@@ -553,36 +865,76 @@ class WhereNewlinesRule(BaseRule):
                 starts_with_where = False
                 if token.tokens:
                     first_token = token.tokens[0]
-                    if isinstance(first_token, Token) and first_token.type == TokenType.KEYWORD and first_token.value.upper() == "WHERE":
+                    if (
+                        isinstance(first_token, Token)
+                        and first_token.type == TokenType.KEYWORD
+                        and first_token.value.upper() == "WHERE"
+                    ):
                         starts_with_where = True
-                
+
                 # Add blank line before WHERE clause
                 if starts_with_where:
                     if result:
-                        last_is_newline = isinstance(result[-1], Token) and result[-1].type == TokenType.NEWLINE
+                        last_is_newline = (
+                            isinstance(result[-1], Token)
+                            and result[-1].type == TokenType.NEWLINE
+                        )
                         if not last_is_newline:
-                            while result and isinstance(result[-1], Token) and result[-1].type == TokenType.WHITESPACE:
+                            while (
+                                result
+                                and isinstance(result[-1], Token)
+                                and result[-1].type == TokenType.WHITESPACE
+                            ):
                                 result.pop()
                             result.append(Token("\n", TokenType.NEWLINE))
                             result.append(Token("\n", TokenType.NEWLINE))
-                
+
                 if token.group_type == GroupType.WHERE_CLAUSE:
-                    processed = self._process_tokens(token.tokens, in_where=True, in_group=in_group)
-                    result.append(TokenGroup(token.group_type, processed, token.name, token.metadata))
-                elif token.group_type in (GroupType.PARENTHESIS, GroupType.SUBQUERY, GroupType.FUNCTION):
-                    processed = self._process_tokens(token.tokens, in_where=in_where, in_group=True)
-                    result.append(TokenGroup(token.group_type, processed, token.name, token.metadata))
+                    processed = self._process_tokens(
+                        token.tokens, in_where=True, in_group=in_group
+                    )
+                    result.append(
+                        TokenGroup(
+                            token.group_type, processed, token.name, token.metadata
+                        )
+                    )
+                elif token.group_type in (
+                    GroupType.PARENTHESIS,
+                    GroupType.SUBQUERY,
+                    GroupType.FUNCTION,
+                ):
+                    processed = self._process_tokens(
+                        token.tokens, in_where=in_where, in_group=True
+                    )
+                    result.append(
+                        TokenGroup(
+                            token.group_type, processed, token.name, token.metadata
+                        )
+                    )
                 else:
-                    processed = self._process_tokens(token.tokens, in_where=in_where, in_group=in_group)
-                    result.append(TokenGroup(token.group_type, processed, token.name, token.metadata))
+                    processed = self._process_tokens(
+                        token.tokens, in_where=in_where, in_group=in_group
+                    )
+                    result.append(
+                        TokenGroup(
+                            token.group_type, processed, token.name, token.metadata
+                        )
+                    )
                 i += 1
                 continue
             if isinstance(token, Token):
                 if token.type == TokenType.KEYWORD and token.value.upper() == "WHERE":
                     if result:
-                        last_is_newline = isinstance(result[-1], Token) and result[-1].type == TokenType.NEWLINE
+                        last_is_newline = (
+                            isinstance(result[-1], Token)
+                            and result[-1].type == TokenType.NEWLINE
+                        )
                         if not last_is_newline:
-                            while result and isinstance(result[-1], Token) and result[-1].type == TokenType.WHITESPACE:
+                            while (
+                                result
+                                and isinstance(result[-1], Token)
+                                and result[-1].type == TokenType.WHITESPACE
+                            ):
                                 result.pop()
                             result.append(Token("\n", TokenType.NEWLINE))
                             result.append(Token("\n", TokenType.NEWLINE))
@@ -597,12 +949,22 @@ class WhereNewlinesRule(BaseRule):
                 if in_where and not in_group and token.type == TokenType.KEYWORD:
                     keyword = token.value.upper()
                     if keyword in self.LOGICAL_OPERATORS:
-                        while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                        while (
+                            result
+                            and isinstance(result[-1], Token)
+                            and result[-1].type
+                            in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                        ):
                             result.pop()
                         result.append(Token("\n", TokenType.NEWLINE))
                         result.append(token)
                         i += 1
-                        while i < len(tokens) and isinstance(tokens[i], Token) and tokens[i].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                        while (
+                            i < len(tokens)
+                            and isinstance(tokens[i], Token)
+                            and tokens[i].type
+                            in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                        ):
                             i += 1
                         if i < len(tokens):
                             result.append(Token(" ", TokenType.WHITESPACE))
@@ -632,22 +994,51 @@ class IndentSelectColumnsRule(BaseRule):
     }
 
     def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext):
-        if not getattr(ctx.config, "indent_select_columns", self.config_fields["indent_select_columns"].default):
+        if not getattr(
+            ctx.config,
+            "indent_select_columns",
+            self.config_fields["indent_select_columns"].default,
+        ):
             return tokens
-        return self._process_tokens(tokens, in_select=False, indent_str=ctx.get_indent_string())
+        return self._process_tokens(
+            tokens, in_select=False, indent_str=ctx.get_indent_string()
+        )
 
-    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]], in_select: bool = False, indent_str: str = "    ") -> List[Union[Token, TokenGroup]]:
+    def _process_tokens(
+        self,
+        tokens: List[Union[Token, TokenGroup]],
+        in_select: bool = False,
+        indent_str: str = "    ",
+    ) -> List[Union[Token, TokenGroup]]:
         result: List[Union[Token, TokenGroup]] = []
         i = 0
         while i < len(tokens):
             token = tokens[i]
             if isinstance(token, TokenGroup):
                 if token.group_type == GroupType.SELECT_CLAUSE:
-                    processed_tokens = self._process_tokens(token.tokens, in_select=True)
-                    result.append(TokenGroup(token.group_type, processed_tokens, token.name, token.metadata))
+                    processed_tokens = self._process_tokens(
+                        token.tokens, in_select=True
+                    )
+                    result.append(
+                        TokenGroup(
+                            token.group_type,
+                            processed_tokens,
+                            token.name,
+                            token.metadata,
+                        )
+                    )
                 else:
-                    processed_tokens = self._process_tokens(token.tokens, in_select=in_select)
-                    result.append(TokenGroup(token.group_type, processed_tokens, token.name, token.metadata))
+                    processed_tokens = self._process_tokens(
+                        token.tokens, in_select=in_select
+                    )
+                    result.append(
+                        TokenGroup(
+                            token.group_type,
+                            processed_tokens,
+                            token.name,
+                            token.metadata,
+                        )
+                    )
                 i += 1
                 continue
             if isinstance(token, Token):
@@ -656,9 +1047,18 @@ class IndentSelectColumnsRule(BaseRule):
                     result.append(token)
                     i += 1
                     continue
-                if token.type == TokenType.KEYWORD and token.value.upper() == "FROM" and in_select:
+                if (
+                    token.type == TokenType.KEYWORD
+                    and token.value.upper() == "FROM"
+                    and in_select
+                ):
                     in_select = False
-                    while result and isinstance(result[-1], Token) and result[-1].type == TokenType.WHITESPACE and result[-1].value == "    ":
+                    while (
+                        result
+                        and isinstance(result[-1], Token)
+                        and result[-1].type == TokenType.WHITESPACE
+                        and result[-1].value == "    "
+                    ):
                         result.pop()
                     result.append(token)
                     i += 1
@@ -667,13 +1067,29 @@ class IndentSelectColumnsRule(BaseRule):
                     result.append(token)
                     # Skip any existing whitespace after the newline
                     next_idx = i + 1
-                    while next_idx < len(tokens) and isinstance(tokens[next_idx], Token) and tokens[next_idx].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                    while (
+                        next_idx < len(tokens)
+                        and isinstance(tokens[next_idx], Token)
+                        and tokens[next_idx].type
+                        in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                    ):
                         next_idx += 1
                     add_indent = True
                     if next_idx < len(tokens):
                         next_token = tokens[next_idx]
-                        if isinstance(next_token, Token) and next_token.type == TokenType.KEYWORD:
-                            if next_token.value.upper() in ("FROM", "WHERE", "GROUP", "ORDER", "HAVING", "UNION", "INTO"):
+                        if (
+                            isinstance(next_token, Token)
+                            and next_token.type == TokenType.KEYWORD
+                        ):
+                            if next_token.value.upper() in (
+                                "FROM",
+                                "WHERE",
+                                "GROUP",
+                                "ORDER",
+                                "HAVING",
+                                "UNION",
+                                "INTO",
+                            ):
                                 add_indent = False
                     if add_indent:
                         result.append(Token(indent_str, TokenType.WHITESPACE))
@@ -704,12 +1120,20 @@ class CaseWhenNewlineIndentRule(BaseRule):
         )
     }
 
-    def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
-        if not getattr(ctx.config, "case_when_newline_indent", self.config_fields["case_when_newline_indent"].default):
+    def apply(
+        self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext
+    ) -> List[Union[Token, TokenGroup]]:
+        if not getattr(
+            ctx.config,
+            "case_when_newline_indent",
+            self.config_fields["case_when_newline_indent"].default,
+        ):
             return tokens
         return self._process_tokens(tokens)
 
-    def _process_tokens(self, tokens: List[Union[Token, TokenGroup]], indent_str: str = "    ") -> List[Union[Token, TokenGroup]]:
+    def _process_tokens(
+        self, tokens: List[Union[Token, TokenGroup]], indent_str: str = "    "
+    ) -> List[Union[Token, TokenGroup]]:
         result: List[Union[Token, TokenGroup]] = []
         i = 0
         in_case = False
@@ -717,41 +1141,80 @@ class CaseWhenNewlineIndentRule(BaseRule):
         while i < len(tokens):
             token = tokens[i]
             if isinstance(token, TokenGroup):
-                processed_group = TokenGroup(token.group_type, self._process_tokens(token.tokens), token.name, token.metadata)
+                processed_group = TokenGroup(
+                    token.group_type,
+                    self._process_tokens(token.tokens),
+                    token.name,
+                    token.metadata,
+                )
                 result.append(processed_group)
                 i += 1
                 continue
-            if isinstance(token, Token) and token.type == TokenType.KEYWORD and token.value.upper() == "CASE":
+            if (
+                isinstance(token, Token)
+                and token.type == TokenType.KEYWORD
+                and token.value.upper() == "CASE"
+            ):
                 case_depth += 1
                 in_case = True
                 result.append(token)
                 i += 1
                 result.append(Token("\n", TokenType.NEWLINE))
-                while i < len(tokens) and isinstance(tokens[i], Token) and tokens[i].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                while (
+                    i < len(tokens)
+                    and isinstance(tokens[i], Token)
+                    and tokens[i].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                ):
                     i += 1
                 continue
-            if in_case and isinstance(token, Token) and token.type == TokenType.KEYWORD and token.value.upper() == "WHEN":
-                while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+            if (
+                in_case
+                and isinstance(token, Token)
+                and token.type == TokenType.KEYWORD
+                and token.value.upper() == "WHEN"
+            ):
+                while (
+                    result
+                    and isinstance(result[-1], Token)
+                    and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                ):
                     result.pop()
                 result.append(Token("\n", TokenType.NEWLINE))
                 result.append(Token(indent_str, TokenType.WHITESPACE))
                 result.append(token)
                 i += 1
                 continue
-            if in_case and isinstance(token, Token) and token.type == TokenType.KEYWORD and token.value.upper() == "ELSE":
-                while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+            if (
+                in_case
+                and isinstance(token, Token)
+                and token.type == TokenType.KEYWORD
+                and token.value.upper() == "ELSE"
+            ):
+                while (
+                    result
+                    and isinstance(result[-1], Token)
+                    and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                ):
                     result.pop()
                 result.append(Token("\n", TokenType.NEWLINE))
                 result.append(Token(indent_str, TokenType.WHITESPACE))
                 result.append(token)
                 i += 1
                 continue
-            if isinstance(token, Token) and token.type == TokenType.KEYWORD and token.value.upper() == "END":
+            if (
+                isinstance(token, Token)
+                and token.type == TokenType.KEYWORD
+                and token.value.upper() == "END"
+            ):
                 if case_depth > 0:
                     case_depth -= 1
                     if case_depth == 0:
                         in_case = False
-                    while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                    while (
+                        result
+                        and isinstance(result[-1], Token)
+                        and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                    ):
                         result.pop()
                     result.append(Token(" ", TokenType.WHITESPACE))
                     result.append(token)
@@ -778,13 +1241,21 @@ class LeadingCommasRule(BaseRule):
         )
     }
 
-    def apply(self, tokens: Union[List[str], List[Union[Token, TokenGroup]]], ctx: FormatterContext) -> Union[List[str], List[Union[Token, TokenGroup]]]:
-        leading = getattr(ctx.config, "leading_commas", self.config_fields["leading_commas"].default)
+    def apply(
+        self,
+        tokens: Union[List[str], List[Union[Token, TokenGroup]]],
+        ctx: FormatterContext,
+    ) -> Union[List[str], List[Union[Token, TokenGroup]]]:
+        leading = getattr(
+            ctx.config, "leading_commas", self.config_fields["leading_commas"].default
+        )
         if not leading:
             return tokens
         if not tokens or isinstance(tokens[0], str):
             sql = "".join(tokens)
-            typed_tokens = tokenize_with_types(sql, ctx.config.dialect, SemanticLevel.BASIC)
+            typed_tokens = tokenize_with_types(
+                sql, ctx.config.dialect, SemanticLevel.BASIC
+            )
             flat_tokens = self._flatten_tokens(typed_tokens)
         else:
             flat_tokens = self._flatten_tokens(tokens)
@@ -797,7 +1268,10 @@ class LeadingCommasRule(BaseRule):
                 has_newline = False
                 whitespace_tokens: List[Token] = []
                 newline_count = 0
-                while j < len(flat_tokens) and flat_tokens[j].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                while j < len(flat_tokens) and flat_tokens[j].type in (
+                    TokenType.WHITESPACE,
+                    TokenType.NEWLINE,
+                ):
                     if flat_tokens[j].type == TokenType.NEWLINE:
                         has_newline = True
                         newline_count += 1
@@ -807,7 +1281,10 @@ class LeadingCommasRule(BaseRule):
                         whitespace_tokens.append(flat_tokens[j])
                     j += 1
                 if has_newline and whitespace_tokens:
-                    while result and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                    while result and result[-1].type in (
+                        TokenType.WHITESPACE,
+                        TokenType.NEWLINE,
+                    ):
                         result.pop()
                     result.extend(whitespace_tokens)
                     result.append(token)
@@ -819,12 +1296,16 @@ class LeadingCommasRule(BaseRule):
 
     def _flatten_tokens(self, tokens: List[Union[Token, TokenGroup]]) -> List[Token]:
         from sqltidy.tokenizer import GroupType as LocalGroupType
+
         result: List[Token] = []
         for item in tokens:
             if isinstance(item, Token):
                 result.append(item)
             elif isinstance(item, TokenGroup):
-                if item.group_type in (LocalGroupType.PARENTHESIS, LocalGroupType.SUBQUERY):
+                if item.group_type in (
+                    LocalGroupType.PARENTHESIS,
+                    LocalGroupType.SUBQUERY,
+                ):
                     result.append(Token("(", TokenType.PUNCTUATION))
                     result.extend(self._flatten_tokens(item.tokens))
                     result.append(Token(")", TokenType.PUNCTUATION))
@@ -907,9 +1388,12 @@ class AliasStyleABCRule(BaseRule):
             new_scope_sql = self._apply_to_scope_text(scope_sql)
             actual_start = start_pos + offset
             actual_end = end_pos + offset
-            result_sql = result_sql[:actual_start] + new_scope_sql + result_sql[actual_end:]
+            result_sql = (
+                result_sql[:actual_start] + new_scope_sql + result_sql[actual_end:]
+            )
             offset += len(new_scope_sql) - len(scope_sql)
         from sqltidy.tokenizer import tokenize
+
         return tokenize(result_sql)
 
     def _apply_to_scope_text(self, sql: str) -> str:
@@ -921,7 +1405,10 @@ class AliasStyleABCRule(BaseRule):
                 letters.append(chr(ord("A") + rem))
             return "".join(reversed(letters))
 
-        pattern = re.compile(r"\b(FROM|JOIN)\s+([A-Za-z_][\w\.]*)\s*(?:AS)?\s*([A-Za-z_][\w]*)?", re.IGNORECASE)
+        pattern = re.compile(
+            r"\b(FROM|JOIN)\s+([A-Za-z_][\w\.]*)\s*(?:AS)?\s*([A-Za-z_][\w]*)?",
+            re.IGNORECASE,
+        )
         mappings: Dict[str, str] = {}
         counter = 0
 
@@ -941,7 +1428,9 @@ class AliasStyleABCRule(BaseRule):
 
         new_sql = pattern.sub(_replacer, sql)
         if mappings:
-            ref_pattern = re.compile(r"\b(" + "|".join(re.escape(k) for k in mappings.keys()) + r")\b(?=\.)")
+            ref_pattern = re.compile(
+                r"\b(" + "|".join(re.escape(k) for k in mappings.keys()) + r")\b(?=\.)"
+            )
             new_sql = ref_pattern.sub(lambda m: mappings[m.group(1)], new_sql)
         return new_sql
 
@@ -1014,13 +1503,19 @@ class AliasStyleTNumericRule(BaseRule):
             new_scope_sql = self._apply_to_scope_text(scope_sql)
             actual_start = start_pos + offset
             actual_end = end_pos + offset
-            result_sql = result_sql[:actual_start] + new_scope_sql + result_sql[actual_end:]
+            result_sql = (
+                result_sql[:actual_start] + new_scope_sql + result_sql[actual_end:]
+            )
             offset += len(new_scope_sql) - len(scope_sql)
         from sqltidy.tokenizer import tokenize
+
         return tokenize(result_sql)
 
     def _apply_to_scope_text(self, sql: str) -> str:
-        pattern = re.compile(r"\b(FROM|JOIN)\s+([A-Za-z_][\w\.]*)\s*(?:AS)?\s*([A-Za-z_][\w]*)?", re.IGNORECASE)
+        pattern = re.compile(
+            r"\b(FROM|JOIN)\s+([A-Za-z_][\w\.]*)\s*(?:AS)?\s*([A-Za-z_][\w]*)?",
+            re.IGNORECASE,
+        )
         mappings: Dict[str, str] = {}
         counter = 0
 
@@ -1040,7 +1535,9 @@ class AliasStyleTNumericRule(BaseRule):
 
         new_sql = pattern.sub(_replacer, sql)
         if mappings:
-            ref_pattern = re.compile(r"\b(" + "|".join(re.escape(k) for k in mappings.keys()) + r")\b(?=\.)")
+            ref_pattern = re.compile(
+                r"\b(" + "|".join(re.escape(k) for k in mappings.keys()) + r")\b(?=\.)"
+            )
             new_sql = ref_pattern.sub(lambda m: mappings[m.group(1)], new_sql)
         return new_sql
 
@@ -1075,7 +1572,9 @@ class SubqueryToCTERule(BaseRule):
                 paren_depth -= 1
                 if paren_depth == 0:
                     remaining = sql[pos + 1 :].lstrip()
-                    if re.match(r"(SELECT|INSERT|UPDATE|DELETE)\b", remaining, re.IGNORECASE):
+                    if re.match(
+                        r"(SELECT|INSERT|UPDATE|DELETE)\b", remaining, re.IGNORECASE
+                    ):
                         return pos + 1
                     if remaining.startswith(","):
                         pos += 1
@@ -1087,7 +1586,7 @@ class SubqueryToCTERule(BaseRule):
         if not getattr(ctx.config, "enable_subquery_to_cte", False):
             return tokens
         sql = "".join(tokens)
-        
+
         # Find existing CTE block if present
         cte_end_pos = self._find_cte_end(sql)
         if cte_end_pos is not None:
@@ -1096,72 +1595,81 @@ class SubqueryToCTERule(BaseRule):
         else:
             existing_cte_block = None
             main_query = sql
-        
+
         # Find subqueries by properly tracking parentheses
         subqueries = []
         i = 0
         while i < len(main_query):
             # Look for "( SELECT" pattern
-            if main_query[i] == '(' and i + 1 < len(main_query):
+            if main_query[i] == "(" and i + 1 < len(main_query):
                 # Skip whitespace after opening paren
                 j = i + 1
-                while j < len(main_query) and main_query[j] in ' \t\n\r':
+                while j < len(main_query) and main_query[j] in " \t\n\r":
                     j += 1
-                
+
                 # Check if SELECT keyword follows
-                if j < len(main_query) - 6 and main_query[j:j+6].upper() == 'SELECT':
+                if (
+                    j < len(main_query) - 6
+                    and main_query[j : j + 6].upper() == "SELECT"
+                ):
                     # Find matching closing paren
                     paren_depth = 1
                     start_pos = i
                     k = i + 1
                     while k < len(main_query) and paren_depth > 0:
-                        if main_query[k] == '(':
+                        if main_query[k] == "(":
                             paren_depth += 1
-                        elif main_query[k] == ')':
+                        elif main_query[k] == ")":
                             paren_depth -= 1
                         k += 1
-                    
+
                     if paren_depth == 0:
                         # Extract the subquery (including parentheses)
                         subquery_with_parens = main_query[start_pos:k]
-                        subquery_content = main_query[start_pos+1:k-1]  # Without outer parens
-                        subqueries.append({
-                            'full': subquery_with_parens,
-                            'content': subquery_content,
-                            'start': start_pos,
-                            'end': k
-                        })
+                        subquery_content = main_query[
+                            start_pos + 1 : k - 1
+                        ]  # Without outer parens
+                        subqueries.append(
+                            {
+                                "full": subquery_with_parens,
+                                "content": subquery_content,
+                                "start": start_pos,
+                                "end": k,
+                            }
+                        )
                         i = k
                         continue
             i += 1
-        
+
         if not subqueries:
             return tokens
-        
+
         # Generate CTEs
         ctes = []
         if existing_cte_block:
-            existing_cte_count = len(re.findall(r"\w+\s+AS\s*\(", existing_cte_block, flags=re.IGNORECASE))
+            existing_cte_count = len(
+                re.findall(r"\w+\s+AS\s*\(", existing_cte_block, flags=re.IGNORECASE)
+            )
             cte_num = existing_cte_count + 1
         else:
             cte_num = 1
-        
+
         # Replace subqueries with CTE references (from end to start to preserve positions)
         modified_query = main_query
         offset = 0
-        
+
         for subquery in reversed(subqueries):
             cte_name = f"cte_{cte_num}"
             cte_sql = f"{cte_name} AS (\n{subquery['content']}\n)"
             ctes.insert(0, cte_sql)
-            
+
             # Replace the subquery with just the CTE name
-            before = modified_query[:subquery['start']]
-            after = modified_query[subquery['end']:]
+            before = modified_query[: subquery["start"]]
+            after = modified_query[subquery["end"] :]
             modified_query = before + cte_name + after
-            
+
             cte_num += 1
-        
+
         # Build final SQL with CTE block
         if existing_cte_block:
             cte_block = existing_cte_block + "\n" + ",".join(ctes) + "\n"
@@ -1170,10 +1678,11 @@ class SubqueryToCTERule(BaseRule):
             if len(ctes) > 1:
                 cte_block += "\n," + "\n,".join(ctes[1:])
             cte_block += "\n"
-        
+
         result_sql = cte_block + modified_query
-        
+
         from sqltidy.tokenizer import tokenize
+
         return tokenize(result_sql)
 
 

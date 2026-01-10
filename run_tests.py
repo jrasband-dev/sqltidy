@@ -17,7 +17,7 @@ import subprocess
 def run_tests(args=None):
     """Run pytest with the given arguments."""
     cmd = [sys.executable, "-m", "pytest"]
-    
+
     if args:
         # Parse custom arguments
         if "unit" in args:
@@ -29,16 +29,16 @@ def run_tests(args=None):
         elif "dialects" in args:
             cmd.append("tests/dialects")
             args.remove("dialects")
-        
+
         # Add remaining args
         cmd.extend(args)
     else:
         # Run all tests
         cmd.append("tests/")
-    
+
     print(f"Running: {' '.join(cmd)}")
     print("=" * 80)
-    
+
     result = subprocess.run(cmd)
     return result.returncode
 

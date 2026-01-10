@@ -9,9 +9,9 @@ from .base import SQLDialect
 from .registry import get_dialect, register_dialect, list_dialects, DIALECTS
 
 __all__ = [
-    'SQLDialect',
-    'get_dialect',
-    'register_dialect',
-    'list_dialects',
-    'DIALECTS',
+    "SQLDialect",
+    "get_dialect",
+    "register_dialect",
+    "list_dialects",
+    "DIALECTS",
 ]
