@@ -1,5 +1,5 @@
 # sqltidy/core.py
-from typing import List, Dict, Any, Union
+from typing import List, Any, Union
 from .rulebook import SQLTidyConfig
 from .tokenizer import tokenize_with_types, Token, TokenGroup, SemanticLevel
 

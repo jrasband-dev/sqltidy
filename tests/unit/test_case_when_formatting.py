@@ -1,6 +1,5 @@
 """Unit tests for CASE WHEN formatting rule (consolidated)."""
 
-import pytest
 from sqltidy.rules.general import CaseWhenNewlineIndentRule
 from sqltidy.rules.base import FormatterContext
 from sqltidy.rulebook import SQLTidyConfig

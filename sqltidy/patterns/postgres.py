@@ -6,7 +6,6 @@ These patterns handle PostgreSQL-specific syntax and constructs.
 
 from typing import Optional
 from . import Pattern, MatchResult, MatchContext
-from .matchers import KeywordPattern
 
 
 class ArrayConstructorPattern(Pattern):
@@ -178,7 +177,7 @@ class JsonOperatorPattern(Pattern):
 
     def match(self, context: MatchContext) -> MatchResult:
         """Match a JSON operator."""
-        from ..tokenizer import Token, TokenType
+        from ..tokenizer import Token
 
         if context.at_end():
             return MatchResult(success=False)

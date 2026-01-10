@@ -7,7 +7,6 @@ Tests MySQL specific features:
 - Syntax features (LIMIT, backticks, etc.)
 """
 
-import pytest
 from sqltidy.dialects import get_dialect
 from sqltidy.tokenizer import is_keyword
 from sqltidy import format_sql

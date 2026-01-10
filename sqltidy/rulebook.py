@@ -3,7 +3,6 @@
 
 from typing import Optional, Dict, Any
 import json
-from pathlib import Path
 
 
 # Supported SQL dialects

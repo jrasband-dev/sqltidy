@@ -7,7 +7,6 @@ Tests:
 - Dialect-specific rules
 """
 
-import pytest
 from sqltidy.rules.base import BaseRule, FormatterContext
 from sqltidy.rules.general import (
     UppercaseKeywordsRule,

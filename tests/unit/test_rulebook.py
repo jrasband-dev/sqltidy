@@ -8,7 +8,7 @@ Tests:
 """
 
 import pytest
-from sqltidy.rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
+from sqltidy.rulebook import SQLTidyConfig
 
 
 class TestSQLTidyConfig:

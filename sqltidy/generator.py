@@ -178,7 +178,7 @@ def create_rulebook(
             from .config_schema import generate_dialect_config
 
             console.print(
-                f"\n[cyan]Auto-generating config from rule metadata...[/cyan]"
+                "\n[cyan]Auto-generating config from rule metadata...[/cyan]"
             )
             if include_plugins:
                 console.print("[dim]Including plugin rules in configuration...[/dim]")
@@ -506,7 +506,6 @@ def reset_rulebook(rulebook_name: Optional[str] = None) -> None:
     """
     from rich.panel import Panel
     from rich.table import Table
-    from rich.tree import Tree
 
     user_dir = get_user_rulebooks_dir()
 
@@ -773,11 +772,11 @@ def update_rulebook(
                         f"  [green]✓[/green] Updated [cyan]{dialect}[/cyan]: Added {len(new_fields)} new field(s)"
                     )
                     if new_tidy_fields:
-                        console.print(f"    [yellow]Tidy rules:[/yellow]")
+                        console.print("    [yellow]Tidy rules:[/yellow]")
                         for field in sorted(new_tidy_fields):
                             console.print(f"      [green]+[/green] {field}")
                     if new_rewrite_fields:
-                        console.print(f"    [magenta]Rewrite rules:[/magenta]")
+                        console.print("    [magenta]Rewrite rules:[/magenta]")
                         for field in sorted(new_rewrite_fields):
                             console.print(f"      [green]+[/green] {field}")
                     updated_count += 1
@@ -1224,7 +1223,7 @@ def remove_rule(rule_name: str) -> None:
 
     if not rule_file.exists():
         print(f"Rule not found: {rule_name}")
-        print(f"\nUse 'sqltidy rules list' to see installed rules.")
+        print("\nUse 'sqltidy rules list' to see installed rules.")
         return
 
     # Confirm deletion

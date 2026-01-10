@@ -5,7 +5,7 @@ These are the building blocks for complex SQL patterns. Each matcher
 is focused on a single, simple matching operation.
 """
 
-from typing import List, Optional, Union, Callable, Set
+from typing import List, Optional, Callable, Set
 from . import Pattern, MatchResult, MatchContext
 
 

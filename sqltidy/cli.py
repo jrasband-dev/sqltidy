@@ -18,8 +18,8 @@ from .generator import (
     list_rules,
     remove_rule,
 )
-from .tokenizer import tokenize_with_types, TokenType, is_keyword
-from .dialects.registry import list_dialects, get_dialect, is_dialect_available
+from .tokenizer import tokenize_with_types, TokenType
+from .dialects.registry import list_dialects, get_dialect
 
 from rich.console import Console
 from rich.text import Text
@@ -33,8 +33,6 @@ from rich.progress import (
     TaskProgressColumn,
     TimeElapsedColumn,
 )
-from rich.syntax import Syntax
-from rich.tree import Tree
 from rich import box
 
 # Create a global console instance
@@ -293,7 +291,7 @@ def handle_tidy_command(args):
                             progress.update(
                                 task,
                                 advance=1,
-                                description=f"[cyan]Formatting files...",
+                                description="[cyan]Formatting files...",
                             )
                             console.print(f"  [green]✓[/green] {file_path.name}")
                         except Exception as e:
@@ -304,7 +302,7 @@ def handle_tidy_command(args):
                             progress.update(
                                 task,
                                 advance=1,
-                                description=f"[cyan]Formatting files...",
+                                description="[cyan]Formatting files...",
                             )
                             console.print(f"  [red]✗[/red] {file_path.name}: {str(e)}")
 
@@ -687,13 +685,13 @@ def handle_rewrite_command(args):
                         in_place=not args.no_in_place,
                     )
 
-                print(f"\nResults:")
+                print("\nResults:")
                 print(f"  Total files: {results['total']}")
                 print(f"  Successful: {results['success']}")
                 print(f"  Failed: {results['failed']}")
 
                 if results["errors"]:
-                    print(f"\nErrors:")
+                    print("\nErrors:")
                     for error in results["errors"]:
                         print(f"  {error['file']}: {error['error']}")
 
@@ -731,7 +729,6 @@ def handle_pattern_command(args):
     from .dialects import get_dialect
 
     # Import pattern_tokenizer to ensure patterns are registered
-    from . import pattern_tokenizer
 
     # List subcommand
     if args.patterns_command == "list":
@@ -1570,7 +1567,7 @@ def main():
         # Always use semantic level unless tokens-only flag is set
         level = SemanticLevel.BASIC if args.tokens_only else SemanticLevel.SEMANTIC
 
-        with console.status(f"[cyan]Analyzing SQL...", spinner="dots"):
+        with console.status("[cyan]Analyzing SQL...", spinner="dots"):
             tokens = tokenize_with_types(sql, dialect=args.dialect, level=level)
 
         # Generate output

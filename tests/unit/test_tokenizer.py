@@ -8,7 +8,6 @@ Tests:
 - SQL Server specific features
 """
 
-import pytest
 from sqltidy.tokenizer import tokenize, tokenize_with_types, is_keyword, TokenType
 
 

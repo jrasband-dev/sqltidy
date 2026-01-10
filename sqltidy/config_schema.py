@@ -6,11 +6,10 @@ registered rules. This enables automatic generation of configuration files and
 ensures that custom/plugin rules can extend the configuration system.
 """
 
-from typing import Dict, List, Any
+from typing import Dict, Any
 from pathlib import Path
 import json
 from .rules.base import (
-    BaseRule,
     ConfigField,
     build_config_schema_from_rules,
     generate_config_defaults,
@@ -196,7 +195,7 @@ def print_config_schema_summary(include_plugins: bool = True):
         print(f"  Description: {field_meta.description}")
 
         if field_meta.dialect_defaults:
-            print(f"  Dialect Defaults:")
+            print("  Dialect Defaults:")
             for dialect, value in sorted(field_meta.dialect_defaults.items()):
                 print(f"    {dialect}: {value}")
         print()

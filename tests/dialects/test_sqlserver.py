@@ -7,7 +7,6 @@ Tests SQL Server/T-SQL specific features:
 - Syntax features (TOP, WITH (NOLOCK), etc.)
 """
 
-import pytest
 from sqltidy.dialects import get_dialect
 from sqltidy.tokenizer import is_keyword
 from sqltidy import format_sql

@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..tokenizer import Token, TokenGroup, TokenType, GroupType
+    from ..tokenizer import Token, TokenGroup, GroupType
     from ..dialects.base import SQLDialect
 
 
@@ -54,7 +54,7 @@ class MatchResult:
     def __repr__(self):
         if self.success:
             return f"<MatchResult success=True tokens={len(self.matched_tokens)} end={self.end_index}>"
-        return f"<MatchResult success=False>"
+        return "<MatchResult success=False>"
 
 
 @dataclass

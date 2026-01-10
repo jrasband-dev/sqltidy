@@ -5,7 +5,7 @@ These patterns compose the tiny matchers into meaningful SQL constructs
 like CASE expressions, JOINs, CTEs, etc.
 """
 
-from typing import List, Optional, Union
+from typing import Optional
 from . import Pattern, MatchResult, MatchContext
 
 
@@ -76,7 +76,7 @@ class CTEPattern(Pattern):
                 # Look ahead to distinguish
                 peek_idx = 1
                 is_column_list = False
-                while not current_context.peek(peek_idx) is None:
+                while current_context.peek(peek_idx) is not None:
                     peek = current_context.peek(peek_idx)
                     if isinstance(peek, Token):
                         if (
@@ -363,7 +363,7 @@ class SubqueryPattern(Pattern):
 
     def match(self, context: MatchContext) -> MatchResult:
         """Match a subquery."""
-        from ..tokenizer import Token, TokenType, TokenGroup, GroupType
+        from ..tokenizer import Token, TokenType, GroupType
 
         # Must start with opening parenthesis
         if context.at_end():

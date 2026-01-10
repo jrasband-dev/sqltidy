@@ -4,7 +4,6 @@ Integration tests for end-to-end SQL formatting.
 Tests complete workflows from input SQL to formatted output.
 """
 
-import pytest
 from sqltidy import format_sql
 from sqltidy.rulebook import SQLTidyConfig
 

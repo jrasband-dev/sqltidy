@@ -2,7 +2,7 @@
 Dialect registry for managing and accessing SQL dialects.
 """
 
-from typing import Dict, List, Optional
+from typing import Dict, List
 from .base import SQLDialect
 from .sqlserver import SQLServerDialect
 from .postgresql import PostgreSQLDialect

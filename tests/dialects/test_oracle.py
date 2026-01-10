@@ -7,7 +7,6 @@ Tests Oracle/PL-SQL specific features:
 - Syntax features (DUAL, ROWNUM, CONNECT BY, etc.)
 """
 
-import pytest
 from sqltidy.dialects import get_dialect
 from sqltidy.tokenizer import is_keyword
 from sqltidy import format_sql
