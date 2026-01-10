@@ -171,7 +171,7 @@ def test_plugin(tokens, ctx):
             time.sleep(0.1)
             try:
                 Path(filepath).unlink()
-            except:
+            except Exception:
                 pass  # Ignore cleanup errors
 
     def test_load_nonexistent_file(self):
@@ -196,7 +196,7 @@ def test_plugin(tokens, ctx):
             time.sleep(0.1)
             try:
                 Path(filepath).unlink()
-            except:
+            except Exception:
                 pass  # Ignore cleanup errors
 
 
@@ -370,7 +370,7 @@ def test_rule(tokens, ctx):
             time.sleep(0.1)
             try:
                 Path(filepath).unlink()
-            except:
+            except Exception:
                 pass  # Ignore cleanup errors
 
     def test_create_with_config(self):

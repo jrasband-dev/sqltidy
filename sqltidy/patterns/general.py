@@ -135,7 +135,6 @@ class CTEPattern(Pattern):
                 current_context = current_context.advance(1)
 
         # Must have opening parenthesis or PARENTHESIS group for subquery
-        subquery_group = None
         while not current_context.at_end():
             curr = current_context.current()
 
@@ -145,7 +144,6 @@ class CTEPattern(Pattern):
                 and curr.group_type == GroupType.PARENTHESIS
             ):
                 matched_tokens.append(curr)
-                subquery_group = curr
                 current_context = current_context.advance(1)
                 break
             # Or a raw opening paren (if parentheses grouping hasn't run yet)
@@ -450,7 +448,6 @@ class SubqueryPattern(Pattern):
 
 
 __all__ = [
-    "JoinClausePattern",
     "CTEPattern",
     "WindowFunctionPattern",
     "SubqueryPattern",

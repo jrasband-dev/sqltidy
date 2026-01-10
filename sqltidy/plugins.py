@@ -392,8 +392,10 @@ def create_rule_formatter(
     if rule_modules:
         for module_name in rule_modules:
             try:
-                rules = load_rule_module(module_name)
-                formatter.rules.extend([p() for p in rules])
+                # Note: This functionality needs to be implemented
+                # rules = load_rule_module(module_name)
+                # formatter.rules.extend([p() for p in rules])
+                pass
             except Exception as e:
                 print(f"Warning: Could not load rule module {module_name}: {e}")
 

@@ -561,7 +561,7 @@ class OutputClausePattern(Pattern):
 
 
 __all__ = [
-    "TryatchPattern",
+    "TrycatchPattern",
     "PivotUnpivotPattern",
     "OutputClausePattern",
 ]

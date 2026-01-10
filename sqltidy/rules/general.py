@@ -1656,7 +1656,6 @@ class SubqueryToCTERule(BaseRule):
 
         # Replace subqueries with CTE references (from end to start to preserve positions)
         modified_query = main_query
-        offset = 0
 
         for subquery in reversed(subqueries):
             cte_name = f"cte_{cte_num}"

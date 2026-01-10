@@ -1,6 +1,6 @@
-sql = open("SQL Files/Cleaned/old.sql").read()
 from sqltidy.rules.general import AliasStyleABCRule
 
+sql = open("SQL Files/Cleaned/old.sql").read()
 rule = AliasStyleABCRule()
 scopes = rule._extract_cte_scopes(sql)
 print(f"Found {len(scopes)} scopes")

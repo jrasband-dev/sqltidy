@@ -5,8 +5,11 @@ These are the building blocks for complex SQL patterns. Each matcher
 is focused on a single, simple matching operation.
 """
 
-from typing import List, Optional, Callable, Set
+from typing import List, Optional, Callable, Set, TYPE_CHECKING
 from . import Pattern, MatchResult, MatchContext
+
+if TYPE_CHECKING:
+    from sqltidy.tokenizer import TokenType, GroupType
 
 
 class TokenPattern(Pattern):

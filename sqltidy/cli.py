@@ -764,7 +764,7 @@ def handle_pattern_command(args):
                     if d_patterns:
                         dialect_patterns_by_dialect[dialect_name] = d_patterns
                         dialect_patterns.extend(d_patterns)
-                except:
+                except Exception:
                     pass
 
             all_patterns = global_patterns + dialect_patterns
@@ -1116,7 +1116,7 @@ def main():
     # -------------------
     # version Command
     # -------------------
-    version_parser = subparsers.add_parser(
+    subparsers.add_parser(
         "version",
         help="Show version information",
         description="Display the sqltidy version number",
@@ -1316,7 +1316,7 @@ def main():
     )
 
     # rules list
-    list_rules_parser = rules_subparsers.add_parser(
+    rules_subparsers.add_parser(
         "list",
         help="List installed rules",
         description="List all custom rules in the user rule directory",
