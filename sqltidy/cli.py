@@ -764,9 +764,9 @@ def handle_pattern_command(args):
                     if d_patterns:
                         dialect_patterns_by_dialect[dialect_name] = d_patterns
                         dialect_patterns.extend(d_patterns)
-                except Exception:
-                    pass
-
+                except Exception as e:
+                    import logging
+                    logging.debug(f"Failed to load dialect patterns: {e}")
             all_patterns = global_patterns + dialect_patterns
             title = "All SQL Patterns"
 

@@ -86,9 +86,10 @@ def _format_sql(
             rule = rule_cls()
             if rule_type is None or getattr(rule, "rule_type", None) == rule_type:
                 formatter.rules.append(rule)
-    except Exception:
+    except Exception as e:
         # Be resilient: if plugin loading fails, continue with built-in rules
-        pass
+        import logging
+        logging.debug(f"Failed to load user plugins: {e}")
 
     return formatter.format(sql, return_metadata=return_metadata)
 

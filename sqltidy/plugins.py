@@ -74,10 +74,11 @@ def auto_load_user_rules() -> List[type]:
                 rules = load_rule_file(filepath)
                 loaded_rules.extend(rules)
                 _LOADED_PLUGIN_FILES.add(file_key)
-            except Exception:
+            except Exception as e:
                 # Silently skip files that can't be loaded
                 # (they might not be rule files)
-                pass
+                import logging
+                logging.debug(f"Skipping file {filepath}: {e}")
 
     return loaded_rules
 

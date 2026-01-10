@@ -6,7 +6,7 @@ Generates dialect-specific config files.
 import json
 import os
 import shutil
-import subprocess
+import subprocess  # nosec B404 - subprocess needed for opening files in default editor
 from pathlib import Path
 from typing import Dict, Any, Optional
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
@@ -474,10 +474,10 @@ def edit_rulebook(rulebook_name: Optional[str] = None) -> None:
     # Open in default editor
     try:
         if os.name == "nt":  # Windows
-            os.startfile(selected_file)
+            os.startfile(selected_file)  # nosec B606 - User's own rulebook file
         elif os.name == "posix":  # macOS and Linux
             opener = "open" if os.uname().sysname == "Darwin" else "xdg-open"
-            subprocess.run([opener, str(selected_file)])
+            subprocess.run([opener, str(selected_file)], check=False)  # nosec B603 - Opening user's own rulebook file
 
         console.print()
         console.print(
