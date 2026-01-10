@@ -400,6 +400,13 @@ def create_rule_formatter(
     return formatter
 
 
-# Convenience aliases
+# Convenience aliases for backwards compatibility
 rule = sqltidy_rule  # Shorter alias
 register = register_rule_class  # Shorter alias
+plugin = sqltidy_rule  # Backwards compatibility
+sqltidy_plugin = sqltidy_rule  # Backwards compatibility
+get_registered_plugins = get_registered_rules  # Backwards compatibility
+clear_plugins = clear_rules  # Backwards compatibility
+load_plugin_file = load_rule_file  # Backwards compatibility
+load_plugins_from_directory = load_rules_from_directory  # Backwards compatibility
+create_plugin_formatter = create_rule_formatter  # Backwards compatibility

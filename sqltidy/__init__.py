@@ -8,11 +8,16 @@ from .api import (
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 
 
+# Alias for backwards compatibility - just reference the same function
+format_sql = tidy_and_rewrite_sql
+
+
 __all__ = [
     # Main formatting functions
     "tidy_sql",
     "rewrite_sql",
     "tidy_and_rewrite_sql",
+    "format_sql",  # Backwards compatibility
     # Configuration
     "SQLTidyConfig",
     "SUPPORTED_DIALECTS",

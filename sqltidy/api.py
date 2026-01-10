@@ -86,7 +86,7 @@ def _format_sql(
     return formatter.format(sql, return_metadata=return_metadata)
 
 
-def tidy_sql(sql: str, dialect: str = 'sqlserver', config: Optional[SQLTidyConfig] = None) -> str:
+def tidy_sql(sql: str, dialect_or_config: Union[str, SQLTidyConfig, None] = None, config: Optional[SQLTidyConfig] = None, dialect: Optional[str] = None) -> str:
     """
     Apply formatting (tidy) rules to SQL without structural transformations.
     
@@ -95,9 +95,9 @@ def tidy_sql(sql: str, dialect: str = 'sqlserver', config: Optional[SQLTidyConfi
 
     Args:
         sql (str): The SQL string to format.
-        dialect (str): SQL dialect. One of: 'sqlserver', 'postgresql', 'mysql',
-            'oracle', 'sqlite'. Default is 'sqlserver'.
-        config (SQLTidyConfig, optional): Custom configuration. If provided, dialect is ignored.
+        dialect_or_config (str or SQLTidyConfig): SQL dialect name or config object (2nd positional).
+        config (SQLTidyConfig, optional): Custom configuration.
+        dialect (str, optional): SQL dialect (if not using dialect_or_config).
 
     Returns:
         str: Formatted SQL string.
@@ -106,11 +106,25 @@ def tidy_sql(sql: str, dialect: str = 'sqlserver', config: Optional[SQLTidyConfi
         >>> sql = "select name,email from users where active=1"
         >>> tidy_sql(sql, dialect='postgresql')
         'select\n    name\n    ,email\nfrom users\nwhere active=1'
+        >>> tidy_sql(sql, config=SQLTidyConfig(dialect='postgresql'))
+        'select\n    name\n    ,email\nfrom users\nwhere active=1'
     """
+    # Handle both positional config and named dialect
+    if dialect_or_config is not None:
+        if isinstance(dialect_or_config, SQLTidyConfig):
+            config = dialect_or_config
+            dialect = None
+        else:
+            dialect = dialect_or_config
+    
+    # Default dialect
+    if dialect is None and config is None:
+        dialect = 'sqlserver'
+    
     return _format_sql(sql, config=config, dialect=dialect, rule_type='tidy')
 
 
-def rewrite_sql(sql: str, dialect: str = 'sqlserver', config: Optional[SQLTidyConfig] = None) -> str:
+def rewrite_sql(sql: str, dialect_or_config: Union[str, SQLTidyConfig, None] = None, config: Optional[SQLTidyConfig] = None, dialect: Optional[str] = None) -> str:
     """
     Apply transformation (rewrite) rules to SQL.
     
@@ -119,9 +133,9 @@ def rewrite_sql(sql: str, dialect: str = 'sqlserver', config: Optional[SQLTidyCo
 
     Args:
         sql (str): The SQL string to transform.
-        dialect (str): SQL dialect. One of: 'sqlserver', 'postgresql', 'mysql',
-            'oracle', 'sqlite'. Default is 'sqlserver'.
-        config (SQLTidyConfig, optional): Custom configuration. If provided, dialect is ignored.
+        dialect_or_config (str or SQLTidyConfig): SQL dialect name or config object (2nd positional).
+        config (SQLTidyConfig, optional): Custom configuration.
+        dialect (str, optional): SQL dialect (if not using dialect_or_config).
 
     Returns:
         str: Transformed SQL string.
@@ -131,13 +145,26 @@ def rewrite_sql(sql: str, dialect: str = 'sqlserver', config: Optional[SQLTidyCo
         >>> rewrite_sql(sql)
         'WITH cte_1 AS (SELECT COUNT(*) FROM users) SELECT total FROM orders'
     """
+    # Handle both positional config and named dialect
+    if dialect_or_config is not None:
+        if isinstance(dialect_or_config, SQLTidyConfig):
+            config = dialect_or_config
+            dialect = None
+        else:
+            dialect = dialect_or_config
+    
+    # Default dialect
+    if dialect is None and config is None:
+        dialect = 'sqlserver'
+        
     return _format_sql(sql, config=config, dialect=dialect, rule_type='rewrite')
 
 
 def tidy_and_rewrite_sql(
     sql: str,
-    dialect: str = 'sqlserver',
-    config: Optional[SQLTidyConfig] = None
+    dialect_or_config: Union[str, SQLTidyConfig, None] = None,
+    config: Optional[SQLTidyConfig] = None,
+    dialect: Optional[str] = None
 ) -> str:
     """
     Apply both transformation and formatting rules to SQL.
@@ -148,9 +175,10 @@ def tidy_and_rewrite_sql(
 
     Args:
         sql (str): The SQL string to transform and format.
-        dialect (str): SQL dialect. One of: 'sqlserver', 'postgresql', 'mysql',
-            'oracle', 'sqlite'. Default is 'sqlserver'.
-        config (SQLTidyConfig, optional): Custom configuration. If provided, dialect is ignored.
+        dialect_or_config (str or SQLTidyConfig): SQL dialect name or config object.
+            Can be passed as 2nd positional arg.
+        config (SQLTidyConfig, optional): Custom configuration.
+        dialect (str, optional): SQL dialect (if not using dialect_or_config).
 
     Returns:
         str: Transformed and formatted SQL string.
@@ -160,6 +188,18 @@ def tidy_and_rewrite_sql(
         >>> tidy_and_rewrite_sql(sql, dialect='postgresql')
         'with cte_1 as (\n    select count(*)\n    from users\n)\nselect\n    total\nfrom orders'
     """
+    # Handle both positional config and named dialect
+    if dialect_or_config is not None:
+        if isinstance(dialect_or_config, SQLTidyConfig):
+            config = dialect_or_config
+            dialect = None
+        else:
+            dialect = dialect_or_config
+    
+    # Default dialect
+    if dialect is None and config is None:
+        dialect = 'sqlserver'
+        
     # First apply rewrite rules
     sql = _format_sql(sql, config=config, dialect=dialect, rule_type='rewrite')
     # Then apply tidy rules

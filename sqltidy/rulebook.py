@@ -1,7 +1,6 @@
 # Configuration for sqltidy
 # Each dialect can have its own config file (e.g., sqltidy_sqlserver.json, sqltidy_postgresql.json)
 
-from dataclasses import dataclass, field
 from typing import Optional, Dict, Any
 import json
 from pathlib import Path
@@ -11,7 +10,6 @@ from pathlib import Path
 SUPPORTED_DIALECTS = ['sqlserver', 'postgresql', 'mysql', 'oracle', 'sqlite']
 
 
-@dataclass
 class SQLTidyConfig:
     """
     Unified configuration for SQL formatting and transformation.
@@ -35,9 +33,31 @@ class SQLTidyConfig:
       }
     }
     """
-    dialect: str = 'sqlserver'
-    tidy: Dict[str, Any] = field(default_factory=dict)
-    rewrite: Dict[str, Any] = field(default_factory=dict)
+    
+    def __init__(self, dialect: str = 'sqlserver', tidy: Optional[Dict[str, Any]] = None, 
+                 rewrite: Optional[Dict[str, Any]] = None, **kwargs):
+        """
+        Initialize config with dialect and optional tidy/rewrite dicts.
+        
+        Additional kwargs are automatically routed to tidy or rewrite sections
+        based on naming convention (enable_* goes to rewrite, others to tidy).
+        
+        Args:
+            dialect: SQL dialect name
+            tidy: Dict of tidy (formatting) rules
+            rewrite: Dict of rewrite (transformation) rules
+            **kwargs: Individual config fields (auto-routed to tidy or rewrite)
+        """
+        self.dialect = dialect
+        self.tidy = tidy.copy() if tidy else {}
+        self.rewrite = rewrite.copy() if rewrite else {}
+        
+        # Auto-route kwargs to tidy or rewrite sections
+        for key, value in kwargs.items():
+            if key.startswith('enable_'):
+                self.rewrite[key] = value
+            else:
+                self.tidy[key] = value
     
     def __getattr__(self, name: str) -> Any:
         """
@@ -46,7 +66,7 @@ class SQLTidyConfig:
         Rules can access config.uppercase_keywords instead of config.tidy["uppercase_keywords"]
         Checks tidy first, then rewrite.
         """
-        # Avoid infinite recursion for dataclass internals
+        # Avoid infinite recursion for internals
         if name in ('tidy', 'rewrite', 'dialect'):
             raise AttributeError(f"Use direct access for '{name}'")
         
@@ -58,8 +78,8 @@ class SQLTidyConfig:
         if name in self.rewrite:
             return self.rewrite[name]
         
-        # Not found in either section
-        raise AttributeError(f"Config has no field '{name}' in tidy or rewrite sections")
+        # Not found - raise AttributeError to allow getattr(config, "field", default) to work
+        raise AttributeError(name)
     
     def get_tidy(self, key: str, default=None) -> Any:
         """Get a tidy rule value with optional default."""
@@ -147,12 +167,14 @@ class SQLTidyConfig:
         """
         Get default configuration for a specific dialect.
         
-        Note: This returns an empty config. Use generate_dialect_config() 
-        from config_schema.py to get a config populated from rule metadata.
+        Auto-generates config from rule metadata with dialect-specific defaults.
         """
         if dialect not in SUPPORTED_DIALECTS:
             raise ValueError(f"Unsupported dialect: {dialect}. Must be one of {SUPPORTED_DIALECTS}")
         
-        return cls(dialect=dialect, tidy={}, rewrite={})
+        # Import here to avoid circular import
+        from .config_schema import generate_dialect_config
+        config_dict = generate_dialect_config(dialect, include_plugins=False)
+        return cls.from_dict(config_dict)
 
 

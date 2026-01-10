@@ -137,7 +137,7 @@ def handle_tidy_command(args):
             with console.status(f"[cyan]Processing {input_path.name}...", spinner="dots"):
                 with open(args.input, "r", encoding="utf-8") as f:
                     sql = f.read()
-                formatted_sql = tidy_sql(sql, config=config, rule_type='tidy')
+                formatted_sql = tidy_sql(sql, config=config)
             
             console.print(f"[green]✓[/green] Formatted {input_path.name}")
             

@@ -167,10 +167,12 @@ class NewlineJoinPatternRule(BaseRule):
                                         while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
                                             result.pop()
                                 result.append(Token("\n", TokenType.NEWLINE))
+                                result.append(Token("\n", TokenType.NEWLINE))
                                 for mod in modifiers:
                                     result.append(mod)
                                     result.append(Token(" ", TokenType.WHITESPACE))
                         else:
+                            result.append(Token("\n", TokenType.NEWLINE))
                             result.append(Token("\n", TokenType.NEWLINE))
                     result.append(token)
                     first_table_after_from = False
@@ -493,6 +495,23 @@ class WhereNewlinesRule(BaseRule):
         while i < len(tokens):
             token = tokens[i]
             if isinstance(token, TokenGroup):
+                # Check if this group starts with WHERE keyword
+                starts_with_where = False
+                if token.tokens:
+                    first_token = token.tokens[0]
+                    if isinstance(first_token, Token) and first_token.type == TokenType.KEYWORD and first_token.value.upper() == "WHERE":
+                        starts_with_where = True
+                
+                # Add blank line before WHERE clause
+                if starts_with_where:
+                    if result:
+                        last_is_newline = isinstance(result[-1], Token) and result[-1].type == TokenType.NEWLINE
+                        if not last_is_newline:
+                            while result and isinstance(result[-1], Token) and result[-1].type == TokenType.WHITESPACE:
+                                result.pop()
+                            result.append(Token("\n", TokenType.NEWLINE))
+                            result.append(Token("\n", TokenType.NEWLINE))
+                
                 if token.group_type == GroupType.WHERE_CLAUSE:
                     processed = self._process_tokens(token.tokens, in_where=True, in_group=in_group)
                     result.append(TokenGroup(token.group_type, processed, token.name, token.metadata))
@@ -630,7 +649,7 @@ class CaseWhenNewlineIndentRule(BaseRule):
     }
 
     def apply(self, tokens: List[Union[Token, TokenGroup]], ctx: FormatterContext) -> List[Union[Token, TokenGroup]]:
-        if not getattr(ctx.config, "case_when_newline_indent", False):
+        if not getattr(ctx.config, "case_when_newline_indent", self.config_fields["case_when_newline_indent"].default):
             return tokens
         return self._process_tokens(tokens)
 
@@ -704,7 +723,7 @@ class LeadingCommasRule(BaseRule):
     }
 
     def apply(self, tokens: Union[List[str], List[Union[Token, TokenGroup]]], ctx: FormatterContext) -> Union[List[str], List[Union[Token, TokenGroup]]]:
-        leading = getattr(ctx.config, "leading_commas", False)
+        leading = getattr(ctx.config, "leading_commas", self.config_fields["leading_commas"].default)
         if not leading:
             return tokens
         if not tokens or isinstance(tokens[0], str):
