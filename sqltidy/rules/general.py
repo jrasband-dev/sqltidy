@@ -665,6 +665,7 @@ class IndentSelectColumnsRule(BaseRule):
                     continue
                 if in_select and token.type == TokenType.NEWLINE:
                     result.append(token)
+                    # Skip any existing whitespace after the newline
                     next_idx = i + 1
                     while next_idx < len(tokens) and isinstance(tokens[next_idx], Token) and tokens[next_idx].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
                         next_idx += 1
@@ -676,7 +677,8 @@ class IndentSelectColumnsRule(BaseRule):
                                 add_indent = False
                     if add_indent:
                         result.append(Token(indent_str, TokenType.WHITESPACE))
-                    i += 1
+                    # Move past the whitespace we skipped
+                    i = next_idx
                     continue
                 result.append(token)
                 i += 1
