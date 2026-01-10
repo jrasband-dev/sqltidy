@@ -407,20 +407,48 @@ class ColumnsNewlineRule(BaseRule):
     def _process_tokens(self, tokens: List[Union[Token, TokenGroup]], in_select: bool = False, in_group: bool = False, first_column_seen: bool = False) -> List[Union[Token, TokenGroup]]:
         result: List[Union[Token, TokenGroup]] = []
         i = 0
+        just_finished_select_clause = False
         while i < len(tokens):
             token = tokens[i]
             if isinstance(token, TokenGroup):
-                if token.group_type == GroupType.SELECT_CLAUSE:
+                # Check if this is a SELECT clause (generic CLAUSE that starts with SELECT)
+                is_select_clause = False
+                if token.group_type in (GroupType.SELECT_CLAUSE, GroupType.CLAUSE):
+                    if token.tokens:
+                        first_token = token.tokens[0]
+                        if isinstance(first_token, Token) and first_token.type == TokenType.KEYWORD and first_token.value.upper() == "SELECT":
+                            is_select_clause = True
+                
+                # Check if this is a FROM clause (generic CLAUSE that starts with FROM)
+                is_from_clause = False
+                if token.group_type in (GroupType.FROM_CLAUSE, GroupType.CLAUSE):
+                    if token.tokens:
+                        first_token = token.tokens[0]
+                        if isinstance(first_token, Token) and first_token.type == TokenType.KEYWORD and first_token.value.upper() in ("FROM", "INTO"):
+                            is_from_clause = True
+                
+                if is_select_clause:
                     processed_tokens = self._process_tokens(token.tokens, in_select=True, in_group=in_group, first_column_seen=False)
                     if processed_tokens and isinstance(processed_tokens[-1], Token) and processed_tokens[-1].type != TokenType.NEWLINE:
                         processed_tokens = processed_tokens + [Token("\n", TokenType.NEWLINE)]
                     result.append(TokenGroup(token.group_type, processed_tokens, token.name, token.metadata))
+                    just_finished_select_clause = True
+                elif is_from_clause and just_finished_select_clause:
+                    # Add blank line before FROM clause
+                    while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                        result.pop()
+                    result.append(Token("\n", TokenType.NEWLINE))
+                    processed_tokens = self._process_tokens(token.tokens, in_select=in_select, in_group=in_group, first_column_seen=first_column_seen)
+                    result.append(TokenGroup(token.group_type, processed_tokens, token.name, token.metadata))
+                    just_finished_select_clause = False
                 elif token.group_type in (GroupType.PARENTHESIS, GroupType.SUBQUERY, GroupType.FUNCTION):
                     processed_tokens = self._process_tokens(token.tokens, in_select=in_select, in_group=True, first_column_seen=first_column_seen)
                     result.append(TokenGroup(token.group_type, processed_tokens, token.name, token.metadata))
+                    just_finished_select_clause = False
                 else:
                     processed_tokens = self._process_tokens(token.tokens, in_select=in_select, in_group=in_group, first_column_seen=first_column_seen)
                     result.append(TokenGroup(token.group_type, processed_tokens, token.name, token.metadata))
+                    just_finished_select_clause = False
                 i += 1
                 continue
             if isinstance(token, Token):
@@ -432,6 +460,16 @@ class ColumnsNewlineRule(BaseRule):
                     while i < len(tokens) and isinstance(tokens[i], Token) and tokens[i].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
                         i += 1
                     result.append(Token("\n", TokenType.NEWLINE))
+                    just_finished_select_clause = False
+                    continue
+                # Handle FROM that comes after SELECT_CLAUSE group
+                if just_finished_select_clause and token.type == TokenType.KEYWORD and token.value.upper() in ("FROM", "INTO"):
+                    while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                        result.pop()
+                    result.append(Token("\n", TokenType.NEWLINE))
+                    result.append(token)
+                    i += 1
+                    just_finished_select_clause = False
                     continue
                 if in_select and not in_group and token.type == TokenType.KEYWORD:
                     keyword = token.value.upper()
@@ -440,6 +478,19 @@ class ColumnsNewlineRule(BaseRule):
                         first_column_seen = False
                         while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
                             result.pop()
+                        result.append(Token("\n", TokenType.NEWLINE))
+                        result.append(Token("\n", TokenType.NEWLINE))
+                        result.append(token)
+                        i += 1
+                        just_finished_select_clause = False
+                        continue
+                # Also handle FROM inside parentheses/subqueries (CTEs, inline subqueries)
+                if in_select and in_group and token.type == TokenType.KEYWORD:
+                    keyword = token.value.upper()
+                    if keyword in ("FROM", "INTO"):
+                        while result and isinstance(result[-1], Token) and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                            result.pop()
+                        result.append(Token("\n", TokenType.NEWLINE))
                         result.append(Token("\n", TokenType.NEWLINE))
                         result.append(token)
                         i += 1
@@ -457,6 +508,9 @@ class ColumnsNewlineRule(BaseRule):
                     result.append(token)
                     i += 1
                     continue
+                # Don't reset just_finished_select_clause for whitespace
+                if token.type not in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                    just_finished_select_clause = False
                 result.append(token)
                 i += 1
                 continue
@@ -1013,6 +1067,8 @@ class SubqueryToCTERule(BaseRule):
         if not getattr(ctx.config, "enable_subquery_to_cte", False):
             return tokens
         sql = "".join(tokens)
+        
+        # Find existing CTE block if present
         cte_end_pos = self._find_cte_end(sql)
         if cte_end_pos is not None:
             existing_cte_block = sql[:cte_end_pos].rstrip()
@@ -1020,31 +1076,83 @@ class SubqueryToCTERule(BaseRule):
         else:
             existing_cte_block = None
             main_query = sql
-        pattern = r"\(\s*SELECT(.*?)\)"
-        matches = re.findall(pattern, main_query, flags=re.IGNORECASE | re.DOTALL)
-        if not matches:
+        
+        # Find subqueries by properly tracking parentheses
+        subqueries = []
+        i = 0
+        while i < len(main_query):
+            # Look for "( SELECT" pattern
+            if main_query[i] == '(' and i + 1 < len(main_query):
+                # Skip whitespace after opening paren
+                j = i + 1
+                while j < len(main_query) and main_query[j] in ' \t\n\r':
+                    j += 1
+                
+                # Check if SELECT keyword follows
+                if j < len(main_query) - 6 and main_query[j:j+6].upper() == 'SELECT':
+                    # Find matching closing paren
+                    paren_depth = 1
+                    start_pos = i
+                    k = i + 1
+                    while k < len(main_query) and paren_depth > 0:
+                        if main_query[k] == '(':
+                            paren_depth += 1
+                        elif main_query[k] == ')':
+                            paren_depth -= 1
+                        k += 1
+                    
+                    if paren_depth == 0:
+                        # Extract the subquery (including parentheses)
+                        subquery_with_parens = main_query[start_pos:k]
+                        subquery_content = main_query[start_pos+1:k-1]  # Without outer parens
+                        subqueries.append({
+                            'full': subquery_with_parens,
+                            'content': subquery_content,
+                            'start': start_pos,
+                            'end': k
+                        })
+                        i = k
+                        continue
+            i += 1
+        
+        if not subqueries:
             return tokens
+        
+        # Generate CTEs
         ctes = []
         if existing_cte_block:
             existing_cte_count = len(re.findall(r"\w+\s+AS\s*\(", existing_cte_block, flags=re.IGNORECASE))
-            i = existing_cte_count + 1
+            cte_num = existing_cte_count + 1
         else:
-            i = 1
-        for subquery in matches:
-            ctename = f"cte_{i}"
-            cte_sql = f"{ctename} AS (\nSELECT{subquery}\n)"
-            ctes.append(cte_sql)
-            main_query = re.sub(r"\(\s*SELECT" + re.escape(subquery) + r"\)", ctename, main_query, flags=re.IGNORECASE | re.DOTALL, count=1)
-            i += 1
-        if not ctes:
-            return tokens
+            cte_num = 1
+        
+        # Replace subqueries with CTE references (from end to start to preserve positions)
+        modified_query = main_query
+        offset = 0
+        
+        for subquery in reversed(subqueries):
+            cte_name = f"cte_{cte_num}"
+            cte_sql = f"{cte_name} AS (\n{subquery['content']}\n)"
+            ctes.insert(0, cte_sql)
+            
+            # Replace the subquery with just the CTE name
+            before = modified_query[:subquery['start']]
+            after = modified_query[subquery['end']:]
+            modified_query = before + cte_name + after
+            
+            cte_num += 1
+        
+        # Build final SQL with CTE block
         if existing_cte_block:
-            cte_block = existing_cte_block + "\n" + "".join(["," + c + "\n" for c in ctes])
+            cte_block = existing_cte_block + "\n" + ",".join(ctes) + "\n"
         else:
-            cte_block = "WITH " + ctes[0] + "\n"
+            cte_block = "WITH " + ctes[0]
             if len(ctes) > 1:
-                cte_block += "".join(["," + c + "\n" for c in ctes[1:]])
-        result_sql = cte_block + main_query
+                cte_block += "\n," + "\n,".join(ctes[1:])
+            cte_block += "\n"
+        
+        result_sql = cte_block + modified_query
+        
         from sqltidy.tokenizer import tokenize
         return tokenize(result_sql)
 
