@@ -1671,7 +1671,8 @@ class SubqueryToCTERule(BaseRule):
 
         # Build final SQL with CTE block
         if existing_cte_block:
-            cte_block = existing_cte_block + "\n" + ",".join(ctes) + "\n"
+            # Add comma before new CTEs when appending to existing CTE block
+            cte_block = existing_cte_block + "\n," + "\n,".join(ctes) + "\n"
         else:
             cte_block = "WITH " + ctes[0]
             if len(ctes) > 1:
