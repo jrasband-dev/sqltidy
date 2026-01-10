@@ -17,7 +17,7 @@ dynamic = ["version"]
 description = "SQL Formatting Made Easy"
 readme = "README.md"
 authors = [{name = "Jayden Rasband"}]
-dependencies = []
+dependencies = ["rich"]
 
 [project.urls]
 "Source" = "https://github.com/jrasband-dev/sqltidy"

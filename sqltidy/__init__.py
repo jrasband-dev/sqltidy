@@ -1,15 +1,15 @@
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 from .api import (
     tidy_sql,
     rewrite_sql,
     tidy_and_rewrite_sql,
-    register_rule,
-    clear_rules,
-    load_rule,
-    load_user_rules,
 )
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
+
+
+# Alias for backwards compatibility - just reference the same function
+format_sql = tidy_and_rewrite_sql
 
 
 __all__ = [
@@ -17,11 +17,7 @@ __all__ = [
     "tidy_sql",
     "rewrite_sql",
     "tidy_and_rewrite_sql",
-    # rule management
-    "register_rule",
-    "clear_rules",
-    "load_rule",
-    "load_user_rules",
+    "format_sql",  # Backwards compatibility
     # Configuration
     "SQLTidyConfig",
     "SUPPORTED_DIALECTS",

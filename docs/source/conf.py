@@ -8,7 +8,7 @@ import os
 import sys
 
 # Add the parent directory to sys.path so Sphinx can find the sqltidy package
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 # Import version from the package
 import sqltidy
@@ -16,25 +16,25 @@ import sqltidy
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'SQLTidy'
-copyright = '2025, Jayden Rasband'
-author = 'Jayden Rasband'
+project = "SQLTidy"
+copyright = "2025, Jayden Rasband"
+author = "Jayden Rasband"
 release = sqltidy.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.coverage',
-    'sphinx.ext.todo',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.coverage",
+    "sphinx.ext.todo",
 ]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
 
 # Autosummary settings
@@ -44,8 +44,8 @@ autosummary_imported_members = False
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
-html_static_path = ['_static']
+html_theme = "alabaster"
+html_static_path = ["_static"]
 
 # Napoleon settings
 napoleon_google_docstring = True
@@ -64,20 +64,20 @@ napoleon_attr_annotations = True
 
 # Autodoc settings
 autodoc_default_options = {
-    'members': True,
-    'member-order': 'bysource',
-    'undoc-members': True,
-    'show-inheritance': True,
-    'special-members': '__init__',
-    'exclude-members': '__weakref__, __dict__, __module__',
+    "members": True,
+    "member-order": "bysource",
+    "undoc-members": True,
+    "show-inheritance": True,
+    "special-members": "__init__",
+    "exclude-members": "__weakref__, __dict__, __module__",
 }
 
 # Enable type hints in documentation
-autodoc_typehints = 'description'
-autodoc_typehints_description_target = 'documented'
-autodoc_class_signature = 'separated'
+autodoc_typehints = "description"
+autodoc_typehints_description_target = "documented"
+autodoc_class_signature = "separated"
 
 # Intersphinx mapping
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
+    "python": ("https://docs.python.org/3", None),
 }
