@@ -885,10 +885,15 @@ class AliasStyleABCRule(BaseRule):
                 pos += 1
             if pos < len(sql) and sql[pos] == ",":
                 pos += 1
-            else:
-                if pos < len(sql):
-                    scopes.append((sql[pos:], pos, len(sql)))
-                break
+            # Check if another CTE follows (with or without comma)
+            next_cte_match = cte_pattern.search(sql, pos)
+            if next_cte_match and next_cte_match.start() == pos:
+                # Another CTE immediately follows, continue the loop
+                continue
+            # No more CTEs, append the rest as the main query scope
+            if pos < len(sql):
+                scopes.append((sql[pos:], pos, len(sql)))
+            break
         return scopes
 
     def apply(self, tokens, ctx):
@@ -923,11 +928,15 @@ class AliasStyleABCRule(BaseRule):
         def _replacer(match):
             nonlocal counter
             kw, table, alias = match.group(1), match.group(2), match.group(3)
-            base = alias or table.split(".")[-1]
+            # Always use the table name as the base, not the existing alias
+            base = table.split(".")[-1]
             if base not in mappings:
                 mappings[base] = _num_to_letters(counter)
                 counter += 1
             new_alias = mappings[base]
+            # Also map the old alias if it exists and is different from table name
+            if alias and alias != base:
+                mappings[alias] = new_alias
             return f"{kw} {table} AS {new_alias}"
 
         new_sql = pattern.sub(_replacer, sql)
@@ -983,10 +992,15 @@ class AliasStyleTNumericRule(BaseRule):
                 pos += 1
             if pos < len(sql) and sql[pos] == ",":
                 pos += 1
-            else:
-                if pos < len(sql):
-                    scopes.append((sql[pos:], pos, len(sql)))
-                break
+            # Check if another CTE follows (with or without comma)
+            next_cte_match = cte_pattern.search(sql, pos)
+            if next_cte_match and next_cte_match.start() == pos:
+                # Another CTE immediately follows, continue the loop
+                continue
+            # No more CTEs, append the rest as the main query scope
+            if pos < len(sql):
+                scopes.append((sql[pos:], pos, len(sql)))
+            break
         return scopes
 
     def apply(self, tokens, ctx):
@@ -1013,11 +1027,15 @@ class AliasStyleTNumericRule(BaseRule):
         def _replacer(match):
             nonlocal counter
             kw, table, alias = match.group(1), match.group(2), match.group(3)
-            base = alias or table.split(".")[-1]
+            # Always use the table name as the base, not the existing alias
+            base = table.split(".")[-1]
             if base not in mappings:
                 mappings[base] = f"T{counter + 1}"
                 counter += 1
             new_alias = mappings[base]
+            # Also map the old alias if it exists and is different from table name
+            if alias and alias != base:
+                mappings[alias] = new_alias
             return f"{kw} {table} AS {new_alias}"
 
         new_sql = pattern.sub(_replacer, sql)
