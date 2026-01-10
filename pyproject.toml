@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["sqltidy", "sqltidy.dialects", "sqltidy.rules", "sqltidy.rules.rewrite", "sqltidy.rules.tidy"]
+packages = ["sqltidy", "sqltidy.dialects", "sqltidy.rules", "sqltidy.patterns"]
 
 [tool.setuptools.package-data]
 sqltidy = ["rulebooks/*.json", "rulebooks/*.md"]
