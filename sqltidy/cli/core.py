@@ -2,10 +2,11 @@ import argparse
 import sys
 import json
 from pathlib import Path
-from . import __version__
-from .api import tidy_sql, rewrite_sql, format_sql_folder, _format_sql
-from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
-from .generator import (
+
+from .. import __version__
+## Import API functions inside main() to avoid circular import
+from ..rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
+from ..cli.dialog import (
     create_rulebook,
     list_rulebooks,
     edit_rulebook,
@@ -17,9 +18,11 @@ from .generator import (
     add_rule,
     list_rules,
     remove_rule,
+
 )
-from .tokenizer import tokenize_with_types, TokenType
-from .dialects.registry import list_dialects, get_dialect
+
+from ..tokenizer import tokenize_with_types, TokenType
+from ..dialects.registry import list_dialects, get_dialect
 
 from rich.console import Console
 from rich.text import Text
@@ -1105,6 +1108,10 @@ def handle_dialects_command(args):
 
 
 def main():
+
+    # Import API functions here to avoid circular import
+    from ..api import tidy_sql, rewrite_sql, format_sql_folder, _format_sql
+
     # Print logo
     print_logo()
 
