@@ -20,10 +20,6 @@ class TokenGroup:
         self.name = name
         self.metadata = metadata or {}
 
-# ...existing code for group_parentheses, group_by_statements, group_by_clauses, group_tokens...
-# For brevity, you can copy the grouping functions from tokenizer.py and adapt imports as needed.
-
-
 def group_parentheses(
     tokens: List[Union[Token, TokenGroup]], dialect: SQLDialect = None
 ) -> List[Union[Token, TokenGroup]]:
