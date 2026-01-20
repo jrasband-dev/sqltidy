@@ -137,7 +137,7 @@ def create_rulebook_from_file(rulebook_file: str) -> SQLTidyConfig:
 
         # If path is None, auto-generate from rules
         if resolved_path is None:
-            from .config_schema import generate_dialect_config
+            from ..config_schema import generate_dialect_config
 
             # Extract dialect from rulebook_file (should be a dialect name)
             dialect = (
@@ -249,7 +249,7 @@ def handle_tidy_command(args):
                             with open(file_path, "r", encoding="utf-8") as f:
                                 sql = f.read()
 
-                            result = _format_sql(
+                            result = tidy_engine(
                                 sql,
                                 config=config,
                                 rule_type="tidy",
@@ -500,7 +500,7 @@ def handle_rewrite_command(args):
                             with open(file_path, "r", encoding="utf-8") as f:
                                 sql = f.read()
 
-                            result = _format_sql(
+                            result = tidy_engine(
                                 sql,
                                 config=config,
                                 rule_type="rewrite",
@@ -528,7 +528,7 @@ def handle_rewrite_command(args):
                                         results["all_rewrite_rules"].add(rule["name"])
 
                             if args.tidy:
-                                tidy_result = _format_sql(
+                                tidy_result = tidy_engine(
                                     formatted_sql,
                                     config=config,
                                     rule_type="tidy",
@@ -1110,7 +1110,7 @@ def handle_dialects_command(args):
 def main():
 
     # Import API functions here to avoid circular import
-    from ..api import tidy_sql, rewrite_sql, format_sql_folder, _format_sql
+    from ..api import tidy_sql, rewrite_sql, format_sql_folder, tidy_engine
 
     # Print logo
     print_logo()
