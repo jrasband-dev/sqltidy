@@ -405,6 +405,7 @@ def handle_tidy_command(args):
 
 
 def handle_rewrite_command(args):
+    from ..api import tidy_sql, rewrite_sql, tidy_engine, format_sql_folder
     """Handle the rewrite command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else "sqlserver"
     config = create_rulebook_from_file(dialect)
