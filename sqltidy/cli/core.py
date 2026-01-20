@@ -6,6 +6,7 @@ from pathlib import Path
 from .. import __version__
 ## Import API functions inside main() to avoid circular import
 from ..rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
+
 from ..cli.dialog import (
     create_rulebook,
     list_rulebooks,
@@ -155,6 +156,7 @@ def create_rulebook_from_file(rulebook_file: str) -> SQLTidyConfig:
 
 
 def handle_tidy_command(args):
+    from ..api import tidy_sql, rewrite_sql, tidy_engine, format_sql_folder
     """Handle the tidy command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else "sqlserver"
     config = create_rulebook_from_file(dialect)
