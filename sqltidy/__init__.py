@@ -11,6 +11,8 @@ from .dialects import (
     
 )
 
+from .io import read_sql
+
 from .rulebook import SQLTidyConfig
 
 from .utils import (
@@ -40,4 +42,5 @@ __all__ = [
     "DIALECTS",
     # Version
     "__version__",
+    "read_sql",
 ]
