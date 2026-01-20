@@ -2,7 +2,7 @@ from typing import Optional, Union
 from pathlib import Path
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 from .core import SQLFormatter
-from .generator import (
+from .cli.dialog import (
     get_bundled_rulebook_path,
     load_rulebook_file,
     get_user_rulebooks_dir,
@@ -12,7 +12,7 @@ from .generator import (
 """API utilities for formatting SQL.
 
 The CLI constructs and passes `SQLTidyConfig` explicitly. For library users
-calling these functions without a config, `_format_sql` will resolve a config
+calling these functions without a config, `tidy_engine` will resolve a config
 by checking the user's rulebook, bundled rulebook, or generating defaults.
 """
 
@@ -20,7 +20,7 @@ by checking the user's rulebook, bundled rulebook, or generating defaults.
 # from the user's rules directory via the plugins system.
 
 
-def _format_sql(
+def tidy_engine(
     sql: str,
     config: Optional[SQLTidyConfig] = None,
     dialect: Optional[str] = None,
@@ -134,7 +134,7 @@ def tidy_sql(
     if dialect is None and config is None:
         dialect = "sqlserver"
 
-    return _format_sql(sql, config=config, dialect=dialect, rule_type="tidy")
+    return tidy_engine(sql, config=config, dialect=dialect, rule_type="tidy")
 
 
 def rewrite_sql(
@@ -175,7 +175,7 @@ def rewrite_sql(
     if dialect is None and config is None:
         dialect = "sqlserver"
 
-    return _format_sql(sql, config=config, dialect=dialect, rule_type="rewrite")
+    return tidy_engine(sql, config=config, dialect=dialect, rule_type="rewrite")
 
 
 def tidy_and_rewrite_sql(
@@ -219,9 +219,9 @@ def tidy_and_rewrite_sql(
         dialect = "sqlserver"
 
     # First apply rewrite rules
-    sql = _format_sql(sql, config=config, dialect=dialect, rule_type="rewrite")
+    sql = tidy_engine(sql, config=config, dialect=dialect, rule_type="rewrite")
     # Then apply tidy rules
-    sql = _format_sql(sql, config=config, dialect=dialect, rule_type="tidy")
+    sql = tidy_engine(sql, config=config, dialect=dialect, rule_type="tidy")
     return sql
 
 
@@ -257,7 +257,7 @@ def format_sql_file(
         sql = f.read()
 
     # Format the SQL
-    formatted_sql = _format_sql(sql, config=config, dialect=dialect)
+    formatted_sql = tidy_engine(sql, config=config, dialect=dialect)
 
     # Determine output path
     if output_path is None:
