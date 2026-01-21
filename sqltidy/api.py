@@ -2,6 +2,7 @@ from typing import Optional, Union
 from pathlib import Path
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 from .core import SQLFormatter
+from .core import SQLScript
 from .cli.dialog import (
     get_bundled_rulebook_path,
     load_rulebook_file,
@@ -26,7 +27,8 @@ def tidy_engine(
     dialect: Optional[str] = None,
     rule_type: Optional[str] = None,
     return_metadata: bool = False,
-) -> Union[str, dict]:
+    return_tokenized: bool = False,
+) -> Union[str, dict, SQLScript]:
     """
     Internal function to format SQL with specified rule type.
 
@@ -91,7 +93,16 @@ def tidy_engine(
         import logging
         logging.debug(f"Failed to load user plugins: {e}")
 
-    return formatter.format(sql, return_metadata=return_metadata)
+    formatted = formatter.format(sql, return_metadata=return_metadata)
+    # If return_metadata=True, formatted is a dict with 'sql' and 'applied_rules'
+    if return_metadata and isinstance(formatted, dict):
+        sql_out = formatted.get('sql', '')
+    else:
+        sql_out = formatted
+    # Tokenize the output SQL with types if requested
+    if return_tokenized:
+        return TokenizedSQLScript.from_sql(sql_out, dialect=config.dialect if config else dialect)
+    return sql_out
 
 
 def tidy_sql(
@@ -256,8 +267,13 @@ def format_sql_file(
     with open(input_path, "r", encoding="utf-8") as f:
         sql = f.read()
 
+
     # Format the SQL
     formatted_sql = tidy_engine(sql, config=config, dialect=dialect)
+    if hasattr(formatted_sql, 'to_string') and callable(getattr(formatted_sql, 'to_string', None)):
+        formatted_sql = formatted_sql.to_string()
+    elif not isinstance(formatted_sql, str):
+        formatted_sql = str(formatted_sql)
 
     # Determine output path
     if output_path is None:

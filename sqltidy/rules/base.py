@@ -29,6 +29,8 @@ class FormatterContext:
 
     def __init__(self, config: SQLTidyConfig):
         self.config = config
+        self.constructs = []  # Will be set by SQLFormatter with matched constructs
+        self.script = None  # Will be set by SQLFormatter with SQLScript object
 
     def get_indent_string(self) -> str:
         """
@@ -195,6 +197,54 @@ class BaseRule:
             elif isinstance(item, TokenGroup):
                 result.extend(item.flatten())
         return result
+
+    # ==================== Helper methods for Construct-based rules ====================
+
+    def get_constructs(
+        self, ctx: FormatterContext, name: Optional[str] = None
+    ) -> List[Dict]:
+        """Get matched constructs from context.
+
+        Args:
+            ctx: Formatter context containing constructs
+            name: Optional construct name to filter by (e.g., 'CTE', 'Subquery')
+
+        Returns:
+            List of construct dictionaries. Each contains:
+            - name: construct type
+            - start: start position in SQL
+            - end: end position in SQL
+            - text: matched text
+            - groups: named capture groups from regex pattern
+        """
+        constructs = getattr(ctx, "constructs", [])
+        if name:
+            return [c for c in constructs if c["name"] == name]
+        return constructs
+
+    def get_construct_count(self, ctx: FormatterContext, name: str) -> int:
+        """Count constructs of a specific type.
+
+        Args:
+            ctx: Formatter context
+            name: Construct name to count (e.g., 'CTE', 'Subquery')
+
+        Returns:
+            Number of matching constructs
+        """
+        return len(self.get_constructs(ctx, name))
+
+    def has_construct(self, ctx: FormatterContext, name: str) -> bool:
+        """Check if SQL contains a specific construct.
+
+        Args:
+            ctx: Formatter context
+            name: Construct name to check for
+
+        Returns:
+            True if construct exists, False otherwise
+        """
+        return self.get_construct_count(ctx, name) > 0
 
     def get_text(self, tokens: List[Union[Token, TokenGroup]]) -> str:
         """Convert tokens to SQL text.

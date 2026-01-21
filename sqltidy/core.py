@@ -1,7 +1,80 @@
 # sqltidy/core.py
 from typing import List, Any, Union
 from .rulebook import SQLTidyConfig
-from .tokenizer import tokenize_with_types, Token, TokenGroup, SemanticLevel
+from .tokenizer import tokenize_with_types, Token, TokenGroup, SemanticLevel, tokenize,TokenType
+from .constructs.base import match_constructs
+
+
+class SQLScript:
+    """
+    Represents a tokenized SQL script, including the original SQL,
+    the list of tokens, and utility methods for further processing.
+    """
+
+    def __init__(self, sql: str, tokens: list, dialect: str = "sqlserver", constructs: list = None):
+        self.sql = sql
+        self._tokens = tokens  # List[Token] or List[str]
+        self.dialect = dialect
+        self._constructs = constructs if constructs is not None else [t.type if hasattr(t, 'type') else None for t in tokens]
+
+    @classmethod
+    def parse(cls, sql: str, dialect: str = "sqlserver") -> SQLScript:
+        tokens = tokenize(sql, dialect)
+        constructs = match_constructs(sql, dialect)
+
+
+        return cls(sql, tokens, dialect, constructs)
+
+    def __repr__(self):
+        return self.sql
+    
+    def flatten(self) -> SQLScript:
+        """Flatten multiple SQLScript instances into one."""
+        # Assume self is a sequence of SQLScript objects
+        if not hasattr(self, '__iter__') or isinstance(self, str):
+            raise TypeError("flatten() should be called on a sequence of SQLScript objects")
+        scripts = list(self)
+        if not scripts:
+            return SQLScript("", [], "sqlserver")
+        combined_sql = "".join(ts.sql for ts in scripts)
+        combined_tokens = []
+        for ts in scripts:
+            combined_tokens.extend(ts._tokens)
+        dialect = scripts[0].dialect
+        return SQLScript(combined_sql, combined_tokens, dialect)
+
+    @property
+    def tokens(self) -> List[dict]:
+        """Return the list of tokens as dicts with value and type."""
+        result = []
+        for t in self._tokens:
+            if hasattr(t, "value") and hasattr(t, "type"):
+                result.append({"value": t.value, "type": t.type.name})
+
+        return result
+    
+    @property
+    def constructs(self) -> List[str]:
+        """Return matched patterns and their Pattern names."""
+        return self._constructs
+        
+        
+    @property
+    def token_list(self) -> List[Union[str, Token]]:
+        """Return the list of tokens."""
+        if self._tokens and hasattr(self._tokens[0], "value"):
+            return [t.value for t in self._tokens]
+        return list(self._tokens)
+    
+    @property
+    def patterns(self) -> Optional[List[TokenType]]:
+        """Return the list of token types (patterns) for the tokens."""
+        return self._patterns
+
+
+
+
+
 
 
 class SQLFormatter:
@@ -15,10 +88,14 @@ class SQLFormatter:
             rule_type: Filter rules by type ('tidy' or 'rewrite'). None loads all.
         """
         from .rules import load_rules
-        from .rules.base import FormatterContext
+        from .rules.base import FormatterContext, BaseRule
 
         self.ctx = FormatterContext(config or SQLTidyConfig())
-        self.rules = load_rules(rule_type=rule_type)
+        loaded_rules = load_rules(rule_type=rule_type)
+        
+        # Filter to ensure only BaseRule instances (defensive programming)
+        self.rules = [r for r in loaded_rules if isinstance(r, BaseRule)]
+        
         self.applied_rules = []  # Track which rules were actually applied
 
     def flatten_tokens(self, tokens: List[Union[Token, TokenGroup]]) -> str:
@@ -51,6 +128,13 @@ class SQLFormatter:
         Returns:
             Formatted SQL string, or dict with metadata if return_metadata=True
         """
+        # Parse SQL using SQLScript to get tokens and matched constructs
+        script = SQLScript.parse(sql, self.ctx.config.dialect)
+        
+        # Set constructs in context so rules can access them
+        self.ctx.constructs = script.constructs
+        self.ctx.script = script
+        
         # Tokenize once using semantic tokenizer
         tokens = tokenize_with_types(
             sql, self.ctx.config.dialect, SemanticLevel.SEMANTIC

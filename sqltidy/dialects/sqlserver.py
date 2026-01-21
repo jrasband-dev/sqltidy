@@ -650,18 +650,15 @@ class SQLServerDialect(SQLDialect):
         """SQL Server supports -- and /* */ comments."""
         return ["--", "/*"]
 
-    def _register_patterns(self):
-        """Register T-SQL specific patterns."""
-        from ..patterns.tsql import (
-            JoinClausePattern,
-            CaseExpressionPattern,
-            TrycatchPattern,
-            PivotUnpivotPattern,
-            OutputClausePattern,
-        )
-
-        self.register_pattern(JoinClausePattern())
-        self.register_pattern(CaseExpressionPattern())
-        self.register_pattern(TrycatchPattern())
-        self.register_pattern(PivotUnpivotPattern())
-        self.register_pattern(OutputClausePattern())
+    # def _register_patterns(self):
+    #     """Register T-SQL specific patterns."""
+    #     from ..constructs.base impor
+    #     for construct in [
+    #         JOIN_CLAUSE,
+    #         CASE_EXPRESSION,
+    #         TRY_CATCH,
+    #         PIVOT,
+    #         UNPIVOT,
+    #         OUTPUT_CLAUSE,
+    #     ]:
+    #         register_pattern(construct, dialect=self.name)

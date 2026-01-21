@@ -156,7 +156,7 @@ def create_rulebook_from_file(rulebook_file: str) -> SQLTidyConfig:
 
 
 def handle_tidy_command(args):
-    from ..api import tidy_sql, rewrite_sql, tidy_engine, format_sql_folder
+    from ..api import tidy_sql, tidy_engine
     """Handle the tidy command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else "sqlserver"
     config = create_rulebook_from_file(dialect)
@@ -420,8 +420,12 @@ def handle_rewrite_command(args):
             ):
                 with open(args.input, "r", encoding="utf-8") as f:
                     sql = f.read()
-                formatted_sql = rewrite_sql(sql, config=config)
 
+                formatted_sql = rewrite_sql(sql, config=config)
+                if hasattr(formatted_sql, 'to_string') and callable(getattr(formatted_sql, 'to_string', None)):
+                    formatted_sql = formatted_sql.to_string()
+                elif not isinstance(formatted_sql, str):
+                    formatted_sql = str(formatted_sql)
                 if args.tidy:
                     formatted_sql = tidy_sql(formatted_sql, config=config)
 
@@ -430,15 +434,27 @@ def handle_rewrite_command(args):
             if args.output:
                 output_path = Path(args.output)
                 output_path.parent.mkdir(parents=True, exist_ok=True)
+                if hasattr(formatted_sql, 'to_string') and callable(getattr(formatted_sql, 'to_string', None)):
+                    formatted_sql = formatted_sql.to_string()
+                elif not isinstance(formatted_sql, str):
+                    formatted_sql = str(formatted_sql)
                 with open(output_path, "w", encoding="utf-8") as f:
                     f.write(formatted_sql)
                 console.print(f"[dim]Saved to:[/dim] [cyan]{output_path}[/cyan]")
             elif args.no_in_place:
+                if hasattr(formatted_sql, 'to_string') and callable(getattr(formatted_sql, 'to_string', None)):
+                    formatted_sql = formatted_sql.to_string()
+                elif not isinstance(formatted_sql, str):
+                    formatted_sql = str(formatted_sql)
                 print(formatted_sql)
             else:
                 # Default: output to Cleaned folder
                 output_path = input_path.parent / "Cleaned" / input_path.name
                 output_path.parent.mkdir(parents=True, exist_ok=True)
+                if hasattr(formatted_sql, 'to_string') and callable(getattr(formatted_sql, 'to_string', None)):
+                    formatted_sql = formatted_sql.to_string()
+                elif not isinstance(formatted_sql, str):
+                    formatted_sql = str(formatted_sql)
                 with open(output_path, "w", encoding="utf-8") as f:
                     f.write(formatted_sql)
                 console.print(f"[dim]Saved to:[/dim] [cyan]{output_path}[/cyan]")
@@ -731,8 +747,8 @@ def handle_rewrite_command(args):
 
 def handle_pattern_command(args):
     """Handle the pattern command to show information about SQL patterns."""
-    from .patterns import get_all_patterns
-    from .dialects import get_dialect
+    from ..constructs import get_all_constructs
+    from ..dialects import get_dialect
 
     # Import pattern_tokenizer to ensure patterns are registered
 
@@ -748,7 +764,7 @@ def handle_pattern_command(args):
                 sys.exit(1)
 
         # Get all patterns
-        global_patterns = get_all_patterns()
+        global_patterns = get_all_constructs()
 
         # Get dialect-specific patterns
         dialect_patterns = []
@@ -761,7 +777,7 @@ def handle_pattern_command(args):
             title = f"Patterns for {dialect_obj.name.upper()}"
         else:
             # Get patterns for ALL dialects
-            from .dialects.registry import list_dialects
+            from ..dialects.registry import list_dialects
 
             for dialect_name in list_dialects():
                 try:
@@ -1588,11 +1604,11 @@ def main():
         # ============================================================
         if not args.tokens_only and level == SemanticLevel.SEMANTIC:
             # Show patterns detected
-            from sqltidy.patterns import get_all_patterns
+            from sqltidy.constructs import get_all_constructs
             from sqltidy.dialects import get_dialect as get_dialect_obj
 
             dialect_obj = get_dialect_obj(args.dialect)
-            global_patterns = get_all_patterns()
+            global_patterns = get_all_constructs()
             dialect_patterns = dialect_obj.get_patterns()
             all_patterns = global_patterns + dialect_patterns
             applicable_patterns = [

@@ -1,4 +1,4 @@
-from .tokenizer.core import SQLScript
+from .core import SQLScript
 
 def read_sql(file_path: str, dialect: str = "sqlserver") -> SQLScript:
     """
@@ -16,4 +16,4 @@ def read_sql(file_path: str, dialect: str = "sqlserver") -> SQLScript:
             sql = f.read()
     else:
         sql = file_path
-    return SQLScript.tokenize(sql, dialect)
+    return SQLScript.parse(sql, dialect)
