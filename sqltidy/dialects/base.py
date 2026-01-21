@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from typing import Set, Dict, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..patterns import Pattern
+    from ..constructs import Construct
 
 
 class SQLDialect(ABC):
@@ -27,7 +27,7 @@ class SQLDialect(ABC):
 
     def __init__(self):
         """Initialize the dialect."""
-        self._patterns: List["Pattern"] = []
+        self._patterns: List["Construct"] = []
         self._validate()
         self._register_patterns()
 
@@ -46,7 +46,7 @@ class SQLDialect(ABC):
         """
         pass
 
-    def register_pattern(self, pattern: "Pattern"):
+    def register_pattern(self, pattern: "Construct"):
         """
         Register a pattern for this dialect.
 
@@ -55,7 +55,7 @@ class SQLDialect(ABC):
         """
         self._patterns.append(pattern)
 
-    def get_patterns(self) -> List["Pattern"]:
+    def get_patterns(self) -> List["Construct"]:
         """
         Get all patterns registered for this dialect.
 
