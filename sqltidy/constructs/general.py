@@ -2,6 +2,7 @@ import re
 from . import Construct, register_construct
 
 
+
 CTE = Construct(
     name="CTE",
     dialect="all",
