@@ -18,6 +18,37 @@ if TYPE_CHECKING:
     from ..dialects import get_dialect
 
 
+@dataclass(frozen=True)
+class Construct:
+    name: str
+    pattern: Pattern
+    dialect: Literal['all','sqlserver','postgres','mysql','sqlite','oracle'] = 'all'
+    
+    def __post_init__(self):
+        # Compile regex once
+        object.__setattr__(self, "_compiled", self.pattern)
+
+    @property
+    def regex(self) -> Pattern:
+        return self._compiled
+
+    def matches(self, text: str) -> bool:
+        return bool(self.regex.search(text))
+    
+    def is_applicable(self, dialect) -> bool:
+        """Check if this construct is applicable for the given dialect."""
+        if self.dialect == 'all':
+            return True
+        
+        # Handle both string and dialect object
+        dialect_name = dialect.name if hasattr(dialect, 'name') else str(dialect)
+        return self.dialect == dialect_name
+
+
+
+
+
+
 def match_constructs(sql: str, dialect: str = "sqlserver", constructs: Optional[List[Construct]] = None) -> List[Dict[str, Any]]:
     """
     Match SQL constructs (patterns) in the given SQL string.
@@ -70,24 +101,6 @@ def match_constructs(sql: str, dialect: str = "sqlserver", constructs: Optional[
     
     return constructs
 
-
-
-@dataclass(frozen=True)
-class Construct:
-    name: str
-    pattern: Pattern
-    dialect: Literal['all','sqlserver','postgres','mysql','sqlite','oracle'] = 'all'
-    
-    def __post_init__(self):
-        # Compile regex once
-        object.__setattr__(self, "_compiled", self.pattern)
-
-    @property
-    def regex(self) -> Pattern:
-        return self._compiled
-
-    def matches(self, text: str) -> bool:
-        return bool(self.regex.search(text))
 
 
 class ConstructRegistry:

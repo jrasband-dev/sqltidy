@@ -31,11 +31,11 @@ SUBQUERY = Construct(
     name="Subquery",
     dialect="all",
     pattern=re.compile(r"""
-    ^\(\s*                         # Opening parenthesis
+    \(\s*                          # Opening parenthesis
     (?P<select_statement>SELECT\s+.*?) # SELECT statement
     \s*\)\s*                       # Closing parenthesis
-    (AS\s+(?P<alias>\w+))?         # Optional alias
-    """, re.VERBOSE | re.IGNORECASE | re.DOTALL | re.MULTILINE)
+    (?:AS\s+(?P<alias>\w+))?       # Optional alias
+    """, re.VERBOSE | re.IGNORECASE | re.DOTALL)
 )
 
 # Register all constructs
