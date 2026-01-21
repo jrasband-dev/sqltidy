@@ -2,7 +2,7 @@
 """
 Tokenizer package init: exposes main API for tokenization and grouping.
 """
-from .core import tokenize_with_types, TokenType, Token, SemanticLevel
+from .base import tokenize_with_types, TokenType, Token, SemanticLevel, tokenize
 from .grouping import group_parentheses, group_by_statements, group_by_clauses, group_tokens, TokenGroup, GroupType
 from .patterns import apply_patterns
 

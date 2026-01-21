@@ -3,7 +3,7 @@
 Token grouping logic: parentheses, statements, clauses, and general grouping helpers.
 """
 from typing import List, Union
-from .core import Token, TokenType
+from .base import Token, TokenType
 from ..dialects import SQLDialect
 
 class GroupType:

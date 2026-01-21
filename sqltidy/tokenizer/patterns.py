@@ -6,22 +6,22 @@ bridging the new pattern system with the existing tokenizer.
 """
 
 from typing import List, Union, Optional
-from ..tokenizer import Token, TokenGroup, GroupType
+from ..tokenizer import TokenGroup, GroupType
 from ..dialects.base import SQLDialect
-from ..patterns import Pattern, MatchContext, MatchResult, register_pattern
-from ..patterns.general import CTEPattern, WindowFunctionPattern, SubqueryPattern
+from ..constructs import Construct
 
-def initialize_default_patterns():
-    """
-    Initialize and register default SQL patterns.
 
-    This should be called once at module load time to set up
-    the global pattern registry with standard SQL patterns.
-    """
-    # Register standard SQL patterns (applicable to all dialects)
-    register_pattern(CTEPattern())
-    register_pattern(WindowFunctionPattern())
-    register_pattern(SubqueryPattern())
+# def initialize_default_patterns():
+#     """
+#     Initialize and register default SQL patterns.
+
+#     This should be called once at module load time to set up
+#     the global pattern registry with standard SQL patterns.
+#     """
+#     # Register standard SQL patterns (applicable to all dialects)
+#     register_pattern(CTEPattern())
+#     register_pattern(WindowFunctionPattern())
+#     register_pattern(SubqueryPattern())
 
 def apply_patterns(
     tokens: List[Union[Token, TokenGroup]],
@@ -54,7 +54,7 @@ def apply_patterns(
             processed.append(item)
 
     # Get all applicable patterns (global + dialect-specific)
-    from sqltidy.patterns import get_all_patterns
+    from sqltidy.constructs import get_all_patterns
 
     global_patterns = get_all_patterns()
     dialect_patterns = dialect.get_patterns()
@@ -72,7 +72,7 @@ def apply_patterns(
 
 def _apply_single_pattern(
     tokens: List[Union[Token, TokenGroup]],
-    pattern: Pattern,
+    pattern: Construct,
     dialect: SQLDialect,
     parent_group_type: Optional[GroupType],
 ) -> List[Union[Token, TokenGroup]]:
@@ -152,7 +152,7 @@ def create_pattern_from_match(match: MatchResult) -> Optional[TokenGroup]:
     )
 
 # Initialize default patterns when module is imported
-initialize_default_patterns()
+# initialize_default_patterns()
 
 __all__ = [
     "initialize_default_patterns",
