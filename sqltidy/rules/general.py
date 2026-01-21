@@ -1428,6 +1428,8 @@ class AliasStyleABCRule(BaseRule):
     def apply(self, tokens, ctx):
         if not getattr(ctx.config, "enable_alias_style_abc", False):
             return tokens
+        # Store dialect for use in _apply_to_scope_text
+        self._dialect = ctx.config.dialect
         sql = "".join(tokens)
         scopes = self._extract_cte_scopes(sql)
         result_sql = sql
@@ -1452,8 +1454,18 @@ class AliasStyleABCRule(BaseRule):
                 letters.append(chr(ord("A") + rem))
             return "".join(reversed(letters))
 
+        # Get SQL keywords from dialect to avoid treating them as aliases
+        from ..dialects import get_dialect
+        dialect = get_dialect(self._dialect)
+        sql_keywords = {kw.upper() for kw in dialect.keywords}
+        
+        # Build keyword pattern for negative lookahead
+        keyword_pattern = "|".join(sorted(sql_keywords, key=len, reverse=True))  # Longest first to avoid partial matches
+        
+        # Pattern to match FROM/JOIN with table and optional alias
+        # Use negative lookahead to prevent matching SQL keywords as aliases
         pattern = re.compile(
-            r"\b(FROM|JOIN)\s+([A-Za-z_][\w\.]*)\s*(?:AS)?\s*([A-Za-z_][\w]*)?",
+            rf"\b(FROM|JOIN)\s+([A-Za-z_][\w\.]*)(?:\s+AS\s+([A-Za-z_][\w]*)|\s+(?!(?:{keyword_pattern})\b)([A-Za-z_][\w]*))?",
             re.IGNORECASE,
         )
         mappings: Dict[str, str] = {}
@@ -1461,7 +1473,11 @@ class AliasStyleABCRule(BaseRule):
 
         def _replacer(match):
             nonlocal counter
-            kw, table, alias = match.group(1), match.group(2), match.group(3)
+            kw = match.group(1)
+            table = match.group(2)
+            # Alias can be in group 3 (after AS) or group 4 (without AS)
+            alias = match.group(3) or match.group(4)
+            
             # Always use the table name as the base, not the existing alias
             base = table.split(".")[-1]
             if base not in mappings:
@@ -1469,7 +1485,7 @@ class AliasStyleABCRule(BaseRule):
                 counter += 1
             new_alias = mappings[base]
             # Also map the old alias if it exists and is different from table name
-            if alias and alias != base:
+            if alias and alias.upper() != base.upper():
                 mappings[alias] = new_alias
             return f"{kw} {table} AS {new_alias}"
 
@@ -1542,6 +1558,8 @@ class AliasStyleTNumericRule(BaseRule):
     def apply(self, tokens, ctx):
         if not getattr(ctx.config, "enable_alias_style_t_numeric", False):
             return tokens
+        # Store dialect for use in _apply_to_scope_text
+        self._dialect = ctx.config.dialect
         sql = "".join(tokens)
         scopes = self._extract_cte_scopes(sql)
         result_sql = sql
@@ -1558,8 +1576,18 @@ class AliasStyleTNumericRule(BaseRule):
         return result_sql
 
     def _apply_to_scope_text(self, sql: str) -> str:
+        # Get SQL keywords from dialect to avoid treating them as aliases
+        from ..dialects import get_dialect
+        dialect = get_dialect(self._dialect)
+        sql_keywords = {kw.upper() for kw in dialect.keywords}
+        
+        # Build keyword pattern for negative lookahead
+        keyword_pattern = "|".join(sorted(sql_keywords, key=len, reverse=True))  # Longest first to avoid partial matches
+        
+        # Pattern to match FROM/JOIN with table and optional alias
+        # Use negative lookahead to prevent matching SQL keywords as aliases
         pattern = re.compile(
-            r"\b(FROM|JOIN)\s+([A-Za-z_][\w\.]*)\s*(?:AS)?\s*([A-Za-z_][\w]*)?",
+            rf"\b(FROM|JOIN)\s+([A-Za-z_][\w\.]*)(?:\s+AS\s+([A-Za-z_][\w]*)|\s+(?!(?:{keyword_pattern})\b)([A-Za-z_][\w]*))?",
             re.IGNORECASE,
         )
         mappings: Dict[str, str] = {}
@@ -1567,7 +1595,11 @@ class AliasStyleTNumericRule(BaseRule):
 
         def _replacer(match):
             nonlocal counter
-            kw, table, alias = match.group(1), match.group(2), match.group(3)
+            kw = match.group(1)
+            table = match.group(2)
+            # Alias can be in group 3 (after AS) or group 4 (without AS)
+            alias = match.group(3) or match.group(4)
+            
             # Always use the table name as the base, not the existing alias
             base = table.split(".")[-1]
             if base not in mappings:
@@ -1575,7 +1607,7 @@ class AliasStyleTNumericRule(BaseRule):
                 counter += 1
             new_alias = mappings[base]
             # Also map the old alias if it exists and is different from table name
-            if alias and alias != base:
+            if alias and alias.upper() != base.upper():
                 mappings[alias] = new_alias
             return f"{kw} {table} AS {new_alias}"
 
