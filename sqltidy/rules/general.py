@@ -1134,16 +1134,18 @@ class CaseWhenNewlineIndentRule(BaseRule):
             self.config_fields["case_when_newline_indent"].default,
         ):
             return tokens
-        
+
         # Check if we have CASE_EXPRESSION constructs available
         case_constructs = self.get_constructs(ctx, "CASE_EXPRESSION")
-        
+
         # Get indent string from context
         indent_str = ctx.get_indent_string()
-        
+
         if case_constructs:
             # Use construct-aware processing for better accuracy
-            return self._process_tokens_with_constructs(tokens, case_constructs, indent_str)
+            return self._process_tokens_with_constructs(
+                tokens, case_constructs, indent_str
+            )
         else:
             # Fallback to token-based processing
             return self._process_tokens(tokens, indent_str)
@@ -1152,14 +1154,14 @@ class CaseWhenNewlineIndentRule(BaseRule):
         self,
         tokens: List[Union[Token, TokenGroup]],
         case_constructs: List[Dict],
-        indent_str: str = "    "
+        indent_str: str = "    ",
     ) -> List[Union[Token, TokenGroup]]:
         """Process tokens using construct information for more accurate formatting."""
         # Build set of positions where CASE expressions occur
         case_positions = set()
         for construct in case_constructs:
-            case_positions.add(construct['start'])
-        
+            case_positions.add(construct["start"])
+
         # Use the regular token-based processing but with construct awareness
         # This helps handle nested CASE expressions correctly
         return self._process_tokens(tokens, indent_str, case_positions)
@@ -1168,17 +1170,17 @@ class CaseWhenNewlineIndentRule(BaseRule):
         self,
         tokens: List[Union[Token, TokenGroup]],
         indent_str: str = "    ",
-        case_positions: Optional[set] = None
+        case_positions: Optional[set] = None,
     ) -> List[Union[Token, TokenGroup]]:
         """Process tokens to format CASE expressions."""
         result: List[Union[Token, TokenGroup]] = []
         i = 0
         in_case = False
         case_depth = 0
-        
+
         while i < len(tokens):
             token = tokens[i]
-            
+
             if isinstance(token, TokenGroup):
                 processed_group = TokenGroup(
                     token.group_type,
@@ -1189,7 +1191,7 @@ class CaseWhenNewlineIndentRule(BaseRule):
                 result.append(processed_group)
                 i += 1
                 continue
-            
+
             if (
                 isinstance(token, Token)
                 and token.type == TokenType.KEYWORD
@@ -1207,7 +1209,7 @@ class CaseWhenNewlineIndentRule(BaseRule):
                 ):
                     i += 1
                 continue
-            
+
             if (
                 in_case
                 and isinstance(token, Token)
@@ -1226,7 +1228,7 @@ class CaseWhenNewlineIndentRule(BaseRule):
                 result.append(token)
                 i += 1
                 continue
-            
+
             if (
                 in_case
                 and isinstance(token, Token)
@@ -1245,7 +1247,7 @@ class CaseWhenNewlineIndentRule(BaseRule):
                 result.append(token)
                 i += 1
                 continue
-            
+
             if (
                 isinstance(token, Token)
                 and token.type == TokenType.KEYWORD
@@ -1265,7 +1267,7 @@ class CaseWhenNewlineIndentRule(BaseRule):
                     result.append(token)
                     i += 1
                     continue
-            
+
             result.append(token)
             i += 1
         return result
@@ -1603,60 +1605,62 @@ class SubqueryToCTERule(BaseRule):
 
     def _find_balanced_subquery(self, sql: str, start_pos: int) -> Optional[Dict]:
         """Find a balanced subquery starting at start_pos (which should be at '(')."""
-        if start_pos >= len(sql) or sql[start_pos] != '(':
+        if start_pos >= len(sql) or sql[start_pos] != "(":
             return None
-        
+
         # Check if SELECT follows the opening paren
         i = start_pos + 1
-        while i < len(sql) and sql[i] in ' \t\n\r':
+        while i < len(sql) and sql[i] in " \t\n\r":
             i += 1
-        
-        if i >= len(sql) - 6 or sql[i:i+6].upper() != 'SELECT':
+
+        if i >= len(sql) - 6 or sql[i : i + 6].upper() != "SELECT":
             return None
-        
+
         # Find matching closing paren
         paren_depth = 1
         pos = start_pos + 1
         while pos < len(sql) and paren_depth > 0:
-            if sql[pos] == '(':
+            if sql[pos] == "(":
                 paren_depth += 1
-            elif sql[pos] == ')':
+            elif sql[pos] == ")":
                 paren_depth -= 1
             pos += 1
-        
+
         if paren_depth != 0:
             return None
-        
+
         # Extract content
         full_text = sql[start_pos:pos]
-        content = sql[start_pos + 1:pos - 1].strip()
-        
+        content = sql[start_pos + 1 : pos - 1].strip()
+
         # Check for optional alias
         alias = None
         alias_end = pos
         j = pos
-        while j < len(sql) and sql[j] in ' \t\n\r':
+        while j < len(sql) and sql[j] in " \t\n\r":
             j += 1
-        if j < len(sql) - 2 and sql[j:j+2].upper() == 'AS':
+        if j < len(sql) - 2 and sql[j : j + 2].upper() == "AS":
             j += 2
-            while j < len(sql) and sql[j] in ' \t\n\r':
+            while j < len(sql) and sql[j] in " \t\n\r":
                 j += 1
             alias_start = j
-            while j < len(sql) and (sql[j].isalnum() or sql[j] == '_'):
+            while j < len(sql) and (sql[j].isalnum() or sql[j] == "_"):
                 j += 1
             if j > alias_start:
                 alias = sql[alias_start:j]
                 alias_end = j
-        
+
         return {
-            'start': start_pos,
-            'end': alias_end,
-            'full': sql[start_pos:alias_end],
-            'content': content,
-            'alias': alias
+            "start": start_pos,
+            "end": alias_end,
+            "full": sql[start_pos:alias_end],
+            "content": content,
+            "alias": alias,
         }
 
-    def _process_subqueries_recursively(self, sql: str, cte_num: int) -> tuple[str, list[str], int]:
+    def _process_subqueries_recursively(
+        self, sql: str, cte_num: int
+    ) -> tuple[str, list[str], int]:
         """
         Recursively find and extract subqueries, returning the modified SQL,
         list of CTE definitions, and updated CTE counter.
@@ -1665,117 +1669,121 @@ class SubqueryToCTERule(BaseRule):
         subqueries = []
         i = 0
         while i < len(sql):
-            if sql[i] == '(':
+            if sql[i] == "(":
                 subquery = self._find_balanced_subquery(sql, i)
                 if subquery:
                     subqueries.append(subquery)
-                    i = subquery['end']
+                    i = subquery["end"]
                     continue
             i += 1
-        
+
         if not subqueries:
             return sql, [], cte_num
-        
+
         # Process each subquery
         all_ctes = []
         replacements = []
-        
+
         for subquery in subqueries:
             # First, recursively process nested subqueries within this subquery
             nested_sql, nested_ctes, cte_num = self._process_subqueries_recursively(
-                subquery['content'], cte_num
+                subquery["content"], cte_num
             )
-            
+
             # Add nested CTEs to our list
             all_ctes.extend(nested_ctes)
-            
+
             # Generate CTE name for this subquery
             cte_name = f"cte_{cte_num}"
             cte_num += 1
-            
+
             # Create CTE definition with potentially modified content
             cte_def = f"{cte_name} AS (\n    {nested_sql}\n)"
             all_ctes.append(cte_def)
-            
+
             # Create replacement (preserve alias if it exists)
             replacement = cte_name
-            if subquery['alias']:
+            if subquery["alias"]:
                 replacement += f" AS {subquery['alias']}"
-            
-            replacements.append((subquery['start'], subquery['end'], replacement))
-        
+
+            replacements.append((subquery["start"], subquery["end"], replacement))
+
         # Apply replacements from end to start to preserve positions
         modified_sql = sql
         for start, end, replacement in reversed(replacements):
             modified_sql = modified_sql[:start] + replacement + modified_sql[end:]
-        
+
         return modified_sql, all_ctes, cte_num
 
     def apply(self, tokens, ctx):
         if not getattr(ctx.config, "enable_subquery_to_cte", False):
             return tokens
-        
+
         sql = "".join(tokens)
-        
+
         # Use constructs from context (already parsed by SQLFormatter)
-        constructs = ctx.constructs if hasattr(ctx, 'constructs') else []
-        
+        constructs = ctx.constructs if hasattr(ctx, "constructs") else []
+
         # Filter for CTE constructs
-        cte_constructs = [c for c in constructs if c['name'] == 'CTE']
-        
+        cte_constructs = [c for c in constructs if c["name"] == "CTE"]
+
         # Determine starting CTE number based on existing CTEs
         initial_cte_num = len(cte_constructs) + 1
-        
+
         # Process existing CTE definitions to extract subqueries within them
         existing_cte_new_ctes = []
         if cte_constructs:
             for cte in cte_constructs:
                 # Extract the CTE's subquery content (the part inside AS (...))
-                cte_subquery = cte['groups'].get('subquery', '')
+                cte_subquery = cte["groups"].get("subquery", "")
                 if cte_subquery:
                     # Recursively process subqueries within this CTE's definition
-                    _, nested_ctes, initial_cte_num = self._process_subqueries_recursively(
-                        cte_subquery, initial_cte_num
+                    _, nested_ctes, initial_cte_num = (
+                        self._process_subqueries_recursively(
+                            cte_subquery, initial_cte_num
+                        )
                     )
                     existing_cte_new_ctes.extend(nested_ctes)
-        
+
         # Process subqueries in the main query part
         if cte_constructs:
             # Find end of existing CTE block
             last_cte = cte_constructs[-1]
-            cte_end = last_cte['end']
+            cte_end = last_cte["end"]
             existing_cte_block = sql[:cte_end]
             main_query = sql[cte_end:]
-            
+
             # Recursively process subqueries in main query
-            modified_main_query, main_query_ctes, final_cte_num = self._process_subqueries_recursively(
-                main_query, initial_cte_num
+            modified_main_query, main_query_ctes, final_cte_num = (
+                self._process_subqueries_recursively(main_query, initial_cte_num)
             )
-            
+
             # Combine all new CTEs
             all_new_ctes = existing_cte_new_ctes + main_query_ctes
-            
+
             # If no new CTEs were created, return original
             if not all_new_ctes:
                 return tokens
-            
+
             # Append new CTEs after existing ones
-            cte_block = existing_cte_block.rstrip() + ",\n" + ",\n".join(all_new_ctes) + "\n"
+            cte_block = (
+                existing_cte_block.rstrip() + ",\n" + ",\n".join(all_new_ctes) + "\n"
+            )
             result_sql = cte_block + modified_main_query
         else:
             # Recursively process all subqueries in the entire SQL
-            modified_sql, new_ctes, final_cte_num = self._process_subqueries_recursively(
-                sql, initial_cte_num
+            modified_sql, new_ctes, final_cte_num = (
+                self._process_subqueries_recursively(sql, initial_cte_num)
             )
-            
+
             # If no new CTEs were created, return original
             if not new_ctes:
                 return tokens
-            
+
             # Create new WITH clause
             cte_block = "WITH " + ",\n".join(new_ctes) + "\n"
             result_sql = cte_block + modified_sql
-        
+
         return result_sql
 
 

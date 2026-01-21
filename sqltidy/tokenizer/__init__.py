@@ -2,11 +2,12 @@
 """
 Tokenizer package init: exposes main API for tokenization and grouping.
 """
+
 from .base import (
-    tokenize_with_types, 
-    TokenType, 
-    Token, 
-    SemanticLevel, 
+    tokenize_with_types,
+    TokenType,
+    Token,
+    SemanticLevel,
     tokenize,
     get_token_type,
     TokenPattern,
@@ -24,7 +25,14 @@ from .base import (
     COMMA,
     FALLBACK,
 )
-from .grouping import group_parentheses, group_by_statements, group_by_clauses, group_tokens, TokenGroup, GroupType
+from .grouping import (
+    group_parentheses,
+    group_by_statements,
+    group_by_clauses,
+    group_tokens,
+    TokenGroup,
+    GroupType,
+)
 from .patterns import apply_patterns
 
 __all__ = [

@@ -10,6 +10,7 @@ def get_user_rulebooks_dir() -> Path:
     """Get the path to user's rulebook directory."""
     return Path.home() / ".sqltidy" / "rulebooks"
 
+
 def get_bundled_rulebooks_dir() -> Path:
     """Get the path to bundled rulebook templates."""
     return Path(__file__).parent / "rulebooks"

@@ -2,6 +2,7 @@
 """
 Core tokenization logic and types.
 """
+
 import re
 from typing import Union, NamedTuple, Pattern, Literal, List, Dict
 from enum import Enum
@@ -14,26 +15,47 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class TokenPattern:
     """Defines a pattern for matching tokens."""
+
     name: str
     pattern: Pattern
-    dialect: Literal['all','sqlserver','postgres','mysql','sqlite','oracle'] = 'all'
-    
+    dialect: Literal["all", "sqlserver", "postgres", "mysql", "sqlite", "oracle"] = (
+        "all"
+    )
+
     @property
     def regex(self) -> Pattern:
         return self.pattern
 
 
 # Define token patterns
-SINGLE_LINE_COMMENT = TokenPattern(name="Single Line Comment", pattern=re.compile(r"--[^\n]*"), dialect="all")
-MULTI_LINE_COMMENT = TokenPattern(name="Multi Line Comment", pattern=re.compile(r"/\*[\s\S]*?\*/"), dialect="all")
+SINGLE_LINE_COMMENT = TokenPattern(
+    name="Single Line Comment", pattern=re.compile(r"--[^\n]*"), dialect="all"
+)
+MULTI_LINE_COMMENT = TokenPattern(
+    name="Multi Line Comment", pattern=re.compile(r"/\*[\s\S]*?\*/"), dialect="all"
+)
 NEWLINE = TokenPattern(name="Newline", pattern=re.compile(r"\n"), dialect="all")
 WHITESPACE = TokenPattern(name="Whitespace", pattern=re.compile(r"\s+"), dialect="all")
-MULTI_CHAR_OPERATOR = TokenPattern(name="Multi-char Operator", pattern=re.compile(r"<=|>=|<>|!="), dialect="all")
-SINGLE_CHAR_PUNCTUATION = TokenPattern(name="Single-char Punctuation", pattern=re.compile(r"[(),.;\[\]*=<>+-/]"), dialect="all")
-SINGLE_QUOTE = TokenPattern(name="Single-quoted String", pattern=re.compile(r"'[^']*'"), dialect="all")
-DOUBLE_QUOTE = TokenPattern(name="Double-quoted String", pattern=re.compile(r'"[^"]*"'), dialect="all")
-IDENTIFIER = TokenPattern(name="Identifier", pattern=re.compile(r"[A-Za-z_@#][A-Za-z0-9_@#$]*"), dialect="all")
-NUMBER = TokenPattern(name="Number", pattern=re.compile(r"[0-9]+(?:\.[0-9]+)?"), dialect="all")
+MULTI_CHAR_OPERATOR = TokenPattern(
+    name="Multi-char Operator", pattern=re.compile(r"<=|>=|<>|!="), dialect="all"
+)
+SINGLE_CHAR_PUNCTUATION = TokenPattern(
+    name="Single-char Punctuation",
+    pattern=re.compile(r"[(),.;\[\]*=<>+-/]"),
+    dialect="all",
+)
+SINGLE_QUOTE = TokenPattern(
+    name="Single-quoted String", pattern=re.compile(r"'[^']*'"), dialect="all"
+)
+DOUBLE_QUOTE = TokenPattern(
+    name="Double-quoted String", pattern=re.compile(r'"[^"]*"'), dialect="all"
+)
+IDENTIFIER = TokenPattern(
+    name="Identifier", pattern=re.compile(r"[A-Za-z_@#][A-Za-z0-9_@#$]*"), dialect="all"
+)
+NUMBER = TokenPattern(
+    name="Number", pattern=re.compile(r"[0-9]+(?:\.[0-9]+)?"), dialect="all"
+)
 COMMA = TokenPattern(name="Comma", pattern=re.compile(r","), dialect="all")
 FALLBACK = TokenPattern(name="Fallback", pattern=re.compile(r"\S"), dialect="all")
 
@@ -41,6 +63,7 @@ FALLBACK = TokenPattern(name="Fallback", pattern=re.compile(r"\S"), dialect="all
 # Token instance (actual token with value and type)
 class Token(NamedTuple):
     """Represents a single SQL token instance with its value and type."""
+
     value: str
     type: TokenType
 
@@ -64,14 +87,14 @@ TOKEN_PATTERNS: List[TokenPattern] = [
 def tokenize(sql: str, dialect: str = "sqlserver") -> List[Token]:
     """
     Tokenize SQL string using TokenPattern definitions.
-    
+
     Iterates through the input SQL and matches each position against
     TOKEN_PATTERNS in order. The first matching pattern is used.
-    
+
     Args:
         sql: SQL string to tokenize
         dialect: SQL dialect for keyword detection
-        
+
     Returns:
         List of Token instances
     """
@@ -79,13 +102,13 @@ def tokenize(sql: str, dialect: str = "sqlserver") -> List[Token]:
         dialect_obj = get_dialect(dialect)
     else:
         dialect_obj = dialect
-    
+
     tokens = []
     position = 0
-    
+
     while position < len(sql):
         matched = False
-        
+
         # Try each pattern in order
         for token_pattern in TOKEN_PATTERNS:
             match = token_pattern.pattern.match(sql, position)
@@ -96,22 +119,26 @@ def tokenize(sql: str, dialect: str = "sqlserver") -> List[Token]:
                 position = match.end()
                 matched = True
                 break
-        
+
         if not matched:
             # Should never happen if FALLBACK pattern is properly defined
             position += 1
-    
+
     return tokens
-    
+
+
 class SemanticLevel(Enum):
     """Semantic processing levels for tokenization."""
+
     BASIC = "basic"
     GROUPED = "grouped"
     STRUCTURED = "structured"
     SEMANTIC = "semantic"
 
 
-def get_token_type(token: str, dialect: Union[str, SQLDialect] = "sqlserver") -> TokenType:
+def get_token_type(
+    token: str, dialect: Union[str, SQLDialect] = "sqlserver"
+) -> TokenType:
     if not token:
         return TokenType.UNKNOWN
     if isinstance(dialect, str):
@@ -146,7 +173,6 @@ def get_token_type(token: str, dialect: Union[str, SQLDialect] = "sqlserver") ->
     return TokenType.UNKNOWN
 
 
-
 def tokenize_with_types(
     sql: str,
     dialect: Union[str, SQLDialect] = "sqlserver",
@@ -154,12 +180,12 @@ def tokenize_with_types(
 ) -> List[Token]:
     """
     Tokenize SQL with type information.
-    
+
     Args:
         sql: SQL string to tokenize
         dialect: SQL dialect for keyword detection
         level: Semantic processing level (currently delegates to tokenize)
-        
+
     Returns:
         List of Token instances
     """

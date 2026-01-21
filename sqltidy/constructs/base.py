@@ -3,9 +3,9 @@ Base classes and infrastructure for the declarative SQL pattern system.
 
 This module provides the core pattern matching framework that other patterns build upon.
 """
+
 from typing import List, Optional, Union, Dict, Any, Pattern, Literal, Iterable
 from dataclasses import dataclass
-
 
 
 # Import types from tokenizer
@@ -22,8 +22,10 @@ if TYPE_CHECKING:
 class Construct:
     name: str
     pattern: Pattern
-    dialect: Literal['all','sqlserver','postgres','mysql','sqlite','oracle'] = 'all'
-    
+    dialect: Literal["all", "sqlserver", "postgres", "mysql", "sqlite", "oracle"] = (
+        "all"
+    )
+
     def __post_init__(self):
         # Compile regex once
         object.__setattr__(self, "_compiled", self.pattern)
@@ -34,30 +36,28 @@ class Construct:
 
     def matches(self, text: str) -> bool:
         return bool(self.regex.search(text))
-    
+
     def is_applicable(self, dialect) -> bool:
         """Check if this construct is applicable for the given dialect."""
-        if self.dialect == 'all':
+        if self.dialect == "all":
             return True
-        
+
         # Handle both string and dialect object
-        dialect_name = dialect.name if hasattr(dialect, 'name') else str(dialect)
+        dialect_name = dialect.name if hasattr(dialect, "name") else str(dialect)
         return self.dialect == dialect_name
 
 
-
-
-
-
-def match_constructs(sql: str, dialect: str = "sqlserver", constructs: Optional[List[Construct]] = None) -> List[Dict[str, Any]]:
+def match_constructs(
+    sql: str, dialect: str = "sqlserver", constructs: Optional[List[Construct]] = None
+) -> List[Dict[str, Any]]:
     """
     Match SQL constructs (patterns) in the given SQL string.
-    
+
     Args:
         sql: SQL string to analyze
         dialect: SQL dialect to use (default: "sqlserver")
         constructs: List of constructs to match. If None, uses all registered constructs.
-    
+
     Returns:
         List of dictionaries containing match information:
         - name: construct name
@@ -67,40 +67,42 @@ def match_constructs(sql: str, dialect: str = "sqlserver", constructs: Optional[
         - text: matched text
     """
     from ..dialects import get_dialect
-    
+
     if isinstance(dialect, str):
         dialect_obj = get_dialect(dialect)
     else:
         dialect_obj = dialect
-    
+
     # Get constructs to match
     if constructs is None:
-        constructs = get_all_constructs(dialect.name if hasattr(dialect, 'name') else dialect)
-    
+        constructs = get_all_constructs(
+            dialect.name if hasattr(dialect, "name") else dialect
+        )
+
     # Filter constructs by dialect
-    dialect_name = dialect_obj.name if hasattr(dialect_obj, 'name') else dialect
+    dialect_name = dialect_obj.name if hasattr(dialect_obj, "name") else dialect
     filtered_constructs = [
-        c for c in constructs 
-        if c.dialect == 'all' or c.dialect == dialect_name
+        c for c in constructs if c.dialect == "all" or c.dialect == dialect_name
     ]
-    
+
     constructs = []
     for construct in filtered_constructs:
         for match in construct.regex.finditer(sql):
-            constructs.append({
-                'name': construct.name,
-                'match': match,
-                'start': match.start(),
-                'end': match.end(),
-                'text': match.group(0),
-                'groups': match.groupdict()
-            })
-    
-    # Sort by start position
-    constructs.sort(key=lambda x: x['start'])
-    
-    return constructs
+            constructs.append(
+                {
+                    "name": construct.name,
+                    "match": match,
+                    "start": match.start(),
+                    "end": match.end(),
+                    "text": match.group(0),
+                    "groups": match.groupdict(),
+                }
+            )
 
+    # Sort by start position
+    constructs.sort(key=lambda x: x["start"])
+
+    return constructs
 
 
 class ConstructRegistry:
@@ -112,7 +114,7 @@ class ConstructRegistry:
 
     def all(self) -> List[Construct]:
         return list(self._constructs.values())
-    
+
     def clear(self) -> None:
         self._constructs.clear()
 
@@ -138,13 +140,10 @@ def get_all_constructs(dialect: Optional[str] = None) -> List[Construct]:
     """Get all patterns from the global registry."""
     return _global_registry.all()
 
+
 def clear_constructs():
     """Clear the global pattern registry."""
     _global_registry.clear()
-
-
-
-
 
 
 __all__ = [

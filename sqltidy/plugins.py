@@ -78,6 +78,7 @@ def auto_load_user_rules() -> List[type]:
                 # Silently skip files that can't be loaded
                 # (they might not be rule files)
                 import logging
+
                 logging.debug(f"Skipping file {filepath}: {e}")
 
     return loaded_rules

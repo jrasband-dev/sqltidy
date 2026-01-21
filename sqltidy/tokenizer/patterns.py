@@ -24,6 +24,7 @@ from ..tokenizer import Token
 #     register_pattern(WindowFunctionPattern())
 #     register_pattern(SubqueryPattern())
 
+
 def apply_patterns(
     tokens: List[Union[Token, TokenGroup]],
     dialect: SQLDialect,
@@ -70,6 +71,7 @@ def apply_patterns(
         result = _apply_single_pattern(result, pattern, dialect, parent_group_type)
 
     return result
+
 
 def _apply_single_pattern(
     tokens: List[Union[Token, TokenGroup]],
@@ -132,6 +134,7 @@ def _apply_single_pattern(
 
     return result
 
+
 def create_pattern_from_match(match: MatchResult) -> Optional[TokenGroup]:
     """
     Create a TokenGroup from a MatchResult.
@@ -151,6 +154,7 @@ def create_pattern_from_match(match: MatchResult) -> Optional[TokenGroup]:
         name=match.group_name,
         metadata=match.metadata,
     )
+
 
 # Initialize default patterns when module is imported
 # initialize_default_patterns()

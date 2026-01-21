@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from .. import __version__
+
 ## Import API functions inside main() to avoid circular import
 from ..rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 
@@ -19,7 +20,6 @@ from ..cli.dialog import (
     add_rule,
     list_rules,
     remove_rule,
-
 )
 
 from ..tokenizer import tokenize_with_types, TokenType
@@ -157,6 +157,7 @@ def create_rulebook_from_file(rulebook_file: str) -> SQLTidyConfig:
 
 def handle_tidy_command(args):
     from ..api import tidy_sql, tidy_engine
+
     """Handle the tidy command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else "sqlserver"
     config = create_rulebook_from_file(dialect)
@@ -406,6 +407,7 @@ def handle_tidy_command(args):
 
 def handle_rewrite_command(args):
     from ..api import tidy_sql, rewrite_sql, tidy_engine, format_sql_folder
+
     """Handle the rewrite command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else "sqlserver"
     config = create_rulebook_from_file(dialect)
@@ -422,7 +424,9 @@ def handle_rewrite_command(args):
                     sql = f.read()
 
                 formatted_sql = rewrite_sql(sql, config=config)
-                if hasattr(formatted_sql, 'to_string') and callable(getattr(formatted_sql, 'to_string', None)):
+                if hasattr(formatted_sql, "to_string") and callable(
+                    getattr(formatted_sql, "to_string", None)
+                ):
                     formatted_sql = formatted_sql.to_string()
                 elif not isinstance(formatted_sql, str):
                     formatted_sql = str(formatted_sql)
@@ -434,7 +438,9 @@ def handle_rewrite_command(args):
             if args.output:
                 output_path = Path(args.output)
                 output_path.parent.mkdir(parents=True, exist_ok=True)
-                if hasattr(formatted_sql, 'to_string') and callable(getattr(formatted_sql, 'to_string', None)):
+                if hasattr(formatted_sql, "to_string") and callable(
+                    getattr(formatted_sql, "to_string", None)
+                ):
                     formatted_sql = formatted_sql.to_string()
                 elif not isinstance(formatted_sql, str):
                     formatted_sql = str(formatted_sql)
@@ -442,7 +448,9 @@ def handle_rewrite_command(args):
                     f.write(formatted_sql)
                 console.print(f"[dim]Saved to:[/dim] [cyan]{output_path}[/cyan]")
             elif args.no_in_place:
-                if hasattr(formatted_sql, 'to_string') and callable(getattr(formatted_sql, 'to_string', None)):
+                if hasattr(formatted_sql, "to_string") and callable(
+                    getattr(formatted_sql, "to_string", None)
+                ):
                     formatted_sql = formatted_sql.to_string()
                 elif not isinstance(formatted_sql, str):
                     formatted_sql = str(formatted_sql)
@@ -451,7 +459,9 @@ def handle_rewrite_command(args):
                 # Default: output to Cleaned folder
                 output_path = input_path.parent / "Cleaned" / input_path.name
                 output_path.parent.mkdir(parents=True, exist_ok=True)
-                if hasattr(formatted_sql, 'to_string') and callable(getattr(formatted_sql, 'to_string', None)):
+                if hasattr(formatted_sql, "to_string") and callable(
+                    getattr(formatted_sql, "to_string", None)
+                ):
                     formatted_sql = formatted_sql.to_string()
                 elif not isinstance(formatted_sql, str):
                     formatted_sql = str(formatted_sql)
@@ -788,6 +798,7 @@ def handle_pattern_command(args):
                         dialect_patterns.extend(d_patterns)
                 except Exception as e:
                     import logging
+
                     logging.debug(f"Failed to load dialect patterns: {e}")
             all_patterns = global_patterns + dialect_patterns
             title = "All SQL Patterns"
@@ -1127,7 +1138,6 @@ def handle_dialects_command(args):
 
 
 def main():
-
     # Import API functions here to avoid circular import
     from ..api import tidy_sql, rewrite_sql, format_sql_folder, tidy_engine
 

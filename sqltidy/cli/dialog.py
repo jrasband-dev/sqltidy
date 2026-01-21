@@ -16,13 +16,10 @@ from ..utils import (
     get_user_rulebooks_dir,
     get_bundled_rulebook_path,
     get_user_rules_dir,
-
 )
 
 
 console = Console()
-
-
 
 
 def create_rulebook(
@@ -103,9 +100,7 @@ def create_rulebook(
             # Auto-generate from rules
             from ..config_schema import generate_dialect_config
 
-            console.print(
-                "\n[cyan]Auto-generating config from rule metadata...[/cyan]"
-            )
+            console.print("\n[cyan]Auto-generating config from rule metadata...[/cyan]")
             if include_plugins:
                 console.print("[dim]Including plugin rules in configuration...[/dim]")
             config_dict = generate_dialect_config(
@@ -149,6 +144,7 @@ def create_rulebook(
     except Exception as e:
         console.print(f"\n[red]✗ Error:[/red] {e}")
         raise
+
 
 def list_rulebooks(directory: str = ".") -> None:
     """
@@ -268,7 +264,6 @@ def list_rulebooks(directory: str = ".") -> None:
         console.print(other_tree)
 
     console.print()
-
 
 
 def edit_rulebook(rulebook_name: Optional[str] = None) -> None:
@@ -422,7 +417,6 @@ def edit_rulebook(rulebook_name: Optional[str] = None) -> None:
             f"\n[yellow]⚠ Warning:[/yellow] Couldn't open editor automatically: {e}"
         )
         console.print(f"[dim]Please manually edit:[/dim] [cyan]{selected_file}[/cyan]")
-
 
 
 def reset_rulebook(rulebook_name: Optional[str] = None) -> None:
@@ -923,8 +917,6 @@ def initialize_user_rulebooks() -> None:
             )
 
 
-
-
 def load_rulebook_file(filepath: str) -> Dict[str, Any]:
     """
     Load rulebook from a JSON file.
@@ -940,7 +932,6 @@ def load_rulebook_file(filepath: str) -> Dict[str, Any]:
 
 
 # rule Management
-
 
 
 def add_rule(rule_file: str) -> None:

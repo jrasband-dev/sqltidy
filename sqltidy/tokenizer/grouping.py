@@ -2,9 +2,11 @@
 """
 Token grouping logic: parentheses, statements, clauses, and general grouping helpers.
 """
+
 from typing import List, Union
 from .base import Token, TokenType
 from ..dialects import SQLDialect
+
 
 class GroupType:
     STATEMENT = "statement"
@@ -26,12 +28,14 @@ class GroupType:
     UNION_CLAUSE = "union_clause"
     LIMIT_CLAUSE = "limit_clause"
 
+
 class TokenGroup:
     def __init__(self, group_type, tokens, name=None, metadata=None):
         self.group_type = group_type
         self.tokens = tokens
         self.name = name
         self.metadata = metadata or {}
+
 
 def group_parentheses(
     tokens: List[Union[Token, TokenGroup]], dialect: SQLDialect = None
@@ -209,7 +213,6 @@ def group_by_statements(tokens: List[Union[Token, TokenGroup]]) -> List[TokenGro
             statements.append(TokenGroup(GroupType.STATEMENT, current_statement))
 
     return statements
-
 
 
 # ============================================================================

@@ -65,5 +65,4 @@ __all__ = [
     "PIVOT",
     "UNPIVOT",
     "OUTPUT_CLAUSE",
-
 ]

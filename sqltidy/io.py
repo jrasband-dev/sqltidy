@@ -1,5 +1,6 @@
 from .core import SQLScript
 
+
 def read_sql(file_path: str, dialect: str = "sqlserver") -> SQLScript:
     """
     Reads a SQL file and returns a tokenized SQLScript object.
@@ -11,7 +12,9 @@ def read_sql(file_path: str, dialect: str = "sqlserver") -> SQLScript:
     Returns:
         SQLScript: Tokenized SQL script object.
     """
-    if isinstance(file_path, str) and (file_path.endswith('.sql') or '\\' in file_path or '/' in file_path):
+    if isinstance(file_path, str) and (
+        file_path.endswith(".sql") or "\\" in file_path or "/" in file_path
+    ):
         with open(file_path, "r", encoding="utf-8") as f:
             sql = f.read()
     else:

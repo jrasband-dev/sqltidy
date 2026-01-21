@@ -93,12 +93,13 @@ def tidy_engine(
     except Exception as e:
         # Be resilient: if plugin loading fails, continue with built-in rules
         import logging
+
         logging.debug(f"Failed to load user plugins: {e}")
 
     formatted = formatter.format(sql, return_metadata=return_metadata)
     # If return_metadata=True, formatted is a dict with 'sql' and 'applied_rules'
     if return_metadata and isinstance(formatted, dict):
-        sql_out = formatted.get('sql', '')
+        sql_out = formatted.get("sql", "")
     else:
         sql_out = formatted
     # Return SQLScript object if requested
@@ -269,10 +270,11 @@ def format_sql_file(
     with open(input_path, "r", encoding="utf-8") as f:
         sql = f.read()
 
-
     # Format the SQL
     formatted_sql = tidy_engine(sql, config=config, dialect=dialect)
-    if hasattr(formatted_sql, 'to_string') and callable(getattr(formatted_sql, 'to_string', None)):
+    if hasattr(formatted_sql, "to_string") and callable(
+        getattr(formatted_sql, "to_string", None)
+    ):
         formatted_sql = formatted_sql.to_string()
     elif not isinstance(formatted_sql, str):
         formatted_sql = str(formatted_sql)
