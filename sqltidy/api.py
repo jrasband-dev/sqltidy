@@ -40,9 +40,11 @@ def tidy_engine(
             'mysql', 'oracle', 'sqlite'. Ignored if config is provided.
         rule_type (str, optional): Filter rules by type ('tidy' or 'rewrite'). None loads all.
         return_metadata (bool, optional): If True, return dict with 'sql' and 'applied_rules'.
+        return_tokenized (bool, optional): If True, return SQLScript object with tokens and constructs.
 
     Returns:
-        str or dict: Formatted SQL string, or metadata dict if return_metadata=True.
+        str, dict, or SQLScript: Formatted SQL string, metadata dict if return_metadata=True,
+            or SQLScript object if return_tokenized=True.
 
     Raises:
         ValueError: If dialect is provided but not in SUPPORTED_DIALECTS.
@@ -99,9 +101,9 @@ def tidy_engine(
         sql_out = formatted.get('sql', '')
     else:
         sql_out = formatted
-    # Tokenize the output SQL with types if requested
+    # Return SQLScript object if requested
     if return_tokenized:
-        return TokenizedSQLScript.from_sql(sql_out, dialect=config.dialect if config else dialect)
+        return SQLScript.parse(sql_out, dialect=config.dialect if config else dialect)
     return sql_out
 
 

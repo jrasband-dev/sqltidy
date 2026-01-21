@@ -4,7 +4,11 @@ from .api import (
     tidy_sql,
     rewrite_sql,
     tidy_and_rewrite_sql,
+    format_sql_file,
+    format_sql_folder,
 )
+
+from .core import SQLScript
 
 from .dialects import (
     DIALECTS,
@@ -29,7 +33,12 @@ __all__ = [
     "tidy_sql",
     "rewrite_sql",
     "tidy_and_rewrite_sql",
+    "format_sql_file",
+    "format_sql_folder",
 
+    # Core classes
+    "SQLScript",
+    
     # Utils
     "get_user_rules_dir",
     "get_user_rulebooks_dir",
@@ -37,10 +46,12 @@ __all__ = [
     "get_rulebook_path",
     "get_bundled_rulebook_path",
     "get_default_filename",
+    "read_sql",
+    
     # Configuration
     "SQLTidyConfig",
     "DIALECTS",
+    
     # Version
     "__version__",
-    "read_sql",
 ]
