@@ -11,7 +11,20 @@ class GroupType:
     CLAUSE = "clause"
     PARENTHESIS = "parenthesis"
     FUNCTION = "function"
-    # ... add other group types as needed ...
+    # Semantic group types
+    JOIN_CLAUSE = "join_clause"
+    CASE_EXPRESSION = "case_expression"
+    WINDOW_FUNCTION = "window_function"
+    CTE = "cte"
+    SUBQUERY = "subquery"
+    SELECT_CLAUSE = "select_clause"
+    FROM_CLAUSE = "from_clause"
+    WHERE_CLAUSE = "where_clause"
+    GROUP_BY_CLAUSE = "group_by_clause"
+    HAVING_CLAUSE = "having_clause"
+    ORDER_BY_CLAUSE = "order_by_clause"
+    UNION_CLAUSE = "union_clause"
+    LIMIT_CLAUSE = "limit_clause"
 
 class TokenGroup:
     def __init__(self, group_type, tokens, name=None, metadata=None):

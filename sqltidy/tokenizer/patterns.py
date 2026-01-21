@@ -9,6 +9,7 @@ from typing import List, Union, Optional
 from ..tokenizer import TokenGroup, GroupType
 from ..dialects.base import SQLDialect
 from ..constructs import Construct
+from ..tokenizer import Token
 
 
 # def initialize_default_patterns():
@@ -54,9 +55,9 @@ def apply_patterns(
             processed.append(item)
 
     # Get all applicable patterns (global + dialect-specific)
-    from sqltidy.constructs import get_all_patterns
+    from sqltidy.constructs import get_all_constructs
 
-    global_patterns = get_all_patterns()
+    global_patterns = get_all_constructs()
     dialect_patterns = dialect.get_patterns()
     all_patterns = global_patterns + dialect_patterns
 
