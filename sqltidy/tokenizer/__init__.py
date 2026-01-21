@@ -1,16 +1,30 @@
 # tokenizer/__init__.py
 """
-Tokenizer package init: exposes main API for tokenization and grouping.
+Tokenizer package: exposes main API for tokenization and grouping.
+All functionality is now consolidated in base.py.
 """
 
 from .base import (
-    tokenize_with_types,
-    TokenType,
-    Token,
-    SemanticLevel,
+    # Core tokenization
     tokenize,
+    tokenize_with_types,
     get_token_type,
+    # Types and classes
+    Token,
+    TokenType,
+    TokenGroup,
+    GroupType,
+    SemanticLevel,
     TokenPattern,
+    # Grouping functions
+    group_parentheses,
+    group_by_statements,
+    group_by_clauses,
+    group_tokens,
+    # Utility functions
+    print_token_tree,
+    is_keyword,
+    # Token patterns
     TOKEN_PATTERNS,
     SINGLE_LINE_COMMENT,
     MULTI_LINE_COMMENT,
@@ -25,33 +39,29 @@ from .base import (
     COMMA,
     FALLBACK,
 )
-from .grouping import (
-    group_parentheses,
-    group_by_statements,
-    group_by_clauses,
-    group_tokens,
-    TokenGroup,
-    GroupType,
-)
-from .patterns import apply_patterns
 
 __all__ = [
+    # Core tokenization
     "tokenize",
     "tokenize_with_types",
     "get_token_type",
-    "TokenType",
+    # Types and classes
     "Token",
-    "TokenPattern",
-    "TOKEN_PATTERNS",
-    "SemanticLevel",
+    "TokenType",
     "TokenGroup",
     "GroupType",
+    "SemanticLevel",
+    "TokenPattern",
+    # Grouping functions
     "group_parentheses",
     "group_by_statements",
     "group_by_clauses",
     "group_tokens",
-    "apply_patterns",
+    # Utility functions
+    "print_token_tree",
+    "is_keyword",
     # Token patterns
+    "TOKEN_PATTERNS",
     "SINGLE_LINE_COMMENT",
     "MULTI_LINE_COMMENT",
     "NEWLINE",
