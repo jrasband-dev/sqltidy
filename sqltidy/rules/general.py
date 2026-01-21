@@ -1392,9 +1392,8 @@ class AliasStyleABCRule(BaseRule):
                 result_sql[:actual_start] + new_scope_sql + result_sql[actual_end:]
             )
             offset += len(new_scope_sql) - len(scope_sql)
-        from sqltidy.tokenizer import tokenize
 
-        return tokenize(result_sql)
+        return result_sql
 
     def _apply_to_scope_text(self, sql: str) -> str:
         def _num_to_letters(n: int) -> str:
@@ -1507,9 +1506,8 @@ class AliasStyleTNumericRule(BaseRule):
                 result_sql[:actual_start] + new_scope_sql + result_sql[actual_end:]
             )
             offset += len(new_scope_sql) - len(scope_sql)
-        from sqltidy.tokenizer import tokenize
 
-        return tokenize(result_sql)
+        return result_sql
 
     def _apply_to_scope_text(self, sql: str) -> str:
         pattern = re.compile(
@@ -1681,9 +1679,7 @@ class SubqueryToCTERule(BaseRule):
 
         result_sql = cte_block + modified_query
 
-        from sqltidy.tokenizer import tokenize
-
-        return tokenize(result_sql)
+        return result_sql
 
 
 __all__ = [
