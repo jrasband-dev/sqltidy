@@ -67,7 +67,7 @@ extensions = [
 ]
 
 # Autosummary configuration
-autosummary_generate = True
+autosummary_generate = False
 autosummary_imported_members = False
 
 # Render docstring text in `single backticks` as code.

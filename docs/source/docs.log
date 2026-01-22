@@ -1,0 +1,204 @@
+2026-01-22 00:06:36,893 - DEBUG - process_sig: (args)
+2026-01-22 00:06:36,894 - DEBUG - return_sig: None
+2026-01-22 00:06:36,905 - DEBUG - process_sig: (name='sqlserver')
+2026-01-22 00:06:36,905 - DEBUG - return_sig: None
+2026-01-22 00:06:36,910 - DEBUG - process_sig: ()
+2026-01-22 00:06:36,910 - DEBUG - return_sig: None
+2026-01-22 00:06:36,915 - DEBUG - process_sig: (name)
+2026-01-22 00:06:36,916 - DEBUG - return_sig: None
+2026-01-22 00:06:36,967 - DEBUG - process_sig: ()
+2026-01-22 00:06:36,967 - DEBUG - return_sig: None
+2026-01-22 00:06:37,004 - DEBUG - process_sig: (args)
+2026-01-22 00:06:37,004 - DEBUG - return_sig: None
+2026-01-22 00:06:37,111 - DEBUG - process_sig: (dialect=None, template_file=None, include_plugins=True)
+2026-01-22 00:06:37,111 - DEBUG - return_sig: None
+2026-01-22 00:06:37,119 - DEBUG - process_sig: (directory='.')
+2026-01-22 00:06:37,119 - DEBUG - return_sig: None
+2026-01-22 00:06:37,126 - DEBUG - process_sig: (rulebook_name=None)
+2026-01-22 00:06:37,126 - DEBUG - return_sig: None
+2026-01-22 00:06:37,134 - DEBUG - process_sig: (rulebook_name=None)
+2026-01-22 00:06:37,134 - DEBUG - return_sig: None
+2026-01-22 00:06:37,144 - DEBUG - process_sig: (rulebook_name=None, include_plugins=True)
+2026-01-22 00:06:37,144 - DEBUG - return_sig: None
+2026-01-22 00:06:37,151 - DEBUG - process_sig: (filepath)
+2026-01-22 00:06:37,151 - DEBUG - return_sig: None
+2026-01-22 00:06:37,186 - DEBUG - process_sig: (rule_file)
+2026-01-22 00:06:37,187 - DEBUG - return_sig: None
+2026-01-22 00:06:37,195 - DEBUG - process_sig: ()
+2026-01-22 00:06:37,195 - DEBUG - return_sig: None
+2026-01-22 00:06:37,201 - DEBUG - process_sig: (rule_name)
+2026-01-22 00:06:37,201 - DEBUG - return_sig: None
+2026-01-22 00:06:37,222 - DEBUG - process_sig: (rule_type='tidy', order=50, supported_dialects=None, name=None, config_fields=None)
+2026-01-22 00:06:37,222 - DEBUG - return_sig: None
+2026-01-22 00:06:37,229 - DEBUG - process_sig: (rule_class)
+2026-01-22 00:06:37,229 - DEBUG - return_sig: None
+2026-01-22 00:06:37,235 - DEBUG - process_sig: (filepath)
+2026-01-22 00:06:37,236 - DEBUG - return_sig: None
+2026-01-22 00:06:37,243 - DEBUG - process_sig: (directory)
+2026-01-22 00:06:37,243 - DEBUG - return_sig: None
+2026-01-22 00:06:37,280 - DEBUG - process_sig: (args)
+2026-01-22 00:06:37,280 - DEBUG - return_sig: None
+2026-01-22 00:08:30,811 - DEBUG - process_sig: (args)
+2026-01-22 00:08:30,812 - DEBUG - return_sig: None
+2026-01-22 00:08:30,831 - DEBUG - process_sig: (args)
+2026-01-22 00:08:30,831 - DEBUG - return_sig: None
+2026-01-22 00:08:30,853 - DEBUG - process_sig: (args)
+2026-01-22 00:08:30,853 - DEBUG - return_sig: None
+2026-01-22 00:08:30,909 - DEBUG - process_sig: (rule_file: str)
+2026-01-22 00:08:30,909 - DEBUG - return_sig: None
+2026-01-22 00:08:30,927 - DEBUG - process_sig: (dialect: str | None = None, template_file: str | None = None, include_plugins: bool = True)
+2026-01-22 00:08:30,927 - DEBUG - return_sig: None
+2026-01-22 00:08:30,943 - DEBUG - process_sig: (rulebook_name: str | None = None)
+2026-01-22 00:08:30,943 - DEBUG - return_sig: None
+2026-01-22 00:08:30,956 - DEBUG - process_sig: (directory: str = '.')
+2026-01-22 00:08:30,956 - DEBUG - return_sig: None
+2026-01-22 00:08:30,973 - DEBUG - process_sig: ()
+2026-01-22 00:08:30,973 - DEBUG - return_sig: None
+2026-01-22 00:08:30,989 - DEBUG - process_sig: (filepath: str)
+2026-01-22 00:08:30,989 - DEBUG - return_sig: ~typing.Dict[str, ~typing.Any]
+2026-01-22 00:08:31,002 - DEBUG - process_sig: (rule_name: str)
+2026-01-22 00:08:31,002 - DEBUG - return_sig: None
+2026-01-22 00:08:31,016 - DEBUG - process_sig: (rulebook_name: str | None = None)
+2026-01-22 00:08:31,016 - DEBUG - return_sig: None
+2026-01-22 00:08:31,035 - DEBUG - process_sig: (rulebook_name: str | None = None, include_plugins: bool = True)
+2026-01-22 00:08:31,035 - DEBUG - return_sig: None
+2026-01-22 00:08:31,056 - DEBUG - process_sig: (name: str = 'sqlserver')
+2026-01-22 00:08:31,056 - DEBUG - return_sig: ~sqltidy.dialects.base.SQLDialect
+2026-01-22 00:08:31,069 - DEBUG - process_sig: (name: str)
+2026-01-22 00:08:31,070 - DEBUG - return_sig: bool
+2026-01-22 00:08:31,084 - DEBUG - process_sig: ()
+2026-01-22 00:08:31,084 - DEBUG - return_sig: ~typing.List[str]
+2026-01-22 00:08:31,110 - DEBUG - process_sig: (filepath: str | ~pathlib.Path)
+2026-01-22 00:08:31,110 - DEBUG - return_sig: ~typing.List[type]
+2026-01-22 00:08:31,126 - DEBUG - process_sig: (directory: str | ~pathlib.Path)
+2026-01-22 00:08:31,126 - DEBUG - return_sig: ~typing.List[type]
+2026-01-22 00:08:31,143 - DEBUG - process_sig: (rule_class: type)
+2026-01-22 00:08:31,143 - DEBUG - return_sig: None
+2026-01-22 00:08:31,164 - DEBUG - process_sig: (rule_type: str = 'tidy', order: int = 50, supported_dialects: ~typing.Set[str] | None = None, name: str | None = None, config_fields: ~typing.Dict | None = None)
+2026-01-22 00:08:31,164 - DEBUG - return_sig: None
+2026-01-22 00:08:31,213 - DEBUG - process_sig: ()
+2026-01-22 00:08:31,213 - DEBUG - return_sig: None
+2026-01-22 00:08:31,252 - DEBUG - process_sig: (args)
+2026-01-22 00:08:31,252 - DEBUG - return_sig: None
+2026-01-22 00:08:31,260 - DEBUG - process_sig: (name='sqlserver')
+2026-01-22 00:08:31,260 - DEBUG - return_sig: None
+2026-01-22 00:08:31,267 - DEBUG - process_sig: ()
+2026-01-22 00:08:31,267 - DEBUG - return_sig: None
+2026-01-22 00:08:31,273 - DEBUG - process_sig: (name)
+2026-01-22 00:08:31,273 - DEBUG - return_sig: None
+2026-01-22 00:08:31,319 - DEBUG - process_sig: ()
+2026-01-22 00:08:31,319 - DEBUG - return_sig: None
+2026-01-22 00:08:31,351 - DEBUG - process_sig: (args)
+2026-01-22 00:08:31,351 - DEBUG - return_sig: None
+2026-01-22 00:08:31,383 - DEBUG - process_sig: (dialect=None, template_file=None, include_plugins=True)
+2026-01-22 00:08:31,383 - DEBUG - return_sig: None
+2026-01-22 00:08:31,391 - DEBUG - process_sig: (directory='.')
+2026-01-22 00:08:31,391 - DEBUG - return_sig: None
+2026-01-22 00:08:31,399 - DEBUG - process_sig: (rulebook_name=None)
+2026-01-22 00:08:31,399 - DEBUG - return_sig: None
+2026-01-22 00:08:31,407 - DEBUG - process_sig: (rulebook_name=None)
+2026-01-22 00:08:31,407 - DEBUG - return_sig: None
+2026-01-22 00:08:31,416 - DEBUG - process_sig: (rulebook_name=None, include_plugins=True)
+2026-01-22 00:08:31,416 - DEBUG - return_sig: None
+2026-01-22 00:08:31,423 - DEBUG - process_sig: (filepath)
+2026-01-22 00:08:31,424 - DEBUG - return_sig: None
+2026-01-22 00:08:31,459 - DEBUG - process_sig: (rule_file)
+2026-01-22 00:08:31,459 - DEBUG - return_sig: None
+2026-01-22 00:08:31,467 - DEBUG - process_sig: ()
+2026-01-22 00:08:31,467 - DEBUG - return_sig: None
+2026-01-22 00:08:31,474 - DEBUG - process_sig: (rule_name)
+2026-01-22 00:08:31,474 - DEBUG - return_sig: None
+2026-01-22 00:08:31,482 - DEBUG - process_sig: (rule_type='tidy', order=50, supported_dialects=None, name=None, config_fields=None)
+2026-01-22 00:08:31,482 - DEBUG - return_sig: None
+2026-01-22 00:08:31,487 - DEBUG - process_sig: (rule_class)
+2026-01-22 00:08:31,487 - DEBUG - return_sig: None
+2026-01-22 00:08:31,495 - DEBUG - process_sig: (filepath)
+2026-01-22 00:08:31,495 - DEBUG - return_sig: None
+2026-01-22 00:08:31,501 - DEBUG - process_sig: (directory)
+2026-01-22 00:08:31,501 - DEBUG - return_sig: None
+2026-01-22 00:08:31,558 - DEBUG - process_sig: (args)
+2026-01-22 00:08:31,559 - DEBUG - return_sig: None
+2026-01-22 00:14:15,195 - DEBUG - process_sig: ()
+2026-01-22 00:14:15,195 - DEBUG - return_sig: None
+2026-01-22 00:14:15,237 - DEBUG - process_sig: (args)
+2026-01-22 00:14:15,237 - DEBUG - return_sig: None
+2026-01-22 00:14:15,250 - DEBUG - process_sig: (name='sqlserver')
+2026-01-22 00:14:15,250 - DEBUG - return_sig: None
+2026-01-22 00:14:15,258 - DEBUG - process_sig: ()
+2026-01-22 00:14:15,259 - DEBUG - return_sig: None
+2026-01-22 00:14:15,265 - DEBUG - process_sig: (name)
+2026-01-22 00:14:15,265 - DEBUG - return_sig: None
+2026-01-22 00:14:15,348 - DEBUG - process_sig: ()
+2026-01-22 00:14:15,348 - DEBUG - return_sig: None
+2026-01-22 00:14:15,385 - DEBUG - process_sig: (args)
+2026-01-22 00:14:15,385 - DEBUG - return_sig: None
+2026-01-22 00:14:15,456 - DEBUG - process_sig: (dialect=None, template_file=None, include_plugins=True)
+2026-01-22 00:14:15,456 - DEBUG - return_sig: None
+2026-01-22 00:14:15,463 - DEBUG - process_sig: (directory='.')
+2026-01-22 00:14:15,463 - DEBUG - return_sig: None
+2026-01-22 00:14:15,469 - DEBUG - process_sig: (rulebook_name=None)
+2026-01-22 00:14:15,469 - DEBUG - return_sig: None
+2026-01-22 00:14:15,478 - DEBUG - process_sig: (rulebook_name=None)
+2026-01-22 00:14:15,478 - DEBUG - return_sig: None
+2026-01-22 00:14:15,486 - DEBUG - process_sig: (rulebook_name=None, include_plugins=True)
+2026-01-22 00:14:15,487 - DEBUG - return_sig: None
+2026-01-22 00:14:15,492 - DEBUG - process_sig: (filepath)
+2026-01-22 00:14:15,492 - DEBUG - return_sig: None
+2026-01-22 00:14:15,526 - DEBUG - process_sig: (rule_file)
+2026-01-22 00:14:15,526 - DEBUG - return_sig: None
+2026-01-22 00:14:15,534 - DEBUG - process_sig: ()
+2026-01-22 00:14:15,534 - DEBUG - return_sig: None
+2026-01-22 00:14:15,541 - DEBUG - process_sig: (rule_name)
+2026-01-22 00:14:15,541 - DEBUG - return_sig: None
+2026-01-22 00:14:15,559 - DEBUG - process_sig: (rule_type='tidy', order=50, supported_dialects=None, name=None, config_fields=None)
+2026-01-22 00:14:15,559 - DEBUG - return_sig: None
+2026-01-22 00:14:15,565 - DEBUG - process_sig: (rule_class)
+2026-01-22 00:14:15,565 - DEBUG - return_sig: None
+2026-01-22 00:14:15,571 - DEBUG - process_sig: (filepath)
+2026-01-22 00:14:15,571 - DEBUG - return_sig: None
+2026-01-22 00:14:15,577 - DEBUG - process_sig: (directory)
+2026-01-22 00:14:15,577 - DEBUG - return_sig: None
+2026-01-22 00:14:15,609 - DEBUG - process_sig: (args)
+2026-01-22 00:14:15,609 - DEBUG - return_sig: None
+2026-01-22 00:14:29,065 - DEBUG - process_sig: ()
+2026-01-22 00:14:29,066 - DEBUG - return_sig: None
+2026-01-22 00:14:29,107 - DEBUG - process_sig: (args)
+2026-01-22 00:14:29,107 - DEBUG - return_sig: None
+2026-01-22 00:14:29,118 - DEBUG - process_sig: (name='sqlserver')
+2026-01-22 00:14:29,118 - DEBUG - return_sig: None
+2026-01-22 00:14:29,125 - DEBUG - process_sig: ()
+2026-01-22 00:14:29,125 - DEBUG - return_sig: None
+2026-01-22 00:14:29,130 - DEBUG - process_sig: (name)
+2026-01-22 00:14:29,130 - DEBUG - return_sig: None
+2026-01-22 00:14:29,184 - DEBUG - process_sig: ()
+2026-01-22 00:14:29,184 - DEBUG - return_sig: None
+2026-01-22 00:14:29,222 - DEBUG - process_sig: (args)
+2026-01-22 00:14:29,223 - DEBUG - return_sig: None
+2026-01-22 00:14:29,315 - DEBUG - process_sig: (dialect=None, template_file=None, include_plugins=True)
+2026-01-22 00:14:29,315 - DEBUG - return_sig: None
+2026-01-22 00:14:29,322 - DEBUG - process_sig: (directory='.')
+2026-01-22 00:14:29,322 - DEBUG - return_sig: None
+2026-01-22 00:14:29,329 - DEBUG - process_sig: (rulebook_name=None)
+2026-01-22 00:14:29,329 - DEBUG - return_sig: None
+2026-01-22 00:14:29,336 - DEBUG - process_sig: (rulebook_name=None)
+2026-01-22 00:14:29,336 - DEBUG - return_sig: None
+2026-01-22 00:14:29,345 - DEBUG - process_sig: (rulebook_name=None, include_plugins=True)
+2026-01-22 00:14:29,345 - DEBUG - return_sig: None
+2026-01-22 00:14:29,350 - DEBUG - process_sig: (filepath)
+2026-01-22 00:14:29,350 - DEBUG - return_sig: None
+2026-01-22 00:14:29,381 - DEBUG - process_sig: (rule_file)
+2026-01-22 00:14:29,381 - DEBUG - return_sig: None
+2026-01-22 00:14:29,389 - DEBUG - process_sig: ()
+2026-01-22 00:14:29,389 - DEBUG - return_sig: None
+2026-01-22 00:14:29,395 - DEBUG - process_sig: (rule_name)
+2026-01-22 00:14:29,395 - DEBUG - return_sig: None
+2026-01-22 00:14:29,413 - DEBUG - process_sig: (rule_type='tidy', order=50, supported_dialects=None, name=None, config_fields=None)
+2026-01-22 00:14:29,413 - DEBUG - return_sig: None
+2026-01-22 00:14:29,419 - DEBUG - process_sig: (rule_class)
+2026-01-22 00:14:29,419 - DEBUG - return_sig: None
+2026-01-22 00:14:29,426 - DEBUG - process_sig: (filepath)
+2026-01-22 00:14:29,426 - DEBUG - return_sig: None
+2026-01-22 00:14:29,431 - DEBUG - process_sig: (directory)
+2026-01-22 00:14:29,432 - DEBUG - return_sig: None
+2026-01-22 00:14:29,463 - DEBUG - process_sig: (args)
+2026-01-22 00:14:29,463 - DEBUG - return_sig: None
