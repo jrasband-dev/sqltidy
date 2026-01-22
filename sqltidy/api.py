@@ -3,11 +3,8 @@ from pathlib import Path
 from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 from .core import SQLFormatter
 from .core import SQLScript
-from .cli.dialog import (
-    get_bundled_rulebook_path,
-    load_rulebook_file,
-    get_user_rulebooks_dir,
-)
+from .cli.dialog import load_rulebook_file
+from .utils import get_bundled_rulebook_path, get_user_rulebooks_dir
 
 
 """API utilities for formatting SQL.

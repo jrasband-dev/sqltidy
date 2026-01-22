@@ -15,12 +15,11 @@ from ..cli.dialog import (
     reset_rulebook,
     update_rulebook,
     load_rulebook_file,
-    get_bundled_rulebook_path,
-    get_user_rulebooks_dir,
     add_rule,
     list_rules,
     remove_rule,
 )
+from ..utils import get_bundled_rulebook_path, get_user_rulebooks_dir
 
 from ..tokenizer import tokenize_with_types, TokenType
 from ..dialects.registry import list_dialects, get_dialect
