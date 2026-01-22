@@ -1,7 +1,7 @@
 import re
 
 
-class Lexems:
+class Lexemes:
     NEWLINE = "\n"
     SPACE = " "
     NOSPACE = ""
@@ -25,9 +25,9 @@ def add_newlines(text: str, every_n: int = 1) -> str:
     """
     words = text.split()
     lines = [
-        Lexems.SPACE.join(words[i : i + every_n]) for i in range(0, len(words), every_n)
+        Lexemes.SPACE.join(words[i : i + every_n]) for i in range(0, len(words), every_n)
     ]
-    return Lexems.NEWLINE.join(lines)
+    return Lexemes.NEWLINE.join(lines)
 
 
 def ensure_trailing_newline(text: str) -> str:
@@ -40,7 +40,7 @@ def ensure_trailing_newline(text: str) -> str:
     Returns:
         str: The string ending with a newline.
     """
-    return text.rstrip("\n") + Lexems.NEWLINE
+    return text.rstrip("\n") + Lexemes.NEWLINE
 
 
 def remove_extra_newlines(text: str) -> str:
@@ -53,4 +53,4 @@ def remove_extra_newlines(text: str) -> str:
     Returns:
         str: The string with extra newlines removed.
     """
-    return re.sub(r"\n+", Lexems.NEWLINE, text)
+    return re.sub(r"\n+", Lexemes.NEWLINE, text)

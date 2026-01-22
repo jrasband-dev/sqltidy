@@ -1,7 +1,7 @@
 import re
 from typing import List, Union, Optional, Dict
 
-from ..lexems.base import Lexems
+from ..lexemes.base import Lexemes
 
 from .base import BaseRule, ConfigField, FormatterContext
 from sqltidy.tokenizer import (
@@ -243,14 +243,14 @@ class NewlineJoinPatternRule(BaseRule):
                                             in (TokenType.WHITESPACE, TokenType.NEWLINE)
                                         ):
                                             result.pop()
-                                result.append(Token(Lexems.NEWLINE, TokenType.NEWLINE))
-                                result.append(Token(Lexems.NEWLINE, TokenType.NEWLINE))
+                                result.append(Token(Lexemes.NEWLINE, TokenType.NEWLINE))
+                                result.append(Token(Lexemes.NEWLINE, TokenType.NEWLINE))
                                 for mod in modifiers:
                                     result.append(mod)
                                     result.append(Token(" ", TokenType.WHITESPACE))
                         else:
-                            result.append(Token(Lexems.NEWLINE, TokenType.NEWLINE))
-                            result.append(Token(Lexems.NEWLINE, TokenType.NEWLINE))
+                            result.append(Token(Lexemes.NEWLINE, TokenType.NEWLINE))
+                            result.append(Token(Lexemes.NEWLINE, TokenType.NEWLINE))
                     result.append(token)
                     first_table_after_from = False
                     i += 1
@@ -320,7 +320,7 @@ class OnNewlinesRule(BaseRule):
                         and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
                     ):
                         result.pop()
-                    result.append(Token(Lexems.NEWLINE, TokenType.NEWLINE))
+                    result.append(Token(Lexemes.NEWLINE, TokenType.NEWLINE))
                     processed = self._process_tokens(token.tokens, in_join)
                     result.append(
                         TokenGroup(
@@ -355,7 +355,7 @@ class OnNewlinesRule(BaseRule):
                         and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
                     ):
                         result.pop()
-                    result.append(Token(Lexems.NEWLINE, TokenType.NEWLINE))
+                    result.append(Token(Lexemes.NEWLINE, TokenType.NEWLINE))
                     result.append(token)
                     in_join = False
                     i += 1
@@ -366,7 +366,7 @@ class OnNewlinesRule(BaseRule):
                     ):
                         i += 1
                     if i < len(tokens):
-                        result.append(Token(Lexems.SPACE, TokenType.WHITESPACE))
+                        result.append(Token(Lexemes.SPACE, TokenType.WHITESPACE))
                     continue
                 if in_join and token.type == TokenType.KEYWORD:
                     keyword = token.value.upper()
