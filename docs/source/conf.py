@@ -94,13 +94,6 @@ exclude_patterns = ["Thumbs.db", ".DS_Store"]
 overloads_location = ["bottom"]
 language = "python"
 
-
-# -- Options for HTML output -------------------------------------------------
-
-
-html_theme = "alabaster"
-html_static_path = ["_static"]
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.
