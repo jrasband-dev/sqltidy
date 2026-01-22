@@ -5,7 +5,7 @@ Consolidated module containing all tokenizer functionality.
 """
 
 import re
-from typing import Union, NamedTuple, Pattern, Literal, List, Dict, Optional
+from typing import Union, NamedTuple, Pattern, List
 from enum import Enum
 from dataclasses import dataclass
 from ..dialects import get_dialect, SQLDialect

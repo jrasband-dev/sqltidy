@@ -4,7 +4,7 @@ Base classes and infrastructure for the declarative SQL pattern system.
 This module provides the core pattern matching framework that other patterns build upon.
 """
 
-from typing import List, Optional, Union, Dict, Any, Pattern, Literal, Iterable
+from typing import List, Optional, Dict, Any, Pattern, Literal, Iterable
 from dataclasses import dataclass
 
 
@@ -13,9 +13,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..tokenizer import Token, TokenGroup, GroupType
-    from ..dialects.base import SQLDialect
-    from ..dialects import get_dialect
+    pass
 
 
 @dataclass(frozen=True)

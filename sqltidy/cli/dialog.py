@@ -14,7 +14,6 @@ from rich import box
 from ..rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
 from ..utils import (
     get_user_rulebooks_dir,
-    get_bundled_rulebook_path,
     get_user_rules_dir,
 )
 

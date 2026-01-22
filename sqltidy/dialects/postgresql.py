@@ -8,7 +8,7 @@ from .base import SQLDialect
 from ..constructs.base import Construct
 
 if TYPE_CHECKING:
-    from ..tokenizer.base import TokenPattern
+    pass
 
 
 class PostgreSQLDialect(SQLDialect):

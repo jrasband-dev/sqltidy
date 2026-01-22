@@ -1122,7 +1122,6 @@ def handle_dialects_command(args):
 
 def main():
     # Import API functions here to avoid circular import
-    from ..api import tidy_sql, rewrite_sql, format_sql_folder, tidy_engine
 
     # Print logo
     print_logo()

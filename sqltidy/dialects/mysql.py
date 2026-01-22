@@ -7,7 +7,7 @@ from typing import Set, TYPE_CHECKING
 from .base import SQLDialect
 
 if TYPE_CHECKING:
-    from ..tokenizer.base import TokenPattern
+    pass
 
 
 class MySQLDialect(SQLDialect):
