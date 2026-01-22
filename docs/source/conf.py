@@ -66,6 +66,10 @@ extensions = [
     "recommonmark",
 ]
 
+# Autosummary configuration
+autosummary_generate = True
+autosummary_imported_members = False
+
 # Render docstring text in `single backticks` as code.
 default_role = "code"
 

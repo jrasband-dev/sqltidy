@@ -2,7 +2,6 @@ Rules System
 ============
 
 SQLTidy uses a rule-based system to format and rewrite SQL code.
-Rules are organized into two main categories: **Tidy Rules** and **Rewrite Rules**.
 
 Rule Architecture
 -----------------
@@ -12,144 +11,67 @@ Base Rule Classes
 
 All rules inherit from base classes that define the rule interface.
 
-.. automodule:: sqltidy.rules.base
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. currentmodule:: sqltidy.rules.base
+
+.. autosummary::
+   :toctree: _autosummary
+
+   ConfigField
+   FormatterContext
+   BaseRule
 
 Rule Loader
 ~~~~~~~~~~~
 
 The rule loader system dynamically loads and manages rules.
 
-.. automodule:: sqltidy.rules.loader
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. currentmodule:: sqltidy.rules.loader
 
-Rule Helpers
-~~~~~~~~~~~~
+.. autosummary::
+   :toctree: _autosummary
+   :nosignatures:
 
-Helper functions for implementing custom rules.
+   load_rules
 
-.. automodule:: sqltidy.rules.helpers
-   :members:
-   :undoc-members:
-   :show-inheritance:
+General Formatting Rules
+------------------------
 
-Built-in Rules
-~~~~~~~~~~~~~~
+These rules format SQL code without changing its structure or meaning.
 
-The core rules module containing built-in formatting rules.
+.. currentmodule:: sqltidy.rules.general
 
-.. automodule:: sqltidy.rules.rules
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. autosummary::
+   :toctree: _autosummary
 
-Tidy Rules
-----------
+   UppercaseKeywordsRule
+   CompactWhitespaceRule
+   NewlineJoinPatternRule
+   OnNewlinesRule
+   QuoteIdentifiersRule
+   SelectNewlineRule
+   ColumnsNewlineRule
+   WhereNewlinesRule
+   IndentSelectColumnsRule
+   CaseWhenNewlineIndentRule
+   LeadingCommasRule
+   AliasStyleABCRule
+   AliasStyleTNumericRule
+   SubqueryToCTERule
 
-Tidy rules format SQL code without changing its structure or meaning.
+Database-Specific Rules
+------------------------
 
-Uppercase Keywords
-~~~~~~~~~~~~~~~~~~
+SQL Server Rules
+~~~~~~~~~~~~~~~~
 
-.. automodule:: sqltidy.rules.tidy.uppercase_keywords
-   :members:
-   :undoc-members:
-   :show-inheritance:
+Rules specific to Microsoft SQL Server (T-SQL).
 
-Newline After SELECT
-~~~~~~~~~~~~~~~~~~~~
+.. currentmodule:: sqltidy.rules.sqlserver
 
-.. automodule:: sqltidy.rules.tidy.newline_after_select
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. autosummary::
+   :toctree: _autosummary
 
-Compact Whitespace
-~~~~~~~~~~~~~~~~~~
-
-.. automodule:: sqltidy.rules.tidy.compact_whitespace
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Indent SELECT Columns
-~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: sqltidy.rules.tidy.indent_select_columns
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Leading Commas
-~~~~~~~~~~~~~~
-
-.. automodule:: sqltidy.rules.tidy.leading_commas
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Quote Identifiers
-~~~~~~~~~~~~~~~~~
-
-.. automodule:: sqltidy.rules.tidy.quote_identifiers
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Oracle CONNECT BY
-~~~~~~~~~~~~~~~~~
-
-.. automodule:: sqltidy.rules.tidy.oracle_connect_by
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-SQL Server TOP Formatting
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: sqltidy.rules.tidy.sqlserver_top_formatting
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Rewrite Rules
--------------
-
-Rewrite rules transform SQL structure while preserving semantics.
-
-Subquery to CTE
-~~~~~~~~~~~~~~~
-
-Convert subqueries to Common Table Expressions (CTEs).
-
-.. automodule:: sqltidy.rules.rewrite.subquery_to_cte
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Alias Style ABC
-~~~~~~~~~~~~~~~
-
-Apply alphabetic table aliases (A, B, C, ...).
-
-.. automodule:: sqltidy.rules.rewrite.alias_style_abc
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Alias Style T-Numeric
-~~~~~~~~~~~~~~~~~~~~~
-
-Apply T-numeric table aliases (T1, T2, T3, ...).
-
-.. automodule:: sqltidy.rules.rewrite.alias_style_t_numeric
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   SQLServerTopFormattingRule
 
 Creating Custom Rules
 ---------------------

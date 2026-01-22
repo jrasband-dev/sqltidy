@@ -20,70 +20,89 @@ Dialect Registry
 
 The dialect registry manages all available SQL dialects.
 
-.. automodule:: sqltidy.dialects.registry
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. currentmodule:: sqltidy.dialects.registry
+
+.. autosummary::
+   :toctree: _autosummary
+   :nosignatures:
+
+   get_dialect
+   register_dialect
+   unregister_dialect
+   list_dialects
+   is_dialect_available
 
 Base Dialect
 ------------
 
 The base dialect class that all specific dialects inherit from.
 
-.. automodule:: sqltidy.dialects.base
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. currentmodule:: sqltidy.dialects.base
+
+.. autosummary::
+   :toctree: _autosummary
+
+   SQLDialect
 
 SQL Server Dialect
 ------------------
 
 Microsoft SQL Server (T-SQL) specific dialect.
 
-.. automodule:: sqltidy.dialects.sqlserver
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. currentmodule:: sqltidy.dialects.sqlserver
+
+.. autosummary::
+   :toctree: _autosummary
+
+   SQLServerDialect
 
 PostgreSQL Dialect
 ------------------
 
 PostgreSQL specific dialect.
 
-.. automodule:: sqltidy.dialects.postgresql
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. currentmodule:: sqltidy.dialects.postgresql
+
+.. autosummary::
+   :toctree: _autosummary
+
+   PostgreSQLDialect
 
 MySQL Dialect
 -------------
 
 MySQL specific dialect.
 
-.. automodule:: sqltidy.dialects.mysql
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. currentmodule:: sqltidy.dialects.mysql
+
+.. autosummary::
+   :toctree: _autosummary
+
+   MySQLDialect
 
 Oracle Dialect
 --------------
 
 Oracle Database (PL/SQL) specific dialect.
 
-.. automodule:: sqltidy.dialects.oracle
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. currentmodule:: sqltidy.dialects.oracle
+
+.. autosummary::
+   :toctree: _autosummary
+
+   OracleDialect
 
 SQLite Dialect
 --------------
 
 SQLite specific dialect.
 
-.. automodule:: sqltidy.dialects.sqlite
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. currentmodule:: sqltidy.dialects.sqlite
+
+.. autosummary::
+   :toctree: _autosummary
+
+   SQLiteDialect
 
 Usage Example
 -------------

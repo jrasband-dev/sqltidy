@@ -11,11 +11,13 @@ Welcome to the SQLTidy documentation! SQLTidy is a Python library for formatting
 
    getting_started
    overview
+   cli
    api
    dialects
    rules
    modules
    plugins
+   
 
 Quick Start
 -----------
