@@ -1,43 +1,388 @@
+
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="./">
+
+<html lang="python" data-content_root="./" >
+
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>SQLTidy Documentation &#8212; SQLTidy 0.4.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
-    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
-    <script src="_static/documentation_options.js?v=6c02275b"></script>
-    <script src="_static/doctools.js?v=fd6eb6e6"></script>
-    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <title>SQLTidy Documentation &#8212; SQLTidy unknown documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=19a9095c"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Getting Started" href="getting_started.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="python"/>
+  </head>
   
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
 
   
   
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
-  </head><body>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
   
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
+<a class="navbar-brand logo" href="#">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">SQLTidy unknown documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting_started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cli/index.html">
+    CLI Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
           
 
-          <div class="body" role="main">
-            
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jrasband-dev/sqltidy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/sqltidy/" title="Pypi" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Pypi</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.linkedin.com/in/jayden-rasband-303449133/" title="LinkedIn" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-linkedin fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">LinkedIn</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting_started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cli/index.html">
+    CLI Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jrasband-dev/sqltidy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/sqltidy/" title="Pypi" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Pypi</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.linkedin.com/in/jayden-rasband-303449133/" title="LinkedIn" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-linkedin fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">LinkedIn</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none"></div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
   <section id="sqltidy-documentation">
-<h1>SQLTidy Documentation<a class="headerlink" href="#sqltidy-documentation" title="Link to this heading">¶</a></h1>
-<p>Welcome to the SQLTidy documentation! SQLTidy is a Python library for formatting and tidying SQL scripts.</p>
-<p><strong>SQLTidy</strong> makes it easy to format and clean up your SQL code with customizable rules and plugins.</p>
+<h1>SQLTidy Documentation<a class="headerlink" href="#sqltidy-documentation" title="Link to this heading">#</a></h1>
+<p>Welcome to SQLTidy! A powerful Python tool for formatting and tidying SQL scripts across multiple database dialects.</p>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#installation">Installation</a></li>
@@ -47,102 +392,61 @@
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#configuration">Configuration</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Package Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#architecture">Architecture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#processing-flow">Processing Flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#quick-reference">Quick Reference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#module-index">Module Index</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#configuration-reference">Configuration Reference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#extension-points">Extension Points</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api.html#main-api">Main API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#configuration">Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#core-formatter">Core Formatter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#tokenizer">Tokenizer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#generator">Generator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#plugins">Plugins</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#command-line-interface">Command-Line Interface</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="dialects.html">Dialect System</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="dialects.html#supported-dialects">Supported Dialects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dialects.html#dialect-registry">Dialect Registry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dialects.html#base-dialect">Base Dialect</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dialects.html#sql-server-dialect">SQL Server Dialect</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dialects.html#postgresql-dialect">PostgreSQL Dialect</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dialects.html#mysql-dialect">MySQL Dialect</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dialects.html#oracle-dialect">Oracle Dialect</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dialects.html#sqlite-dialect">SQLite Dialect</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dialects.html#usage-example">Usage Example</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="rules.html">Rules System</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="rules.html#rule-architecture">Rule Architecture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rules.html#tidy-rules">Tidy Rules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rules.html#rewrite-rules">Rewrite Rules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rules.html#creating-custom-rules">Creating Custom Rules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rules.html#configuration">Configuration</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#main-package">Main Package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#core-modules">Core Modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#dialects-package">Dialects Package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#rules-package">Rules Package</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="plugins.html">Creating Plugins</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="plugins.html#overview">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugins.html#plugin-api">Plugin API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugins.html#base-rule-class">Base Rule Class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugins.html#creating-a-custom-plugin">Creating a Custom Plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugins.html#registering-your-plugin">Registering Your Plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugins.html#clearing-plugins">Clearing Plugins</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugins.html#best-practices">Best Practices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugins.html#example-complete-plugin">Example: Complete Plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli/index.html">CLI Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli/tidy.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">tidy</span></code> - Format SQL Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/rewrite.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rewrite</span></code> - Transform SQL Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/rulebooks.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rulebooks</span></code> - Manage Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/rules.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rules</span></code> - Manage Custom Rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/dialects.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">dialects</span></code> - Explore SQL Dialects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/index.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/index.html#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/index.html#command-overview">Command Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/index.html#common-options">Common Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/index.html#common-workflows">Common Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/index.html#default-behavior">Default Behavior</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/index.html#file-locations">File Locations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/index.html#api-entry-point">API Entry Point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/index.html#see-also">See Also</a></li>
 </ul>
 </li>
 </ul>
 </div>
 <section id="quick-start">
-<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h2>
-<section id="installation">
-<h3>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h3>
-<p>Install SQLTidy using pip:</p>
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">#</a></h2>
+<p><strong>Installation</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>sqltidy
 </pre></div>
 </div>
-</section>
-<section id="basic-usage">
-<h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h3>
-<p>Format a SQL string:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_sql</span>
+<p><strong>Command Line</strong></p>
+<p>Format SQL files from your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>tidy<span class="w"> </span>myfile.sql
+sqltidy<span class="w"> </span>tidy<span class="w"> </span><span class="s2">&quot;SQL Files&quot;</span><span class="w"> </span>-r<span class="w"> </span>--pattern<span class="w"> </span><span class="s2">&quot;*.sql&quot;</span>
+</pre></div>
+</div>
+<p>See the <a class="reference internal" href="cli/index.html"><span class="doc">CLI Reference</span></a> for complete command reference.</p>
+<p><strong>Python API</strong></p>
+<p>Use SQLTidy programmatically in your code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqltidy</span><span class="w"> </span><span class="kn">import</span> <span class="n">tidy_sql</span>
 
 <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT * FROM users WHERE age &gt; 18&quot;</span>
-<span class="n">formatted</span> <span class="o">=</span> <span class="n">format_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
+<span class="n">formatted</span> <span class="o">=</span> <span class="n">tidy_sql</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">formatted</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>See the <span class="xref std std-doc">api</span> for detailed API documentation.</p>
 </section>
-</section>
-<section id="features">
-<h2>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p><strong>Easy to Use</strong>: Simple API for formatting SQL</p></li>
-<li><p><strong>Extensible</strong>: Register custom plugins at runtime</p></li>
-<li><p><strong>Configurable</strong>: Customize formatting behavior with configuration objects</p></li>
-<li><p><strong>Fast</strong>: Efficient tokenization and formatting</p></li>
+<li><p><strong>Multi-Dialect Support</strong>: SQL Server, PostgreSQL, MySQL, Oracle, SQLite</p></li>
+<li><p><strong>Flexible Formatting</strong>: Tidy (format) and Rewrite (transform) rules</p></li>
+<li><p><strong>Extensible</strong>: Create custom rules and plugins</p></li>
+<li><p><strong>CLI &amp; API</strong>: Use from command line or Python code</p></li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>For more details, see the <a class="reference internal" href="getting_started.html"><span class="doc">Getting Started</span></a> guide.</p>
-</div>
 </section>
 </section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">#</a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
@@ -151,76 +455,106 @@
 </section>
 
 
-          </div>
-          
-        </div>
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="right-next"
+       href="getting_started.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Getting Started</p>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="Main">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="#">SQLTidy</a></h1>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">SQLTidy Documentation</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quick-start">Quick Start</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-features">Key Features</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
 
+  </nav></div>
 
-
-
-
-
-
-<search id="searchbox" style="display: none" role="search">
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
-      <input type="submit" value="Go" />
-    </form>
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
     </div>
-</search>
-<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Package Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dialects.html">Dialect System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rules.html">Rules System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plugins.html">Creating Plugins</a></li>
-</ul>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="getting_started.html" title="next chapter">Getting Started</a></li>
-  </ul></li>
-</ul>
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Jayden Rasband.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
 </div>
 
-
-
-
-
-
-
-
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &#169;2025, Jayden Rasband.
-      
-      |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
-      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
-      
-      |
-      <a href="_sources/index.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
-    
-
-    
+  </footer>
   </body>
 </html>

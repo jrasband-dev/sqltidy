@@ -1,0 +1,812 @@
+
+<!DOCTYPE html>
+
+
+<html lang="python" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>sqltidy rulebooks - Manage Configuration &#8212; SQLTidy unknown documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=19a9095c"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'cli/rulebooks';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sqltidy rules - Manage Custom Rules" href="rules.html" />
+    <link rel="prev" title="sqltidy rewrite - Transform SQL Structure" href="rewrite.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="python"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">SQLTidy unknown documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    CLI Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jrasband-dev/sqltidy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/sqltidy/" title="Pypi" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Pypi</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.linkedin.com/in/jayden-rasband-303449133/" title="LinkedIn" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-linkedin fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">LinkedIn</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    CLI Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jrasband-dev/sqltidy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/sqltidy/" title="Pypi" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Pypi</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.linkedin.com/in/jayden-rasband-303449133/" title="LinkedIn" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-linkedin fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">LinkedIn</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Commands:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="tidy.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">tidy</span></code> - Format SQL Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rewrite.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rewrite</span></code> - Transform SQL Structure</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rulebooks</span></code> - Manage Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rules.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rules</span></code> - Manage Custom Rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dialects.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">dialects</span></code> - Explore SQL Dialects</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">CLI Reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><code...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="sqltidy-rulebooks-manage-configuration">
+<h1><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rulebooks</span></code> - Manage Configuration<a class="headerlink" href="#sqltidy-rulebooks-manage-configuration" title="Link to this heading">#</a></h1>
+<p>Manage dialect-specific rulebooks that control formatting and rewriting behavior.</p>
+<section id="synopsis">
+<h2>Synopsis<a class="headerlink" href="#synopsis" title="Link to this heading">#</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>rulebooks<span class="w"> </span><span class="o">{</span>create,list,edit,reset,sync<span class="o">}</span><span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Link to this heading">#</a></h2>
+<p>Rulebooks are JSON configuration files stored in <code class="docutils literal notranslate"><span class="pre">~/.sqltidy/rulebooks/</span></code> that define
+formatting and transformation rules for each SQL dialect. Each rulebook contains:</p>
+<ul class="simple">
+<li><p><strong>Tidy rules:</strong> Formatting preferences (uppercase keywords, indentation, etc.)</p></li>
+<li><p><strong>Rewrite rules:</strong> Structural transformations (subquery→CTE, alias styles, etc.)</p></li>
+</ul>
+</section>
+<section id="subcommands">
+<h2>Subcommands<a class="headerlink" href="#subcommands" title="Link to this heading">#</a></h2>
+<section id="create">
+<h3><code class="docutils literal notranslate"><span class="pre">create</span></code><a class="headerlink" href="#create" title="Link to this heading">#</a></h3>
+<p>Create a new rulebook for a dialect.</p>
+<p><strong>Synopsis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>create<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Options:</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">-d,</span> <span class="pre">--dialect</span> <span class="pre">{sqlserver,postgresql,mysql,oracle,sqlite}</span></code></dt><dd><p>Dialect for the rulebook. If omitted, prompts interactively.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">-t,</span> <span class="pre">--template</span> <span class="pre">PATH</span></code></dt><dd><p>Use an existing rulebook as a template.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--no-plugins</span></code></dt><dd><p>Exclude user plugin rules from configuration. By default, custom rules
+from <code class="docutils literal notranslate"><span class="pre">~/.sqltidy/rules/</span></code> are included.</p>
+</dd>
+</dl>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create PostgreSQL rulebook (interactive)</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>create
+
+<span class="c1"># Create specific dialect</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>create<span class="w"> </span>-d<span class="w"> </span>postgresql
+
+<span class="c1"># Create from template</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>create<span class="w"> </span>-d<span class="w"> </span>mysql<span class="w"> </span>-t<span class="w"> </span>sqltidy_postgresql.json
+
+<span class="c1"># Create without plugins</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>create<span class="w"> </span>-d<span class="w"> </span>oracle<span class="w"> </span>--no-plugins
+</pre></div>
+</div>
+</section>
+<section id="list">
+<h3><code class="docutils literal notranslate"><span class="pre">list</span></code><a class="headerlink" href="#list" title="Link to this heading">#</a></h3>
+<p>List all rulebooks in the user directory.</p>
+<p><strong>Synopsis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>list<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Options:</strong></p>
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">-d,</span> <span class="pre">--directory</span> <span class="pre">PATH</span></code></dt><dd><p>Directory to search for rulebooks.</p>
+<p><strong>Default:</strong> <code class="docutils literal notranslate"><span class="pre">~/.sqltidy/rulebooks/</span></code></p>
+</dd>
+</dl>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># List user rulebooks</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>list
+
+<span class="c1"># List rulebooks in custom directory</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>list<span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;C:\Configs&quot;</span>
+</pre></div>
+</div>
+<p><strong>Output Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>User Rulebook Directory
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+C:\Users\user\.sqltidy\rulebooks
+
+📚 Rulebooks (3 found)
+├── 📄 sqltidy_postgresql.json
+│   ├── Dialect: postgresql
+│   ├── Rules enabled: 12 (8 tidy, 4 rewrite)
+│   └── Size: 3.2 KB
+├── 📄 sqltidy_sqlserver.json
+│   ├── Dialect: sqlserver
+│   ├── Rules enabled: 10 (7 tidy, 3 rewrite)
+│   └── Size: 2.8 KB
+└── 📄 sqltidy_mysql.json
+    ├── Dialect: mysql
+    ├── Rules enabled: 11 (8 tidy, 3 rewrite)
+    └── Size: 3.0 KB
+</pre></div>
+</div>
+</section>
+<section id="edit">
+<h3><code class="docutils literal notranslate"><span class="pre">edit</span></code><a class="headerlink" href="#edit" title="Link to this heading">#</a></h3>
+<p>Edit an existing rulebook in your default text editor.</p>
+<p><strong>Synopsis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>edit<span class="w"> </span><span class="o">[</span>RULEBOOK<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Arguments:</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">RULEBOOK</span></code></dt><dd><p>Dialect name (e.g., <code class="docutils literal notranslate"><span class="pre">postgresql</span></code>) or filename. If omitted, shows
+interactive selection menu.</p>
+</dd>
+</dl>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Edit specific dialect (interactive choice if not found)</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>edit<span class="w"> </span>postgresql
+
+<span class="c1"># Edit by filename</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>edit<span class="w"> </span>sqltidy_mysql.json
+
+<span class="c1"># Interactive selection</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>edit
+</pre></div>
+</div>
+<p><strong>Notes:</strong></p>
+<ul class="simple">
+<li><p>Opens the file in your system's default JSON/text editor</p></li>
+<li><p>Only edits files in <code class="docutils literal notranslate"><span class="pre">~/.sqltidy/rulebooks/</span></code></p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">create</span></code> to make new rulebooks first</p></li>
+</ul>
+</section>
+<section id="reset">
+<h3><code class="docutils literal notranslate"><span class="pre">reset</span></code><a class="headerlink" href="#reset" title="Link to this heading">#</a></h3>
+<p>Reset a rulebook to auto-generated defaults.</p>
+<p><strong>Synopsis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>reset<span class="w"> </span><span class="o">[</span>RULEBOOK<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Arguments:</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">RULEBOOK</span></code></dt><dd><p>Dialect name, filename, or <code class="docutils literal notranslate"><span class="pre">all</span></code> to reset all rulebooks.</p>
+</dd>
+</dl>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Reset specific dialect</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>reset<span class="w"> </span>postgresql
+
+<span class="c1"># Reset all rulebooks</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>reset<span class="w"> </span>all
+</pre></div>
+</div>
+<p><strong>Warning:</strong></p>
+<p>This permanently removes your customizations and regenerates the rulebook
+from rule metadata.</p>
+</section>
+<section id="sync">
+<h3><code class="docutils literal notranslate"><span class="pre">sync</span></code><a class="headerlink" href="#sync" title="Link to this heading">#</a></h3>
+<p>Sync an existing rulebook with newly registered rules.</p>
+<p><strong>Synopsis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>sync<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span><span class="o">[</span>RULEBOOK<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Arguments:</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">RULEBOOK</span></code></dt><dd><p>Dialect name, filename, or <code class="docutils literal notranslate"><span class="pre">all</span></code> to sync all rulebooks.</p>
+</dd>
+</dl>
+<p><strong>Options:</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--no-plugins</span></code></dt><dd><p>Exclude plugin rules from sync.</p>
+</dd>
+</dl>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Sync after adding custom rules</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>sync<span class="w"> </span>postgresql
+
+<span class="c1"># Sync all rulebooks</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>sync<span class="w"> </span>all
+
+<span class="c1"># Sync without plugins</span>
+sqltidy<span class="w"> </span>rulebooks<span class="w"> </span>sync<span class="w"> </span>mysql<span class="w"> </span>--no-plugins
+</pre></div>
+</div>
+<p><strong>Use Case:</strong></p>
+<p>After adding custom plugin rules to <code class="docutils literal notranslate"><span class="pre">~/.sqltidy/rules/</span></code>, run sync to add
+their configuration fields to existing rulebooks while preserving your
+current settings.</p>
+</section>
+</section>
+<section id="rulebook-structure">
+<h2>Rulebook Structure<a class="headerlink" href="#rulebook-structure" title="Link to this heading">#</a></h2>
+<p>Rulebooks are JSON files with this structure:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dialect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;postgresql&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;tidy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;uppercase_keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;compact&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;leading_commas&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;indent_select_columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;newline_after_select&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;newline_on_join&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;quote_identifiers&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;rewrite&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;enable_subquery_to_cte&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;enable_alias_style_abc&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;enable_alias_style_t_numeric&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="dialect-defaults">
+<h2>Dialect Defaults<a class="headerlink" href="#dialect-defaults" title="Link to this heading">#</a></h2>
+<p>Each dialect has different default formatting preferences:</p>
+<p><strong>SQL Server (T-SQL)</strong></p>
+<ul class="simple">
+<li><p>Uppercase keywords: <code class="docutils literal notranslate"><span class="pre">true</span></code></p></li>
+<li><p>Quote identifiers: <code class="docutils literal notranslate"><span class="pre">[brackets]</span></code></p></li>
+</ul>
+<p><strong>PostgreSQL</strong></p>
+<ul class="simple">
+<li><p>Uppercase keywords: <code class="docutils literal notranslate"><span class="pre">false</span></code></p></li>
+<li><p>Quote identifiers: <code class="docutils literal notranslate"><span class="pre">&quot;double</span> <span class="pre">quotes&quot;</span></code> (when needed)</p></li>
+</ul>
+<p><strong>MySQL</strong></p>
+<ul class="simple">
+<li><p>Uppercase keywords: varies</p></li>
+<li><p>Quote identifiers: <code class="docutils literal notranslate"><span class="pre">backticks</span></code> (when needed)</p></li>
+</ul>
+<p><strong>Oracle (PL/SQL)</strong></p>
+<ul class="simple">
+<li><p>Uppercase keywords: <code class="docutils literal notranslate"><span class="pre">true</span></code></p></li>
+<li><p>Quote identifiers: <code class="docutils literal notranslate"><span class="pre">&quot;double</span> <span class="pre">quotes&quot;</span></code></p></li>
+</ul>
+<p><strong>SQLite</strong></p>
+<ul class="simple">
+<li><p>Uppercase keywords: <code class="docutils literal notranslate"><span class="pre">false</span></code></p></li>
+<li><p>Quote identifiers: minimal</p></li>
+</ul>
+</section>
+<section id="locations">
+<h2>Locations<a class="headerlink" href="#locations" title="Link to this heading">#</a></h2>
+<dl>
+<dt><strong>User Rulebooks</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">~/.sqltidy/rulebooks/sqltidy_{dialect}.json</span></code></p>
+<p>Customizations stored here take precedence.</p>
+</dd>
+<dt><strong>Bundled Rulebooks</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">{package}/sqltidy/rulebooks/sqltidy_{dialect}.json</span></code></p>
+<p>Package defaults used when no user rulebook exists.</p>
+</dd>
+<dt><strong>Auto-Generated</strong></dt><dd><p>When no file exists, generated from rule metadata on-demand.</p>
+</dd>
+</dl>
+</section>
+<section id="api-reference">
+<h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+</tbody>
+</table>
+</div>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="tidy.html"><span class="doc">sqltidy tidy - Format SQL Files</span></a> - Apply rulebook formatting</p></li>
+<li><p><a class="reference internal" href="rewrite.html"><span class="doc">sqltidy rewrite - Transform SQL Structure</span></a> - Apply rulebook transformations</p></li>
+<li><p><a class="reference internal" href="rules.html"><span class="doc">sqltidy rules - Manage Custom Rules</span></a> - Manage custom rule plugins</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="rewrite.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rewrite</span></code> - Transform SQL Structure</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="rules.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rules</span></code> - Manage Custom Rules</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#synopsis">Synopsis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#description">Description</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subcommands">Subcommands</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create"><code class="docutils literal notranslate"><span class="pre">create</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#list"><code class="docutils literal notranslate"><span class="pre">list</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#edit"><code class="docutils literal notranslate"><span class="pre">edit</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reset"><code class="docutils literal notranslate"><span class="pre">reset</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sync"><code class="docutils literal notranslate"><span class="pre">sync</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rulebook-structure">Rulebook Structure</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dialect-defaults">Dialect Defaults</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#locations">Locations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See Also</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Jayden Rasband.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,973 @@
+
+<!DOCTYPE html>
+
+
+<html lang="python" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>sqltidy dialects - Explore SQL Dialects &#8212; SQLTidy unknown documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=19a9095c"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'cli/dialects';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="sqltidy rules - Manage Custom Rules" href="rules.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="python"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">SQLTidy unknown documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    CLI Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jrasband-dev/sqltidy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/sqltidy/" title="Pypi" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Pypi</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.linkedin.com/in/jayden-rasband-303449133/" title="LinkedIn" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-linkedin fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">LinkedIn</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    CLI Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jrasband-dev/sqltidy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/sqltidy/" title="Pypi" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Pypi</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.linkedin.com/in/jayden-rasband-303449133/" title="LinkedIn" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-linkedin fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">LinkedIn</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Commands:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="tidy.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">tidy</span></code> - Format SQL Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rewrite.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rewrite</span></code> - Transform SQL Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rulebooks.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rulebooks</span></code> - Manage Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rules.html"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rules</span></code> - Manage Custom Rules</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">dialects</span></code> - Explore SQL Dialects</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">CLI Reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><code...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="sqltidy-dialects-explore-sql-dialects">
+<h1><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">dialects</span></code> - Explore SQL Dialects<a class="headerlink" href="#sqltidy-dialects-explore-sql-dialects" title="Link to this heading">#</a></h1>
+<p>Explore supported SQL dialects and their keywords, data types, and functions.</p>
+<section id="synopsis">
+<h2>Synopsis<a class="headerlink" href="#synopsis" title="Link to this heading">#</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>dialects<span class="w"> </span><span class="o">{</span>list,keywords,datatypes,functions<span class="o">}</span><span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Link to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">dialects</span></code> command helps you understand dialect-specific SQL features.
+Use it to:</p>
+<ul class="simple">
+<li><p>See which dialects are supported</p></li>
+<li><p>View keywords for a specific dialect</p></li>
+<li><p>List data types available in a dialect</p></li>
+<li><p>Browse built-in functions</p></li>
+</ul>
+</section>
+<section id="subcommands">
+<h2>Subcommands<a class="headerlink" href="#subcommands" title="Link to this heading">#</a></h2>
+<section id="list">
+<h3><code class="docutils literal notranslate"><span class="pre">list</span></code><a class="headerlink" href="#list" title="Link to this heading">#</a></h3>
+<p>List all supported SQL dialects.</p>
+<p><strong>Synopsis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>dialects<span class="w"> </span>list<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Options:</strong></p>
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">{table,json}</span></code></dt><dd><p>Output format.</p>
+<p><strong>Default:</strong> <code class="docutils literal notranslate"><span class="pre">table</span></code></p>
+</dd>
+</dl>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Table format</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>list
+
+<span class="c1"># JSON format</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>list<span class="w"> </span>--format<span class="w"> </span>json
+</pre></div>
+</div>
+<p><strong>Output Example (table):</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Supported SQL Dialects
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Dialect       Description
+─────────────────────────────────────────────
+sqlserver     Microsoft SQL Server (T-SQL)
+postgresql    PostgreSQL
+mysql         MySQL / MariaDB
+oracle        Oracle Database (PL/SQL)
+sqlite        SQLite
+</pre></div>
+</div>
+<p><strong>Output Example (json):</strong></p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sqlserver&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Microsoft SQL Server (T-SQL)&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;postgresql&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PostgreSQL&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mysql&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MySQL / MariaDB&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oracle&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Oracle Database (PL/SQL)&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sqlite&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SQLite&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="keywords">
+<h3><code class="docutils literal notranslate"><span class="pre">keywords</span></code><a class="headerlink" href="#keywords" title="Link to this heading">#</a></h3>
+<p>Show SQL keywords for a specific dialect.</p>
+<p><strong>Synopsis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>dialects<span class="w"> </span>keywords<span class="w"> </span>DIALECT<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Arguments:</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">DIALECT</span></code></dt><dd><p>Dialect name: <code class="docutils literal notranslate"><span class="pre">sqlserver</span></code>, <code class="docutils literal notranslate"><span class="pre">postgresql</span></code>, <code class="docutils literal notranslate"><span class="pre">mysql</span></code>, <code class="docutils literal notranslate"><span class="pre">oracle</span></code>, or <code class="docutils literal notranslate"><span class="pre">sqlite</span></code>.</p>
+</dd>
+</dl>
+<p><strong>Options:</strong></p>
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">{table,json}</span></code></dt><dd><p>Output format.</p>
+<p><strong>Default:</strong> <code class="docutils literal notranslate"><span class="pre">table</span></code></p>
+</dd>
+</dl>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># View PostgreSQL keywords</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>keywords<span class="w"> </span>postgresql
+
+<span class="c1"># JSON format</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>keywords<span class="w"> </span>sqlserver<span class="w"> </span>--format<span class="w"> </span>json
+
+<span class="c1"># Pipe to search</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>keywords<span class="w"> </span>mysql<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;table&quot;</span>
+</pre></div>
+</div>
+<p><strong>Output Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>SQL Keywords for POSTGRESQL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Total keywords: 472
+
+SELECT     FROM       WHERE      GROUP      ORDER
+BY         AS         JOIN       LEFT       RIGHT
+INNER      OUTER      CROSS      ON         USING
+AND        OR         NOT        IN         EXISTS
+BETWEEN    LIKE       ILIKE      CASE       WHEN
+THEN       ELSE       END        IS         NULL
+...
+</pre></div>
+</div>
+</section>
+<section id="datatypes">
+<h3><code class="docutils literal notranslate"><span class="pre">datatypes</span></code><a class="headerlink" href="#datatypes" title="Link to this heading">#</a></h3>
+<p>Show data types for a specific dialect.</p>
+<p><strong>Synopsis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>dialects<span class="w"> </span>datatypes<span class="w"> </span>DIALECT<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Arguments:</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">DIALECT</span></code></dt><dd><p>Dialect name.</p>
+</dd>
+</dl>
+<p><strong>Options:</strong></p>
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">{table,json}</span></code></dt><dd><p>Output format.</p>
+<p><strong>Default:</strong> <code class="docutils literal notranslate"><span class="pre">table</span></code></p>
+</dd>
+</dl>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># View SQL Server data types</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>datatypes<span class="w"> </span>sqlserver
+
+<span class="c1"># Compare dialects</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>datatypes<span class="w"> </span>postgresql<span class="w"> </span>&gt;<span class="w"> </span>pg_types.txt
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>datatypes<span class="w"> </span>mysql<span class="w"> </span>&gt;<span class="w"> </span>mysql_types.txt
+diff<span class="w"> </span>pg_types.txt<span class="w"> </span>mysql_types.txt
+</pre></div>
+</div>
+<p><strong>Output Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Data Types for SQLSERVER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Total data types: 34
+
+Numeric Types:
+  INT, BIGINT, SMALLINT, TINYINT, DECIMAL,
+  NUMERIC, FLOAT, REAL, MONEY, SMALLMONEY
+
+String Types:
+  VARCHAR, NVARCHAR, CHAR, NCHAR, TEXT,
+  NTEXT
+
+Date/Time Types:
+  DATETIME, DATETIME2, DATE, TIME,
+  SMALLDATETIME, DATETIMEOFFSET
+
+Binary Types:
+  VARBINARY, BINARY, IMAGE
+
+Other Types:
+  BIT, UNIQUEIDENTIFIER, XML, GEOGRAPHY,
+  GEOMETRY, HIERARCHYID, SQL_VARIANT
+</pre></div>
+</div>
+</section>
+<section id="functions">
+<h3><code class="docutils literal notranslate"><span class="pre">functions</span></code><a class="headerlink" href="#functions" title="Link to this heading">#</a></h3>
+<p>Show built-in functions for a specific dialect.</p>
+<p><strong>Synopsis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqltidy<span class="w"> </span>dialects<span class="w"> </span>functions<span class="w"> </span>DIALECT<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Arguments:</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">DIALECT</span></code></dt><dd><p>Dialect name.</p>
+</dd>
+</dl>
+<p><strong>Options:</strong></p>
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">{table,json}</span></code></dt><dd><p>Output format.</p>
+<p><strong>Default:</strong> <code class="docutils literal notranslate"><span class="pre">table</span></code></p>
+</dd>
+</dl>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># View Oracle functions</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>functions<span class="w"> </span>oracle
+
+<span class="c1"># JSON output</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>functions<span class="w"> </span>postgresql<span class="w"> </span>--format<span class="w"> </span>json
+
+<span class="c1"># Search for specific functions</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>functions<span class="w"> </span>mysql<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;date&quot;</span>
+</pre></div>
+</div>
+<p><strong>Output Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Built-in Functions for POSTGRESQL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Total functions: 238
+
+String Functions:
+  CONCAT, SUBSTRING, UPPER, LOWER, TRIM,
+  LTRIM, RTRIM, LENGTH, POSITION, REPLACE
+
+Numeric Functions:
+  ABS, CEIL, FLOOR, ROUND, TRUNC, MOD,
+  POWER, SQRT, EXP, LN, LOG
+
+Date/Time Functions:
+  NOW, CURRENT_DATE, CURRENT_TIME,
+  CURRENT_TIMESTAMP, DATE_TRUNC, EXTRACT,
+  AGE, DATE_PART
+
+Aggregate Functions:
+  COUNT, SUM, AVG, MIN, MAX, ARRAY_AGG,
+  STRING_AGG, JSON_AGG
+
+Window Functions:
+  ROW_NUMBER, RANK, DENSE_RANK, NTILE,
+  LAG, LEAD, FIRST_VALUE, LAST_VALUE
+</pre></div>
+</div>
+</section>
+</section>
+<section id="dialect-differences">
+<h2>Dialect Differences<a class="headerlink" href="#dialect-differences" title="Link to this heading">#</a></h2>
+<section id="sql-server-t-sql">
+<h3>SQL Server (T-SQL)<a class="headerlink" href="#sql-server-t-sql" title="Link to this heading">#</a></h3>
+<p><strong>Key Features:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TOP</span></code> clause for limiting results</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[]</span></code> brackets for quoting identifiers</p></li>
+<li><p>Rich date functions: <code class="docutils literal notranslate"><span class="pre">GETDATE()</span></code>, <code class="docutils literal notranslate"><span class="pre">DATEADD()</span></code>, <code class="docutils literal notranslate"><span class="pre">DATEDIFF()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ISNULL()</span></code> for null handling</p></li>
+<li><p>Window functions with <code class="docutils literal notranslate"><span class="pre">OVER</span></code> clause</p></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- Top N rows</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">TOP</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">users</span>
+
+<span class="c1">-- Quoted identifiers</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="p">[</span><span class="k">User</span><span class="w"> </span><span class="n">Name</span><span class="p">]</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="p">[</span><span class="n">My</span><span class="w"> </span><span class="k">Table</span><span class="p">]</span>
+
+<span class="c1">-- Date functions</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">GETDATE</span><span class="p">(),</span><span class="w"> </span><span class="n">DATEADD</span><span class="p">(</span><span class="k">day</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="n">OrderDate</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="postgresql">
+<h3>PostgreSQL<a class="headerlink" href="#postgresql" title="Link to this heading">#</a></h3>
+<p><strong>Key Features:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LIMIT</span></code> and <code class="docutils literal notranslate"><span class="pre">OFFSET</span></code> for pagination</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code> double quotes for quoting (when needed)</p></li>
+<li><p>Advanced JSON/JSONB support</p></li>
+<li><p>Array types and functions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ILIKE</span></code> for case-insensitive matching</p></li>
+<li><p>Rich text search capabilities</p></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- Limit/offset</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="k">OFFSET</span><span class="w"> </span><span class="mi">20</span>
+
+<span class="c1">-- Case-insensitive search</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">ILIKE</span><span class="w"> </span><span class="s1">&#39;%john%&#39;</span>
+
+<span class="c1">-- JSON operations</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="k">data</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;name&#39;</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">json_table</span>
+
+<span class="c1">-- Arrays</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="nb">ARRAY</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="mysql">
+<h3>MySQL<a class="headerlink" href="#mysql" title="Link to this heading">#</a></h3>
+<p><strong>Key Features:</strong></p>
+<ul class="simple">
+<li><p>Backticks for quoting identifiers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LIMIT</span></code> with optional <code class="docutils literal notranslate"><span class="pre">OFFSET</span></code></p></li>
+<li><p>Auto-increment with <code class="docutils literal notranslate"><span class="pre">AUTO_INCREMENT</span></code></p></li>
+<li><p>String concatenation with <code class="docutils literal notranslate"><span class="pre">CONCAT()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IFNULL()</span></code> and <code class="docutils literal notranslate"><span class="pre">COALESCE()</span></code></p></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- Backtick identifiers</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">`</span><span class="k">user</span><span class="o">-</span><span class="n">name</span><span class="o">`</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="o">`</span><span class="n">my</span><span class="w"> </span><span class="k">table</span><span class="o">`</span>
+
+<span class="c1">-- Auto-increment</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="nb">INT</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">)</span>
+
+<span class="c1">-- String functions</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">CONCAT</span><span class="p">(</span><span class="n">first_name</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="w"> </span><span class="n">last_name</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">full_name</span>
+</pre></div>
+</div>
+</section>
+<section id="oracle-pl-sql">
+<h3>Oracle (PL/SQL)<a class="headerlink" href="#oracle-pl-sql" title="Link to this heading">#</a></h3>
+<p><strong>Key Features:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ROWNUM</span></code> for row limiting</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DUAL</span></code> dummy table</p></li>
+<li><p>Rich date arithmetic</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NVL()</span></code> for null handling</p></li>
+<li><p>Hierarchical queries with <code class="docutils literal notranslate"><span class="pre">CONNECT</span> <span class="pre">BY</span></code></p></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- Row limiting</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">ROWNUM</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">10</span>
+
+<span class="c1">-- Dual table</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">SYSDATE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">DUAL</span>
+
+<span class="c1">-- Hierarchical query</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">employees</span>
+<span class="k">CONNECT</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">PRIOR</span><span class="w"> </span><span class="n">employee_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">manager_id</span>
+<span class="k">START</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">manager_id</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span>
+</pre></div>
+</div>
+</section>
+<section id="sqlite">
+<h3>SQLite<a class="headerlink" href="#sqlite" title="Link to this heading">#</a></h3>
+<p><strong>Key Features:</strong></p>
+<ul class="simple">
+<li><p>Minimal data types (dynamic typing)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LIMIT</span></code> with optional <code class="docutils literal notranslate"><span class="pre">OFFSET</span></code></p></li>
+<li><p>Limited built-in functions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AUTOINCREMENT</span></code> for primary keys</p></li>
+<li><p>Lightweight and embedded</p></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- Limit</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="k">OFFSET</span><span class="w"> </span><span class="mi">5</span>
+
+<span class="c1">-- Auto-increment</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="nb">INTEGER</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="n">AUTOINCREMENT</span><span class="p">)</span>
+
+<span class="c1">-- Date functions (limited)</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">datetime</span><span class="p">(</span><span class="s1">&#39;now&#39;</span><span class="p">),</span><span class="w"> </span><span class="nb">date</span><span class="p">(</span><span class="s1">&#39;now&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="use-cases">
+<h2>Use Cases<a class="headerlink" href="#use-cases" title="Link to this heading">#</a></h2>
+<section id="migration-planning">
+<h3>Migration Planning<a class="headerlink" href="#migration-planning" title="Link to this heading">#</a></h3>
+<p>Compare keywords and functions between dialects:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compare keywords</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>keywords<span class="w"> </span>sqlserver<span class="w"> </span>&gt;<span class="w"> </span>sqlserver_keywords.txt
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>keywords<span class="w"> </span>postgresql<span class="w"> </span>&gt;<span class="w"> </span>postgresql_keywords.txt
+diff<span class="w"> </span>sqlserver_keywords.txt<span class="w"> </span>postgresql_keywords.txt
+</pre></div>
+</div>
+</section>
+<section id="learning">
+<h3>Learning<a class="headerlink" href="#learning" title="Link to this heading">#</a></h3>
+<p>Explore unfamiliar dialects:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Learn Oracle functions</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>functions<span class="w"> </span>oracle<span class="w"> </span><span class="p">|</span><span class="w"> </span>less
+
+<span class="c1"># Search for specific capability</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>functions<span class="w"> </span>postgresql<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;json&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="validation">
+<h3>Validation<a class="headerlink" href="#validation" title="Link to this heading">#</a></h3>
+<p>Check if a keyword/function exists in a dialect:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Does PostgreSQL have ISNULL?</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>functions<span class="w"> </span>postgresql<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;isnull&quot;</span>
+
+<span class="c1"># What about IFNULL?</span>
+sqltidy<span class="w"> </span>dialects<span class="w"> </span>functions<span class="w"> </span>mysql<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;ifnull&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="api-reference">
+<h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+</tbody>
+</table>
+</div>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_dialect</span></code></p></td>
+<td><p>Get a dialect by name.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_dialects</span></code></p></td>
+<td><p>List all registered dialect names.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_dialect_available</span></code></p></td>
+<td><p>Check if a dialect is available.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><span class="xref std std-doc">../dialects</span> - Dialect system architecture</p></li>
+<li><p><a class="reference internal" href="tidy.html"><span class="doc">sqltidy tidy - Format SQL Files</span></a> - Format with dialect-specific rules</p></li>
+<li><p><a class="reference internal" href="rulebooks.html"><span class="doc">sqltidy rulebooks - Manage Configuration</span></a> - Dialect-specific configuration</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="rules.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">sqltidy</span> <span class="pre">rules</span></code> - Manage Custom Rules</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#synopsis">Synopsis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#description">Description</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subcommands">Subcommands</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#list"><code class="docutils literal notranslate"><span class="pre">list</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#keywords"><code class="docutils literal notranslate"><span class="pre">keywords</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#datatypes"><code class="docutils literal notranslate"><span class="pre">datatypes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#functions"><code class="docutils literal notranslate"><span class="pre">functions</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dialect-differences">Dialect Differences</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sql-server-t-sql">SQL Server (T-SQL)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#postgresql">PostgreSQL</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mysql">MySQL</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#oracle-pl-sql">Oracle (PL/SQL)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sqlite">SQLite</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#use-cases">Use Cases</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#migration-planning">Migration Planning</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#learning">Learning</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#validation">Validation</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See Also</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Jayden Rasband.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
