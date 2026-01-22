@@ -1,9 +1,7 @@
 SQLTidy Documentation
 ======================
 
-Welcome to the SQLTidy documentation! SQLTidy is a Python library for formatting and tidying SQL scripts.
-
-**SQLTidy** makes it easy to format and clean up your SQL code with customizable rules and plugins.
+Welcome to SQLTidy! A powerful Python tool for formatting and tidying SQL scripts across multiple database dialects.
 
 .. toctree::
    :maxdepth: 2
@@ -11,6 +9,7 @@ Welcome to the SQLTidy documentation! SQLTidy is a Python library for formatting
 
    getting_started
    overview
+   cli/index
    api
    dialects
    rules
@@ -20,39 +19,44 @@ Welcome to the SQLTidy documentation! SQLTidy is a Python library for formatting
 Quick Start
 -----------
 
-Installation
-~~~~~~~~~~~~
-
-Install SQLTidy using pip:
+**Installation**
 
 .. code-block:: bash
 
    pip install sqltidy
 
-Basic Usage
-~~~~~~~~~~~
+**Command Line**
 
-Format a SQL string:
+Format SQL files from your terminal:
+
+.. code-block:: bash
+
+   sqltidy tidy myfile.sql
+   sqltidy tidy "SQL Files" -r --pattern "*.sql"
+
+See the :doc:`cli/index` for complete command reference.
+
+**Python API**
+
+Use SQLTidy programmatically in your code:
 
 .. code-block:: python
 
-   from sqltidy import format_sql
+   from sqltidy import tidy_sql
    
    sql = "SELECT * FROM users WHERE age > 18"
-   formatted = format_sql(sql)
+   formatted = tidy_sql(sql)
    print(formatted)
 
-Features
---------
+See the :doc:`api` for detailed API documentation.
 
-- **Easy to Use**: Simple API for formatting SQL
-- **Extensible**: Register custom plugins at runtime
-- **Configurable**: Customize formatting behavior with configuration objects
-- **Fast**: Efficient tokenization and formatting
+Key Features
+------------
 
-.. note::
-
-   For more details, see the :doc:`getting_started` guide.
+- **Multi-Dialect Support**: SQL Server, PostgreSQL, MySQL, Oracle, SQLite
+- **Flexible Formatting**: Tidy (format) and Rewrite (transform) rules
+- **Extensible**: Create custom rules and plugins
+- **CLI & API**: Use from command line or Python code
 
 Indices and tables
 ==================

@@ -6,13 +6,13 @@ is focused on a single, simple matching operation.
 """
 
 from typing import List, Optional, Callable, Set, TYPE_CHECKING
-from . import Pattern, MatchResult, MatchContext
+from . import Construct, MatchResult, MatchContext
 
 if TYPE_CHECKING:
     from sqltidy.tokenizer import TokenType, GroupType
 
 
-class TokenPattern(Pattern):
+class TokenPattern(Construct):
     """Match a token by predicate function."""
 
     def __init__(self, predicate: Callable, name: Optional[str] = None):
@@ -46,7 +46,7 @@ class TokenPattern(Pattern):
         return MatchResult(success=False)
 
 
-class KeywordPattern(Pattern):
+class KeywordPattern(Construct):
     """Match a specific SQL keyword (case-insensitive)."""
 
     def __init__(self, keyword: str, name: Optional[str] = None):
@@ -84,7 +84,7 @@ class KeywordPattern(Pattern):
         return MatchResult(success=False)
 
 
-class KeywordSetPattern(Pattern):
+class KeywordSetPattern(Construct):
     """Match any keyword from a set."""
 
     def __init__(self, keywords: Set[str], name: Optional[str] = None):
@@ -123,7 +123,7 @@ class KeywordSetPattern(Pattern):
         return MatchResult(success=False)
 
 
-class IdentifierPattern(Pattern):
+class IdentifierPattern(Construct):
     """Match an identifier token."""
 
     def match(self, context: MatchContext) -> MatchResult:
@@ -147,7 +147,7 @@ class IdentifierPattern(Pattern):
         return MatchResult(success=False)
 
 
-class TokenTypePattern(Pattern):
+class TokenTypePattern(Construct):
     """Match a token of a specific type."""
 
     def __init__(self, token_type: "TokenType", name: Optional[str] = None):
@@ -181,7 +181,7 @@ class TokenTypePattern(Pattern):
         return MatchResult(success=False)
 
 
-class GroupTypePattern(Pattern):
+class GroupTypePattern(Construct):
     """Match a token group of a specific type."""
 
     def __init__(self, group_type: "GroupType", name: Optional[str] = None):
@@ -215,10 +215,10 @@ class GroupTypePattern(Pattern):
         return MatchResult(success=False)
 
 
-class SequencePattern(Pattern):
+class SequencePattern(Construct):
     """Match a sequence of patterns in order."""
 
-    def __init__(self, patterns: List[Pattern], name: Optional[str] = None):
+    def __init__(self, patterns: List[Construct], name: Optional[str] = None):
         """
         Initialize a sequence pattern.
 
@@ -252,10 +252,10 @@ class SequencePattern(Pattern):
         )
 
 
-class OptionalPattern(Pattern):
+class OptionalPattern(Construct):
     """Match a pattern optionally (always succeeds)."""
 
-    def __init__(self, pattern: Pattern, name: Optional[str] = None):
+    def __init__(self, pattern: Construct, name: Optional[str] = None):
         """
         Initialize an optional pattern.
 
@@ -282,12 +282,12 @@ class OptionalPattern(Pattern):
         )
 
 
-class OneOrMorePattern(Pattern):
+class OneOrMorePattern(Construct):
     """Match a pattern one or more times."""
 
     def __init__(
         self,
-        pattern: Pattern,
+        pattern: Construct,
         name: Optional[str] = None,
         max_matches: Optional[int] = None,
     ):
@@ -332,12 +332,12 @@ class OneOrMorePattern(Pattern):
         )
 
 
-class ZeroOrMorePattern(Pattern):
+class ZeroOrMorePattern(Construct):
     """Match a pattern zero or more times."""
 
     def __init__(
         self,
-        pattern: Pattern,
+        pattern: Construct,
         name: Optional[str] = None,
         max_matches: Optional[int] = None,
     ):
@@ -379,10 +379,10 @@ class ZeroOrMorePattern(Pattern):
         )
 
 
-class AlternativePattern(Pattern):
+class AlternativePattern(Construct):
     """Match one of several alternative patterns."""
 
-    def __init__(self, patterns: List[Pattern], name: Optional[str] = None):
+    def __init__(self, patterns: List[Construct], name: Optional[str] = None):
         """
         Initialize an alternative pattern.
 
@@ -405,12 +405,12 @@ class AlternativePattern(Pattern):
         return MatchResult(success=False)
 
 
-class UntilPattern(Pattern):
+class UntilPattern(Construct):
     """Match tokens until a stop pattern is found."""
 
     def __init__(
         self,
-        stop_pattern: Pattern,
+        stop_pattern: Construct,
         include_stop: bool = False,
         name: Optional[str] = None,
     ):
@@ -454,13 +454,13 @@ class UntilPattern(Pattern):
         )
 
 
-class BetweenPattern(Pattern):
+class BetweenPattern(Construct):
     """Match tokens between start and end patterns."""
 
     def __init__(
         self,
-        start_pattern: Pattern,
-        end_pattern: Pattern,
+        start_pattern: Construct,
+        end_pattern: Construct,
         include_delimiters: bool = True,
         name: Optional[str] = None,
     ):
@@ -530,7 +530,7 @@ class BetweenPattern(Pattern):
         )
 
 
-class WhitespacePattern(Pattern):
+class WhitespacePattern(Construct):
     """Match whitespace or newline tokens."""
 
     def __init__(self, optional: bool = True, name: Optional[str] = None):

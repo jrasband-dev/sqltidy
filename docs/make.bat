@@ -1,45 +1,35 @@
 @ECHO OFF
+
+pushd %~dp0
+
 REM Command file for Sphinx documentation
 
 if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
-set BUILDDIR=_build
-set ALLSPHINXOPTS=-d %BUILDDIR%/doctrees %SPHINXOPTS%
+set SOURCEDIR=source
+set BUILDDIR=build
 
-if NOT "%PAPER%" == "" (
-	set ALLSPHINXOPTS=%ALLSPHINXOPTS% -D latex_paper_size=%PAPER%
-)
-
-if "%1" == "" goto targets
-
-if "%1" == "clean" (
-	for /d %%i in (%BUILDDIR%\*) do (rmdir /q /s %%i)
-	del /q /s %BUILDDIR%\*.*
-	goto end
-)
-
-if "%1" == "html" (
-	%SPHINXBUILD% -b html %ALLSPHINXOPTS% . %BUILDDIR%\html
-	if errorlevel 1 exit /b 1
+%SPHINXBUILD% >NUL 2>NUL
+if errorlevel 9009 (
 	echo.
-	echo.Build finished. The HTML documentation is in %BUILDDIR%\html.
-	goto end
+	echo.The 'sphinx-build' command was not found. Make sure you have Sphinx
+	echo.installed, then set the SPHINXBUILD environment variable to point
+	echo.to the full path of the 'sphinx-build' executable. Alternatively you
+	echo.may add the Sphinx directory to PATH.
+	echo.
+	echo.If you don't have Sphinx installed, grab it from
+	echo.https://www.sphinx-doc.org/
+	exit /b 1
 )
 
-if "%1" == "help" (
-	%SPHINXBUILD% -M help . %BUILDDIR%
-	goto end
-)
+if "%1" == "" goto help
 
-REM Default: route to sphinx-build
-%SPHINXBUILD% -M %1 %ALLSPHINXOPTS% . %BUILDDIR%
-
-:targets
-echo.Please use `make ^<target^>` where ^<target^> is one of
-echo.  html       to make standalone HTML files
-echo.  clean      to make a clean build
-echo.
+%SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 goto end
 
+:help
+%SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+
 :end
+popd

@@ -2,24 +2,27 @@ import argparse
 import sys
 import json
 from pathlib import Path
-from . import __version__
-from .api import tidy_sql, rewrite_sql, format_sql_folder, _format_sql
-from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
-from .generator import (
+
+from .. import __version__
+
+## Import API functions inside main() to avoid circular import
+from ..rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
+
+from ..cli.dialog import (
     create_rulebook,
     list_rulebooks,
     edit_rulebook,
     reset_rulebook,
     update_rulebook,
     load_rulebook_file,
-    get_bundled_rulebook_path,
-    get_user_rulebooks_dir,
     add_rule,
     list_rules,
     remove_rule,
 )
-from .tokenizer import tokenize_with_types, TokenType
-from .dialects.registry import list_dialects, get_dialect
+from ..utils import get_bundled_rulebook_path, get_user_rulebooks_dir
+
+from ..tokenizer import tokenize_with_types, TokenType
+from ..dialects.registry import list_dialects, get_dialect
 
 from rich.console import Console
 from rich.text import Text
@@ -134,7 +137,7 @@ def create_rulebook_from_file(rulebook_file: str) -> SQLTidyConfig:
 
         # If path is None, auto-generate from rules
         if resolved_path is None:
-            from .config_schema import generate_dialect_config
+            from ..config_schema import generate_dialect_config
 
             # Extract dialect from rulebook_file (should be a dialect name)
             dialect = (
@@ -152,6 +155,8 @@ def create_rulebook_from_file(rulebook_file: str) -> SQLTidyConfig:
 
 
 def handle_tidy_command(args):
+    from ..api import tidy_sql, tidy_engine
+
     """Handle the tidy command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else "sqlserver"
     config = create_rulebook_from_file(dialect)
@@ -246,7 +251,7 @@ def handle_tidy_command(args):
                             with open(file_path, "r", encoding="utf-8") as f:
                                 sql = f.read()
 
-                            result = _format_sql(
+                            result = tidy_engine(
                                 sql,
                                 config=config,
                                 rule_type="tidy",
@@ -400,6 +405,8 @@ def handle_tidy_command(args):
 
 
 def handle_rewrite_command(args):
+    from ..api import tidy_sql, rewrite_sql, tidy_engine, format_sql_folder
+
     """Handle the rewrite command for file, folder, or stdin input."""
     dialect = args.dialect if args.dialect else "sqlserver"
     config = create_rulebook_from_file(dialect)
@@ -414,8 +421,14 @@ def handle_rewrite_command(args):
             ):
                 with open(args.input, "r", encoding="utf-8") as f:
                     sql = f.read()
-                formatted_sql = rewrite_sql(sql, config=config)
 
+                formatted_sql = rewrite_sql(sql, config=config)
+                if hasattr(formatted_sql, "to_string") and callable(
+                    getattr(formatted_sql, "to_string", None)
+                ):
+                    formatted_sql = formatted_sql.to_string()
+                elif not isinstance(formatted_sql, str):
+                    formatted_sql = str(formatted_sql)
                 if args.tidy:
                     formatted_sql = tidy_sql(formatted_sql, config=config)
 
@@ -424,15 +437,33 @@ def handle_rewrite_command(args):
             if args.output:
                 output_path = Path(args.output)
                 output_path.parent.mkdir(parents=True, exist_ok=True)
+                if hasattr(formatted_sql, "to_string") and callable(
+                    getattr(formatted_sql, "to_string", None)
+                ):
+                    formatted_sql = formatted_sql.to_string()
+                elif not isinstance(formatted_sql, str):
+                    formatted_sql = str(formatted_sql)
                 with open(output_path, "w", encoding="utf-8") as f:
                     f.write(formatted_sql)
                 console.print(f"[dim]Saved to:[/dim] [cyan]{output_path}[/cyan]")
             elif args.no_in_place:
+                if hasattr(formatted_sql, "to_string") and callable(
+                    getattr(formatted_sql, "to_string", None)
+                ):
+                    formatted_sql = formatted_sql.to_string()
+                elif not isinstance(formatted_sql, str):
+                    formatted_sql = str(formatted_sql)
                 print(formatted_sql)
             else:
                 # Default: output to Cleaned folder
                 output_path = input_path.parent / "Cleaned" / input_path.name
                 output_path.parent.mkdir(parents=True, exist_ok=True)
+                if hasattr(formatted_sql, "to_string") and callable(
+                    getattr(formatted_sql, "to_string", None)
+                ):
+                    formatted_sql = formatted_sql.to_string()
+                elif not isinstance(formatted_sql, str):
+                    formatted_sql = str(formatted_sql)
                 with open(output_path, "w", encoding="utf-8") as f:
                     f.write(formatted_sql)
                 console.print(f"[dim]Saved to:[/dim] [cyan]{output_path}[/cyan]")
@@ -497,7 +528,7 @@ def handle_rewrite_command(args):
                             with open(file_path, "r", encoding="utf-8") as f:
                                 sql = f.read()
 
-                            result = _format_sql(
+                            result = tidy_engine(
                                 sql,
                                 config=config,
                                 rule_type="rewrite",
@@ -525,7 +556,7 @@ def handle_rewrite_command(args):
                                         results["all_rewrite_rules"].add(rule["name"])
 
                             if args.tidy:
-                                tidy_result = _format_sql(
+                                tidy_result = tidy_engine(
                                     formatted_sql,
                                     config=config,
                                     rule_type="tidy",
@@ -725,10 +756,7 @@ def handle_rewrite_command(args):
 
 def handle_pattern_command(args):
     """Handle the pattern command to show information about SQL patterns."""
-    from .patterns import get_all_patterns
-    from .dialects import get_dialect
-
-    # Import pattern_tokenizer to ensure patterns are registered
+    from ..dialects import get_dialect
 
     # List subcommand
     if args.patterns_command == "list":
@@ -741,54 +769,44 @@ def handle_pattern_command(args):
                 print(f"Error: {e}", file=sys.stderr)
                 sys.exit(1)
 
-        # Get all patterns
-        global_patterns = get_all_patterns()
-
-        # Get dialect-specific patterns
-        dialect_patterns = []
+        # Get constructs from dialects
+        all_patterns = []
         dialect_patterns_by_dialect = {}
 
         if dialect_obj:
-            # Get patterns for specific dialect
-            dialect_patterns = dialect_obj.get_patterns()
-            all_patterns = global_patterns + dialect_patterns
-            title = f"Patterns for {dialect_obj.name.upper()}"
+            # Get constructs for specific dialect
+            all_patterns = dialect_obj.get_constructs()
+            title = f"Constructs for {dialect_obj.name.upper()}"
         else:
-            # Get patterns for ALL dialects
-            from .dialects.registry import list_dialects
+            # Get constructs for ALL dialects
+            from ..dialects.registry import list_dialects
 
             for dialect_name in list_dialects():
                 try:
                     d = get_dialect(dialect_name)
-                    d_patterns = d.get_patterns()
+                    d_patterns = d.get_constructs()
                     if d_patterns:
                         dialect_patterns_by_dialect[dialect_name] = d_patterns
-                        dialect_patterns.extend(d_patterns)
+                        all_patterns.extend(d_patterns)
                 except Exception as e:
                     import logging
-                    logging.debug(f"Failed to load dialect patterns: {e}")
-            all_patterns = global_patterns + dialect_patterns
-            title = "All SQL Patterns"
+
+                    logging.debug(f"Failed to load dialect constructs: {e}")
+            title = "All SQL Constructs"
 
         if args.format == "json":
             import json
 
             pattern_info = []
             for pattern in all_patterns:
-                # Determine if pattern is global or dialect-specific
-                is_global = pattern in global_patterns
+                # Determine if pattern is common or dialect-specific
+                is_common = pattern.dialect == "all"
 
-                if is_global:
-                    scope = "Global"
-                elif dialect_obj:
-                    scope = dialect_obj.name
+                if dialect_obj:
+                    scope = "Common" if is_common else dialect_obj.name
                 else:
                     # Find which dialect this pattern belongs to
-                    scope = "Unknown"
-                    for dname, dpatterns in dialect_patterns_by_dialect.items():
-                        if pattern in dpatterns:
-                            scope = dname
-                            break
+                    scope = pattern.dialect if pattern.dialect != "all" else "Common"
 
                 pattern_info.append(
                     {
@@ -805,16 +823,13 @@ def handle_pattern_command(args):
             table.add_column("Type", style="green")
 
             for pattern in all_patterns:
-                # Determine if pattern is global or dialect-specific
-                is_global = pattern in global_patterns
+                # Determine if pattern is common or dialect-specific
+                is_common = pattern.dialect == "all"
 
-                if is_global:
-                    scope = "Global"
-                elif dialect_obj:
-                    scope = dialect_obj.name
+                if dialect_obj:
+                    scope = "Common" if is_common else dialect_obj.name
                 else:
-                    # Find which dialect this pattern belongs to
-                    scope = "Unknown"
+                    scope = pattern.dialect if pattern.dialect != "all" else "Common"
                     for dname, dpatterns in dialect_patterns_by_dialect.items():
                         if pattern in dpatterns:
                             scope = dname
@@ -829,14 +844,15 @@ def handle_pattern_command(args):
 
             # Show summary
             if dialect_obj:
-                global_count = len([p for p in all_patterns if p in global_patterns])
-                dialect_count = len(dialect_patterns)
+                # Count patterns by scope
+                global_count = len([p for p in all_patterns if p.dialect == "all"])
+                dialect_count = len([p for p in all_patterns if p.dialect != "all"])
                 console.print(
                     f"\n[cyan]Total:[/cyan] {len(all_patterns)} patterns ({global_count} global + {dialect_count} {dialect_obj.name})\n"
                 )
             else:
                 # Count patterns by dialect
-                global_count = len(global_patterns)
+                global_count = len([p for p in all_patterns if p.dialect == "all"])
                 dialect_counts = {
                     dname: len(dpatterns)
                     for dname, dpatterns in dialect_patterns_by_dialect.items()
@@ -1105,6 +1121,8 @@ def handle_dialects_command(args):
 
 
 def main():
+    # Import API functions here to avoid circular import
+
     # Print logo
     print_logo()
 
@@ -1563,12 +1581,28 @@ def main():
 
         # Import semantic tokenizer components
         from sqltidy.tokenizer import SemanticLevel, TokenGroup, GroupType, Token
+        from sqltidy.tokenizer.base import group_tokens
+        from sqltidy.constructs.base import match_constructs as match_sql_constructs
 
         # Always use semantic level unless tokens-only flag is set
         level = SemanticLevel.BASIC if args.tokens_only else SemanticLevel.SEMANTIC
 
         with console.status("[cyan]Analyzing SQL...", spinner="dots"):
+            # Tokenize the SQL
             tokens = tokenize_with_types(sql, dialect=args.dialect, level=level)
+
+            # Apply semantic grouping if not in tokens-only mode
+            if level == SemanticLevel.SEMANTIC:
+                tokens = group_tokens(
+                    tokens,
+                    group_parentheses_flag=True,
+                    group_statements_flag=False,
+                    group_clauses_flag=True,
+                    dialect=args.dialect,
+                )
+
+                # Also match constructs in the raw SQL for counting
+                construct_matches = match_sql_constructs(sql, dialect=args.dialect)
 
         # Generate output
         output_lines = []
@@ -1577,54 +1611,7 @@ def main():
         # SECTION 1: PATTERNS
         # ============================================================
         if not args.tokens_only and level == SemanticLevel.SEMANTIC:
-            # Show patterns detected
-            from sqltidy.patterns import get_all_patterns
-            from sqltidy.dialects import get_dialect as get_dialect_obj
-
-            dialect_obj = get_dialect_obj(args.dialect)
-            global_patterns = get_all_patterns()
-            dialect_patterns = dialect_obj.get_patterns()
-            all_patterns = global_patterns + dialect_patterns
-            applicable_patterns = [
-                p for p in all_patterns if p.is_applicable(dialect_obj)
-            ]
-
-            use_rich = not args.output
-
-            if use_rich:
-                console.print("\n[bold magenta]═══ PATTERNS ═══[/bold magenta]")
-                console.print()
-                pattern_table = Table(
-                    title="Pattern Detection", box=box.ROUNDED, border_style="magenta"
-                )
-                pattern_table.add_column("Pattern", style="cyan")
-                pattern_table.add_column("Dialect", style="yellow")
-                pattern_table.add_column("Status", justify="center", style="green")
-
-                for pattern in all_patterns:
-                    if pattern.is_applicable(dialect_obj):
-                        scope = "Global" if pattern in global_patterns else args.dialect
-                        pattern_table.add_row(pattern.name, scope, "✓")
-
-                console.print(pattern_table)
-                console.print(
-                    f"\n[dim]{len(applicable_patterns)} patterns active ({len(global_patterns)} global + {len(dialect_patterns)} {args.dialect})[/dim]"
-                )
-            else:
-                output_lines.append("\n" + "=" * 60)
-                output_lines.append("PATTERNS")
-                output_lines.append("=" * 60)
-                output_lines.append("\n=== Pattern Detection ===")
-                for pattern in all_patterns:
-                    if pattern.is_applicable(dialect_obj):
-                        scope = "Global" if pattern in global_patterns else args.dialect
-                        output_lines.append(f"  ✓ {pattern.name} ({scope})")
-                output_lines.append(
-                    f"\n{len(applicable_patterns)} patterns active ({len(global_patterns)} global + {len(dialect_patterns)} {args.dialect})"
-                )
-
-        if not args.tokens_only and level != SemanticLevel.BASIC:
-            # Helper function to find all groups recursively
+            # Helper function to find all groups recursively (needed for construct counting)
             def find_all_groups(items, target_type):
                 results = []
                 for item in items:
@@ -1634,6 +1621,77 @@ def main():
                         results.extend(find_all_groups(item.tokens, target_type))
                 return results
 
+            # Show constructs detected
+            from sqltidy.dialects import get_dialect as get_dialect_obj
+
+            dialect_obj = get_dialect_obj(args.dialect)
+            # All constructs (common + dialect-specific) are now in the dialect
+            all_patterns = dialect_obj.get_constructs()
+            applicable_patterns = [
+                p for p in all_patterns if p.is_applicable(dialect_obj)
+            ]
+
+            use_rich = not args.output
+
+            if use_rich:
+                console.print("\n[bold magenta]═══ CONSTRUCTS ═══[/bold magenta]")
+                console.print()
+                pattern_table = Table(
+                    title="Construct Detection", box=box.ROUNDED, border_style="magenta"
+                )
+                pattern_table.add_column("Pattern", style="cyan")
+                pattern_table.add_column("Dialect", style="yellow")
+                pattern_table.add_column("Status", justify="center", style="green")
+                pattern_table.add_column("Matched", justify="right", style="blue")
+
+                # Separate common and dialect-specific constructs
+                common_constructs = [p for p in all_patterns if p.dialect == "all"]
+                dialect_constructs = [p for p in all_patterns if p.dialect != "all"]
+
+                # Count construct matches by name
+                from collections import Counter
+
+                construct_match_counts = Counter(m["name"] for m in construct_matches)
+
+                for pattern in all_patterns:
+                    if pattern.is_applicable(dialect_obj):
+                        scope = "Common" if pattern.dialect == "all" else args.dialect
+                        # Get count from regex matches
+                        count = construct_match_counts.get(pattern.name, 0)
+                        pattern_table.add_row(pattern.name, scope, "✓", str(count))
+
+                console.print(pattern_table)
+                console.print(
+                    f"\n[dim]{len(applicable_patterns)} patterns active ({len(common_constructs)} common + {len(dialect_constructs)} {args.dialect}-specific)[/dim]"
+                )
+            else:
+                output_lines.append("\n" + "=" * 60)
+                output_lines.append("PATTERNS")
+                output_lines.append("=" * 60)
+                output_lines.append("\n=== Pattern Detection ===")
+
+                # Separate common and dialect-specific constructs
+                common_constructs = [p for p in all_patterns if p.dialect == "all"]
+                dialect_constructs = [p for p in all_patterns if p.dialect != "all"]
+
+                # Count construct matches by name
+                from collections import Counter
+
+                construct_match_counts = Counter(m["name"] for m in construct_matches)
+
+                for pattern in all_patterns:
+                    if pattern.is_applicable(dialect_obj):
+                        scope = "Common" if pattern.dialect == "all" else args.dialect
+                        # Get count from regex matches
+                        count = construct_match_counts.get(pattern.name, 0)
+                        output_lines.append(
+                            f"  ✓ {pattern.name} ({scope}) - Matched: {count}"
+                        )
+                output_lines.append(
+                    f"\n{len(applicable_patterns)} patterns active ({len(common_constructs)} common + {len(dialect_constructs)} {args.dialect}-specific)"
+                )
+
+        if not args.tokens_only and level != SemanticLevel.BASIC:
             # Use Rich only if not outputting to file
             use_rich = not args.output
 

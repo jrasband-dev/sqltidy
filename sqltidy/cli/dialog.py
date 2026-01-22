@@ -1,102 +1,24 @@
-"""
-Interactive configuration generator for sqltidy.
-Generates dialect-specific config files.
-"""
-
-import json
-import os
-import shutil
-import subprocess  # nosec B404 - subprocess needed for opening files in default editor
 from pathlib import Path
 from typing import Dict, Any, Optional
-from .rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
+import json
+import shutil
 
+import subprocess  # nosec B404 - subprocess needed for opening files in default editor
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.tree import Tree
 from rich import box
 
+
+from ..rulebook import SQLTidyConfig, SUPPORTED_DIALECTS
+from ..utils import (
+    get_user_rulebooks_dir,
+    get_user_rules_dir,
+)
+
+
 console = Console()
-
-
-def get_user_rulebooks_dir() -> Path:
-    """Get the path to user's rulebook directory."""
-    return Path.home() / ".sqltidy" / "rulebooks"
-
-
-def get_bundled_rulebooks_dir() -> Path:
-    """Get the path to bundled rulebook templates."""
-    return Path(__file__).parent / "rulebooks"
-
-
-def initialize_user_rulebooks() -> None:
-    """
-    Initialize user rulebook directory.
-
-    If bundled rulebooks exist, copies them to user directory.
-    If no bundled rulebooks exist, generates them from rule metadata.
-    """
-    user_dir = get_user_rulebooks_dir()
-    bundled_dir = get_bundled_rulebooks_dir()
-
-    # Create user rulebook directory if it doesn't exist
-    user_dir.mkdir(parents=True, exist_ok=True)
-
-    # Try to copy bundled rulebooks if they exist
-    if bundled_dir.exists():
-        bundled_rulebooks = list(bundled_dir.glob("sqltidy_*.json"))
-        if bundled_rulebooks:
-            # Bundled files exist - copy them
-            for bundled_rulebook in bundled_rulebooks:
-                user_rulebook = user_dir / bundled_rulebook.name
-                if not user_rulebook.exists():
-                    shutil.copy2(bundled_rulebook, user_rulebook)
-            return
-
-    # No bundled files - generate from rules
-    from .config_schema import save_dialect_config_to_json
-
-    for dialect in SUPPORTED_DIALECTS:
-        user_rulebook = user_dir / f"sqltidy_{dialect}.json"
-        if not user_rulebook.exists():
-            save_dialect_config_to_json(
-                dialect, str(user_rulebook), include_plugins=False
-            )
-
-
-def get_rulebook_path(dialect: str) -> Path:
-    """
-    Get the path to a rulebook file, checking user directory first, then bundled.
-
-    Args:
-        dialect: SQL dialect name
-
-    Returns:
-        Path to the rulebook file (user rulebook if exists, otherwise bundled)
-    """
-    user_path = get_user_rulebooks_dir() / f"sqltidy_{dialect}.json"
-    if user_path.exists():
-        return user_path
-    return get_bundled_rulebook_path(dialect)
-
-
-def get_bundled_rulebook_path(dialect: str) -> Path:
-    """
-    Get the path to a bundled rulebook template for a specific dialect.
-
-    Args:
-        dialect: SQL dialect name
-
-    Returns:
-        Path to the bundled rulebook file
-    """
-    return get_bundled_rulebooks_dir() / f"sqltidy_{dialect}.json"
-
-
-def get_default_filename(dialect: str) -> str:
-    """Get default rulebook filename for a dialect."""
-    return f"sqltidy_{dialect}.json"
 
 
 def create_rulebook(
@@ -167,7 +89,7 @@ def create_rulebook(
                 console.print(
                     "[dim]Proceeding with auto-generation from rules...[/dim]\n"
                 )
-                from .config_schema import generate_dialect_config
+                from ..config_schema import generate_dialect_config
 
                 config_dict = generate_dialect_config(
                     dialect, include_plugins=include_plugins
@@ -175,11 +97,9 @@ def create_rulebook(
                 config = SQLTidyConfig.from_dict(config_dict)
         else:
             # Auto-generate from rules
-            from .config_schema import generate_dialect_config
+            from ..config_schema import generate_dialect_config
 
-            console.print(
-                "\n[cyan]Auto-generating config from rule metadata...[/cyan]"
-            )
+            console.print("\n[cyan]Auto-generating config from rule metadata...[/cyan]")
             if include_plugins:
                 console.print("[dim]Including plugin rules in configuration...[/dim]")
             config_dict = generate_dialect_config(
@@ -357,6 +277,7 @@ def edit_rulebook(rulebook_name: Optional[str] = None) -> None:
     """
     from rich.panel import Panel
     from rich.table import Table
+    import os
 
     user_dir = get_user_rulebooks_dir()
 
@@ -664,7 +585,7 @@ def update_rulebook(
         rulebook_name: Name of the rulebook file or dialect to update, or 'all' to update all
         include_plugins: Whether to include plugin rules in the update (default: True)
     """
-    from .config_schema import generate_dialect_config
+    from ..config_schema import generate_dialect_config
     from rich.panel import Panel
     from rich.table import Table
     from rich.tree import Tree
@@ -960,6 +881,41 @@ def update_rulebook(
         console.print("\n[yellow]Update cancelled.[/yellow]")
 
 
+def initialize_user_rulebooks() -> None:
+    """
+    Initialize user rulebook directory.
+
+    If bundled rulebooks exist, copies them to user directory.
+    If no bundled rulebooks exist, generates them from rule metadata.
+    """
+    user_dir = get_user_rulebooks_dir()
+    bundled_dir = get_bundled_rulebooks_dir()
+
+    # Create user rulebook directory if it doesn't exist
+    user_dir.mkdir(parents=True, exist_ok=True)
+
+    # Try to copy bundled rulebooks if they exist
+    if bundled_dir.exists():
+        bundled_rulebooks = list(bundled_dir.glob("sqltidy_*.json"))
+        if bundled_rulebooks:
+            # Bundled files exist - copy them
+            for bundled_rulebook in bundled_rulebooks:
+                user_rulebook = user_dir / bundled_rulebook.name
+                if not user_rulebook.exists():
+                    shutil.copy2(bundled_rulebook, user_rulebook)
+            return
+
+    # No bundled files - generate from rules
+    from ..config_schema import save_dialect_config_to_json
+
+    for dialect in SUPPORTED_DIALECTS:
+        user_rulebook = user_dir / f"sqltidy_{dialect}.json"
+        if not user_rulebook.exists():
+            save_dialect_config_to_json(
+                dialect, str(user_rulebook), include_plugins=False
+            )
+
+
 def load_rulebook_file(filepath: str) -> Dict[str, Any]:
     """
     Load rulebook from a JSON file.
@@ -975,11 +931,6 @@ def load_rulebook_file(filepath: str) -> Dict[str, Any]:
 
 
 # rule Management
-
-
-def get_user_rules_dir() -> Path:
-    """Get the path to user's rule directory."""
-    return Path.home() / ".sqltidy" / "rules"
 
 
 def add_rule(rule_file: str) -> None:
