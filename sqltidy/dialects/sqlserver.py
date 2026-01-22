@@ -20,112 +20,112 @@ class SQLServerDialect(SQLDialect):
         """Register SQL Server specific token patterns."""
         # Import at runtime to avoid circular import
         from ..tokenizer.base import TokenPattern
-        
+
         # Comments
-        self.register_token_pattern(TokenPattern(
-            name="Single Line Comment",
-            pattern=re.compile(r"--[^\n]*")
-        ))
-        self.register_token_pattern(TokenPattern(
-            name="Multi Line Comment",
-            pattern=re.compile(r"/\*[\s\S]*?\*/")
-        ))
-        
+        self.register_token_pattern(
+            TokenPattern(name="Single Line Comment", pattern=re.compile(r"--[^\n]*"))
+        )
+        self.register_token_pattern(
+            TokenPattern(
+                name="Multi Line Comment", pattern=re.compile(r"/\*[\s\S]*?\*/")
+            )
+        )
+
         # Whitespace
-        self.register_token_pattern(TokenPattern(
-            name="Newline",
-            pattern=re.compile(r"\n")
-        ))
-        self.register_token_pattern(TokenPattern(
-            name="Whitespace",
-            pattern=re.compile(r"\s+")
-        ))
-        
+        self.register_token_pattern(
+            TokenPattern(name="Newline", pattern=re.compile(r"\n"))
+        )
+        self.register_token_pattern(
+            TokenPattern(name="Whitespace", pattern=re.compile(r"\s+"))
+        )
+
         # Operators
-        self.register_token_pattern(TokenPattern(
-            name="Multi-char Operator",
-            pattern=re.compile(r"<=|>=|<>|!=")
-        ))
-        self.register_token_pattern(TokenPattern(
-            name="Single-char Punctuation",
-            pattern=re.compile(r"[(),.;\[\]*=<>+-/]")
-        ))
-        
+        self.register_token_pattern(
+            TokenPattern(name="Multi-char Operator", pattern=re.compile(r"<=|>=|<>|!="))
+        )
+        self.register_token_pattern(
+            TokenPattern(
+                name="Single-char Punctuation",
+                pattern=re.compile(r"[(),.;\[\]*=<>+-/]"),
+            )
+        )
+
         # Strings
-        self.register_token_pattern(TokenPattern(
-            name="Single-quoted String",
-            pattern=re.compile(r"'[^']*'")
-        ))
-        self.register_token_pattern(TokenPattern(
-            name="Double-quoted String",
-            pattern=re.compile(r'"[^"]*"')
-        ))
-        
+        self.register_token_pattern(
+            TokenPattern(name="Single-quoted String", pattern=re.compile(r"'[^']*'"))
+        )
+        self.register_token_pattern(
+            TokenPattern(name="Double-quoted String", pattern=re.compile(r'"[^"]*"'))
+        )
+
         # Identifiers and numbers
-        self.register_token_pattern(TokenPattern(
-            name="Identifier",
-            pattern=re.compile(r"[A-Za-z_@#][A-Za-z0-9_@#$]*")
-        ))
-        self.register_token_pattern(TokenPattern(
-            name="Number",
-            pattern=re.compile(r"[0-9]+(?:\.[0-9]+)?")
-        ))
-        self.register_token_pattern(TokenPattern(
-            name="Comma",
-            pattern=re.compile(r",")
-        ))
-        
+        self.register_token_pattern(
+            TokenPattern(
+                name="Identifier", pattern=re.compile(r"[A-Za-z_@#][A-Za-z0-9_@#$]*")
+            )
+        )
+        self.register_token_pattern(
+            TokenPattern(name="Number", pattern=re.compile(r"[0-9]+(?:\.[0-9]+)?"))
+        )
+        self.register_token_pattern(
+            TokenPattern(name="Comma", pattern=re.compile(r","))
+        )
+
         # Fallback
-        self.register_token_pattern(TokenPattern(
-            name="Fallback",
-            pattern=re.compile(r"\S")
-        ))
+        self.register_token_pattern(
+            TokenPattern(name="Fallback", pattern=re.compile(r"\S"))
+        )
 
     def _register_constructs(self):
         """Register SQL Server specific constructs."""
         # First register common constructs (CTE, WindowFunction, Subquery)
         super()._register_constructs()
-        
+
         # Then register SQL Server-specific constructs
         # JOIN_CLAUSE
-        self.register_construct(Construct(
-            name="Join Clause",
-            type="clause",
-            dialect="sqlserver",
-            pattern=re.compile(
-                r"""
+        self.register_construct(
+            Construct(
+                name="Join Clause",
+                type="clause",
+                dialect="sqlserver",
+                pattern=re.compile(
+                    r"""
             \b(?P<join_type>INNER\s+JOIN|LEFT\s+(?:OUTER\s+)?JOIN|RIGHT\s+(?:OUTER\s+)?JOIN|FULL\s+(?:OUTER\s+)?JOIN|CROSS\s+JOIN)\b\s+  # JOIN type
             (?P<table>\w+(?:\.\w+)?)\s*  # Table name (optionally schema-qualified)
             (?:(?:AS\s+)?(?P<alias>\w+))?\s*  # Optional alias (with or without AS)
             (?:ON\s+(?P<on_condition>[^\n;]+?))?  # Optional ON condition
             (?=\s*(?:WHERE|GROUP|HAVING|ORDER|UNION|EXCEPT|INTERSECT|LIMIT|OFFSET|FETCH|INNER\s+JOIN|LEFT\s+JOIN|RIGHT\s+JOIN|FULL\s+JOIN|CROSS\s+JOIN|;|\n|$)) # Lookahead for clause end
             """,
-                re.VERBOSE | re.IGNORECASE | re.MULTILINE,
-            ),
-        ))
+                    re.VERBOSE | re.IGNORECASE | re.MULTILINE,
+                ),
+            )
+        )
 
         # CASE_EXPRESSION
-        self.register_construct(Construct(
-            name="CASE_EXPRESSION",
-            type="clause",
-            dialect="sqlserver",
-            pattern=re.compile(
-                r"""
+        self.register_construct(
+            Construct(
+                name="CASE_EXPRESSION",
+                type="clause",
+                dialect="sqlserver",
+                pattern=re.compile(
+                    r"""
             ^\s*CASE\s+                             # CASE keyword
             (?P<case_body>.*?)                      # Body of CASE expression
             \s*END\s*                              # END keyword
             """,
-                re.VERBOSE | re.IGNORECASE | re.DOTALL | re.MULTILINE,
-            ),
-        ))
+                    re.VERBOSE | re.IGNORECASE | re.DOTALL | re.MULTILINE,
+                ),
+            )
+        )
 
         # TRY_CATCH
-        self.register_construct(Construct(
-            name="Try Catch",
-            type="clause",
-            dialect="sqlserver",
-            pattern=re.compile(
-                r"""
+        self.register_construct(
+            Construct(
+                name="Try Catch",
+                type="clause",
+                dialect="sqlserver",
+                pattern=re.compile(
+                    r"""
             ^\s*BEGIN\s+TRY\s+                     # BEGIN TRY
             (?P<try_block>.*?)                      # TRY block content
             \s*END\s+TRY\s+                        # END TRY
@@ -133,52 +133,59 @@ class SQLServerDialect(SQLDialect):
             (?P<catch_block>.*?)                    # CATCH block content
             \s*END\s+CATCH\s*                      # END CATCH
             """,
-                re.VERBOSE | re.IGNORECASE | re.DOTALL | re.MULTILINE,
-            ),
-        ))
+                    re.VERBOSE | re.IGNORECASE | re.DOTALL | re.MULTILINE,
+                ),
+            )
+        )
 
         # PIVOT
-        self.register_construct(Construct(
-            name="Pivot",
-            type="clause",
-            dialect="sqlserver",
-            pattern=re.compile(
-                r"""
+        self.register_construct(
+            Construct(
+                name="Pivot",
+                type="clause",
+                dialect="sqlserver",
+                pattern=re.compile(
+                    r"""
             ^\s*PIVOT\s*                           # PIVOT keyword
             \(\s*(?P<aggregate_function>.*?)\s+FOR\s+(?P<pivot_column>\w+)\s+IN\s*\((?P<values>.*?)\)\s*\) # PIVOT details
             """,
-                re.VERBOSE | re.IGNORECASE | re.MULTILINE,
-            ),
-        ))
+                    re.VERBOSE | re.IGNORECASE | re.MULTILINE,
+                ),
+            )
+        )
 
         # UNPIVOT
-        self.register_construct(Construct(
-            name="Unpivot",
-            type="clause",
-            dialect="sqlserver",
-            pattern=re.compile(
-                r"""
+        self.register_construct(
+            Construct(
+                name="Unpivot",
+                type="clause",
+                dialect="sqlserver",
+                pattern=re.compile(
+                    r"""
             ^\s*UNPIVOT\s*                         # UNPIVOT keyword
             \(\s*(?P<value_column>\w+)\s+FOR\s+(?P<pivot_column>\w+)\s+IN\s*\((?P<columns>.*?)\)\s*\) # UNPIVOT details
             """,
-                re.VERBOSE | re.IGNORECASE | re.MULTILINE,
-            ),
-        ))
+                    re.VERBOSE | re.IGNORECASE | re.MULTILINE,
+                ),
+            )
+        )
 
         # OUTPUT_CLAUSE
-        self.register_construct(Construct(
-            name="Output Clause",
-            type="clause",
-            dialect="sqlserver",
-            pattern=re.compile(
-                r"""
+        self.register_construct(
+            Construct(
+                name="Output Clause",
+                type="clause",
+                dialect="sqlserver",
+                pattern=re.compile(
+                    r"""
             ^\s*OUTPUT\s+                          # OUTPUT keyword
             (?P<output_list>.*?)                    # List of output columns
             (\s+INTO\s+(?P<into_table>\w+))?       # Optional INTO clause
             """,
-                re.VERBOSE | re.IGNORECASE | re.MULTILINE,
-            ),
-        ))
+                    re.VERBOSE | re.IGNORECASE | re.MULTILINE,
+                ),
+            )
+        )
 
     @property
     def name(self) -> str:
@@ -818,5 +825,3 @@ class SQLServerDialect(SQLDialect):
     def comment_styles(self) -> list:
         """SQL Server supports -- and /* */ comments."""
         return ["--", "/*"]
-
-

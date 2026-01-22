@@ -18,6 +18,7 @@ from ..dialects import get_dialect, SQLDialect
 
 class TokenType(Enum):
     """Token type classification."""
+
     KEYWORD = "keyword"
     IDENTIFIER = "identifier"
     STRING = "string"
@@ -32,6 +33,7 @@ class TokenType(Enum):
 
 class GroupType:
     """Constants for different types of token groups."""
+
     STATEMENT = "statement"
     CLAUSE = "clause"
     PARENTHESIS = "parenthesis"
@@ -54,6 +56,7 @@ class GroupType:
 
 class SemanticLevel(Enum):
     """Semantic processing levels for tokenization."""
+
     BASIC = "basic"
     GROUPED = "grouped"
     STRUCTURED = "structured"
@@ -68,6 +71,7 @@ class SemanticLevel(Enum):
 @dataclass(frozen=True)
 class TokenPattern:
     """Defines a pattern for matching tokens."""
+
     name: str
     pattern: Pattern
 
@@ -83,13 +87,14 @@ class TokenPattern:
 
 class Token(NamedTuple):
     """Represents a single SQL token instance with its value and type."""
+
     value: str
     type: TokenType
 
 
 class TokenGroup:
     """Represents a group of tokens (parentheses, functions, clauses, etc.)."""
-    
+
     def __init__(self, group_type, tokens, name=None, metadata=None):
         self.group_type = group_type
         self.tokens = tokens
@@ -121,12 +126,12 @@ def get_token_type(
     """Determine the type of a token based on its value and dialect."""
     if not token:
         return TokenType.UNKNOWN
-    
+
     if isinstance(dialect, str):
         dialect_obj = get_dialect(dialect)
     else:
         dialect_obj = dialect
-    
+
     # Check for comments
     # Multi-line: /* ... */
     # Single-line: -- ... or # ... (MySQL)
@@ -135,38 +140,38 @@ def get_token_type(
         return TokenType.COMMENT
     if token.startswith("#") and len(token) > 1:
         return TokenType.COMMENT
-    
+
     if token.isspace():
         if "\n" in token:
             return TokenType.NEWLINE
         return TokenType.WHITESPACE
-    
+
     if (token.startswith("'") and token.endswith("'")) or (
         token.startswith('"') and token.endswith('"')
     ):
         return TokenType.STRING
-    
+
     if token.replace(".", "", 1).isdigit():
         return TokenType.NUMBER
-    
+
     if token in ("<=", ">=", "<>", "!=", "<", ">", "=", "+", "-", "*", "/"):
         return TokenType.OPERATOR
-    
+
     if token in ("(", ")", ",", ".", ";", "[", "]"):
         return TokenType.PUNCTUATION
-    
+
     if dialect_obj.is_keyword(token):
         return TokenType.KEYWORD
-    
+
     id_chars = dialect_obj.identifier_chars
     if id_chars:
         pattern = f"^[A-Za-z_{id_chars}][A-Za-z0-9_{id_chars}]*$"
     else:
         pattern = r"^[A-Za-z_][A-Za-z0-9_]*$"
-    
+
     if re.match(pattern, token):
         return TokenType.IDENTIFIER
-    
+
     return TokenType.UNKNOWN
 
 
@@ -191,7 +196,7 @@ def tokenize(sql: str, dialect: str = "sqlserver") -> List[Token]:
 
     tokens = []
     position = 0
-    
+
     # Get token patterns from dialect
     token_patterns = dialect_obj.get_token_patterns()
 
@@ -277,7 +282,9 @@ def group_parentheses(
 
             if depth == 0:
                 # Found matching parenthesis
-                inner_tokens = tokens[i + 1 : j - 1]  # Exclude the parentheses themselves
+                inner_tokens = tokens[
+                    i + 1 : j - 1
+                ]  # Exclude the parentheses themselves
 
                 # Recursively group inner tokens
                 grouped_inner = group_parentheses(inner_tokens, dialect)
@@ -290,7 +297,10 @@ def group_parentheses(
                         if result[k].type in (TokenType.IDENTIFIER, TokenType.KEYWORD):
                             prev_token = result[k]
                             break
-                        elif result[k].type not in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                        elif result[k].type not in (
+                            TokenType.WHITESPACE,
+                            TokenType.NEWLINE,
+                        ):
                             break
 
                 # SQL function keywords or identifiers followed by parentheses are functions
@@ -311,9 +321,15 @@ def group_parentheses(
 
                             if prev_token_found:
                                 # Skip whitespace, newline, and punctuation
-                                if result[k].type in (TokenType.WHITESPACE, TokenType.NEWLINE):
+                                if result[k].type in (
+                                    TokenType.WHITESPACE,
+                                    TokenType.NEWLINE,
+                                ):
                                     continue
-                                elif result[k].type == TokenType.PUNCTUATION and result[k].value == ".":
+                                elif (
+                                    result[k].type == TokenType.PUNCTUATION
+                                    and result[k].value == "."
+                                ):
                                     continue
                                 elif result[k].type == TokenType.IDENTIFIER:
                                     continue
@@ -338,7 +354,8 @@ def group_parentheses(
                         while (
                             result
                             and isinstance(result[-1], Token)
-                            and result[-1].type in (TokenType.WHITESPACE, TokenType.NEWLINE)
+                            and result[-1].type
+                            in (TokenType.WHITESPACE, TokenType.NEWLINE)
                         ):
                             result.pop()
 
@@ -460,7 +477,9 @@ def group_by_clauses(tokens: List[Union[Token, TokenGroup]]) -> List[TokenGroup]
                 # Save previous clause
                 if current_clause:
                     clauses.append(
-                        TokenGroup(GroupType.CLAUSE, current_clause, name=current_clause_name)
+                        TokenGroup(
+                            GroupType.CLAUSE, current_clause, name=current_clause_name
+                        )
                     )
 
                 # Start new clause
@@ -504,7 +523,7 @@ def group_tokens(
         dialect_obj = get_dialect(dialect)
     else:
         dialect_obj = dialect
-    
+
     result = list(tokens)  # Start with copy of tokens
 
     # Apply groupings in order
@@ -517,12 +536,15 @@ def group_tokens(
     if group_clauses_flag:
         # If we have statements, group clauses within each statement
         if group_statements_flag and all(
-            isinstance(r, TokenGroup) and r.group_type == GroupType.STATEMENT for r in result
+            isinstance(r, TokenGroup) and r.group_type == GroupType.STATEMENT
+            for r in result
         ):
             new_result = []
             for stmt in result:
                 clauses = group_by_clauses(stmt.tokens)
-                new_result.append(TokenGroup(GroupType.STATEMENT, clauses, name=stmt.name))
+                new_result.append(
+                    TokenGroup(GroupType.STATEMENT, clauses, name=stmt.name)
+                )
             result = new_result
         else:
             result = group_by_clauses(result)

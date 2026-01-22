@@ -40,7 +40,7 @@ class SQLDialect(ABC):
 
         Override this method to register constructs specific to this dialect.
         Constructs are used to identify dialect-specific SQL patterns.
-        
+
         Base implementation registers common constructs (CTE, WINDOW_FUNCTION, SUBQUERY)
         that are applicable to all dialects.
 
@@ -48,7 +48,7 @@ class SQLDialect(ABC):
             def _register_constructs(self):
                 # First call parent to register common constructs
                 super()._register_constructs()
-                
+
                 # Then register dialect-specific constructs
                 from ..constructs.base import Construct
                 self.register_construct(TryCatchConstruct())
@@ -56,16 +56,17 @@ class SQLDialect(ABC):
         """
         import re
         from ..constructs.base import Construct
-        
+
         # Register common constructs applicable to all SQL dialects
-        
+
         # CTE (Common Table Expression)
-        self.register_construct(Construct(
-            name="CTE",
-            type="clause",
-            dialect="all",
-            pattern=re.compile(
-                r"""
+        self.register_construct(
+            Construct(
+                name="CTE",
+                type="clause",
+                dialect="all",
+                pattern=re.compile(
+                    r"""
             ^\s*WITH\s+                # WITH keyword at start
             (?P<cte_name>\w+)          # CTE name (identifier)
             (?:\s*\((?P<columns>[^)]*)\))?  # Optional column list
@@ -74,41 +75,46 @@ class SQLDialect(ABC):
             (?P<subquery>.*?)          # Subquery (non-greedy)
             \)\s*                      # Closing parenthesis
             """,
-                re.VERBOSE | re.IGNORECASE | re.DOTALL | re.MULTILINE,
-            ),
-        ))
-        
+                    re.VERBOSE | re.IGNORECASE | re.DOTALL | re.MULTILINE,
+                ),
+            )
+        )
+
         # Window Function
-        self.register_construct(Construct(
-            name="WindowFunction",
-            type="clause",
-            dialect="all",
-            pattern=re.compile(
-                r"""
+        self.register_construct(
+            Construct(
+                name="WindowFunction",
+                type="clause",
+                dialect="all",
+                pattern=re.compile(
+                    r"""
             ^(?P<function_name>\w+)\s*     # Function name
             \(\s*(?P<arguments>.*?)\s*\)\s* # Function arguments
             OVER\s*                        # OVER keyword
             \(\s*(?P<over_clause>.*?)\s*\)  # OVER clause content
             """,
-                re.VERBOSE | re.IGNORECASE | re.DOTALL | re.MULTILINE,
-            ),
-        ))
-        
+                    re.VERBOSE | re.IGNORECASE | re.DOTALL | re.MULTILINE,
+                ),
+            )
+        )
+
         # Subquery
-        self.register_construct(Construct(
-            name="Subquery",
-            type="clause",
-            dialect="all",
-            pattern=re.compile(
-                r"""
+        self.register_construct(
+            Construct(
+                name="Subquery",
+                type="clause",
+                dialect="all",
+                pattern=re.compile(
+                    r"""
             \(\s*                          # Opening parenthesis
             (?P<select_statement>SELECT\s+.*?) # SELECT statement
             \s*\)\s*                       # Closing parenthesis
             (?:AS\s+(?P<alias>\w+))?       # Optional alias
             """,
-                re.VERBOSE | re.IGNORECASE | re.DOTALL,
-            ),
-        ))
+                    re.VERBOSE | re.IGNORECASE | re.DOTALL,
+                ),
+            )
+        )
 
     def _register_token_patterns(self):
         """
@@ -155,7 +161,7 @@ class SQLDialect(ABC):
     def get_token_patterns(self) -> List["TokenPattern"]:
         """
         Get all token patterns registered for this dialect.
-        
+
         Lazy-loads patterns on first access to avoid circular import issues.
 
         Returns:

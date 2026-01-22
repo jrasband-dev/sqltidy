@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class Construct:
     name: str
-    type: Literal['clause']
+    type: Literal["clause"]
     pattern: Pattern
     dialect: Literal["all", "sqlserver", "postgres", "mysql", "sqlite", "oracle"] = (
         "all"

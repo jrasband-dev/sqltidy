@@ -1456,12 +1456,15 @@ class AliasStyleABCRule(BaseRule):
 
         # Get SQL keywords from dialect to avoid treating them as aliases
         from ..dialects import get_dialect
+
         dialect = get_dialect(self._dialect)
         sql_keywords = {kw.upper() for kw in dialect.keywords}
-        
+
         # Build keyword pattern for negative lookahead
-        keyword_pattern = "|".join(sorted(sql_keywords, key=len, reverse=True))  # Longest first to avoid partial matches
-        
+        keyword_pattern = "|".join(
+            sorted(sql_keywords, key=len, reverse=True)
+        )  # Longest first to avoid partial matches
+
         # Pattern to match FROM/JOIN with table and optional alias
         # Use negative lookahead to prevent matching SQL keywords as aliases
         pattern = re.compile(
@@ -1477,7 +1480,7 @@ class AliasStyleABCRule(BaseRule):
             table = match.group(2)
             # Alias can be in group 3 (after AS) or group 4 (without AS)
             alias = match.group(3) or match.group(4)
-            
+
             # Always use the table name as the base, not the existing alias
             base = table.split(".")[-1]
             if base not in mappings:
@@ -1578,12 +1581,15 @@ class AliasStyleTNumericRule(BaseRule):
     def _apply_to_scope_text(self, sql: str) -> str:
         # Get SQL keywords from dialect to avoid treating them as aliases
         from ..dialects import get_dialect
+
         dialect = get_dialect(self._dialect)
         sql_keywords = {kw.upper() for kw in dialect.keywords}
-        
+
         # Build keyword pattern for negative lookahead
-        keyword_pattern = "|".join(sorted(sql_keywords, key=len, reverse=True))  # Longest first to avoid partial matches
-        
+        keyword_pattern = "|".join(
+            sorted(sql_keywords, key=len, reverse=True)
+        )  # Longest first to avoid partial matches
+
         # Pattern to match FROM/JOIN with table and optional alias
         # Use negative lookahead to prevent matching SQL keywords as aliases
         pattern = re.compile(
@@ -1599,7 +1605,7 @@ class AliasStyleTNumericRule(BaseRule):
             table = match.group(2)
             # Alias can be in group 3 (after AS) or group 4 (without AS)
             alias = match.group(3) or match.group(4)
-            
+
             # Always use the table name as the base, not the existing alias
             base = table.split(".")[-1]
             if base not in mappings:

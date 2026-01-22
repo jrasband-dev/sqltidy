@@ -26,66 +26,63 @@ class MySQLDialect(SQLDialect):
         """Register MySQL specific token patterns."""
         # Import at runtime to avoid circular import
         from ..tokenizer.base import TokenPattern
-        
+
         # Comments (MySQL supports # for single-line comments)
-        self.register_token_pattern(TokenPattern(
-            name="Single Line Comment",
-            pattern=re.compile(r"(--|#)[^\n]*")
-        ))
-        self.register_token_pattern(TokenPattern(
-            name="Multi Line Comment",
-            pattern=re.compile(r"/\*[\s\S]*?\*/")
-        ))
-        
+        self.register_token_pattern(
+            TokenPattern(
+                name="Single Line Comment", pattern=re.compile(r"(--|#)[^\n]*")
+            )
+        )
+        self.register_token_pattern(
+            TokenPattern(
+                name="Multi Line Comment", pattern=re.compile(r"/\*[\s\S]*?\*/")
+            )
+        )
+
         # Whitespace
-        self.register_token_pattern(TokenPattern(
-            name="Newline",
-            pattern=re.compile(r"\n")
-        ))
-        self.register_token_pattern(TokenPattern(
-            name="Whitespace",
-            pattern=re.compile(r"\s+")
-        ))
-        
+        self.register_token_pattern(
+            TokenPattern(name="Newline", pattern=re.compile(r"\n"))
+        )
+        self.register_token_pattern(
+            TokenPattern(name="Whitespace", pattern=re.compile(r"\s+"))
+        )
+
         # Operators
-        self.register_token_pattern(TokenPattern(
-            name="Multi-char Operator",
-            pattern=re.compile(r"<=|>=|<>|!=")
-        ))
-        self.register_token_pattern(TokenPattern(
-            name="Single-char Punctuation",
-            pattern=re.compile(r"[(),.;\[\]*=<>+-/`]")  # MySQL uses backticks
-        ))
-        
+        self.register_token_pattern(
+            TokenPattern(name="Multi-char Operator", pattern=re.compile(r"<=|>=|<>|!="))
+        )
+        self.register_token_pattern(
+            TokenPattern(
+                name="Single-char Punctuation",
+                pattern=re.compile(r"[(),.;\[\]*=<>+-/`]"),  # MySQL uses backticks
+            )
+        )
+
         # Strings
-        self.register_token_pattern(TokenPattern(
-            name="Single-quoted String",
-            pattern=re.compile(r"'[^']*'")
-        ))
-        self.register_token_pattern(TokenPattern(
-            name="Double-quoted String",
-            pattern=re.compile(r'"[^"]*"')
-        ))
-        
+        self.register_token_pattern(
+            TokenPattern(name="Single-quoted String", pattern=re.compile(r"'[^']*'"))
+        )
+        self.register_token_pattern(
+            TokenPattern(name="Double-quoted String", pattern=re.compile(r'"[^"]*"'))
+        )
+
         # Identifiers and numbers
-        self.register_token_pattern(TokenPattern(
-            name="Identifier",
-            pattern=re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
-        ))
-        self.register_token_pattern(TokenPattern(
-            name="Number",
-            pattern=re.compile(r"[0-9]+(?:\.[0-9]+)?")
-        ))
-        self.register_token_pattern(TokenPattern(
-            name="Comma",
-            pattern=re.compile(r",")
-        ))
-        
+        self.register_token_pattern(
+            TokenPattern(
+                name="Identifier", pattern=re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+            )
+        )
+        self.register_token_pattern(
+            TokenPattern(name="Number", pattern=re.compile(r"[0-9]+(?:\.[0-9]+)?"))
+        )
+        self.register_token_pattern(
+            TokenPattern(name="Comma", pattern=re.compile(r","))
+        )
+
         # Fallback
-        self.register_token_pattern(TokenPattern(
-            name="Fallback",
-            pattern=re.compile(r"\S")
-        ))
+        self.register_token_pattern(
+            TokenPattern(name="Fallback", pattern=re.compile(r"\S"))
+        )
 
     @property
     def name(self) -> str:

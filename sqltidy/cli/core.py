@@ -1591,7 +1591,7 @@ def main():
         with console.status("[cyan]Analyzing SQL...", spinner="dots"):
             # Tokenize the SQL
             tokens = tokenize_with_types(sql, dialect=args.dialect, level=level)
-            
+
             # Apply semantic grouping if not in tokens-only mode
             if level == SemanticLevel.SEMANTIC:
                 tokens = group_tokens(
@@ -1599,9 +1599,9 @@ def main():
                     group_parentheses_flag=True,
                     group_statements_flag=False,
                     group_clauses_flag=True,
-                    dialect=args.dialect
+                    dialect=args.dialect,
                 )
-                
+
                 # Also match constructs in the raw SQL for counting
                 construct_matches = match_sql_constructs(sql, dialect=args.dialect)
 
@@ -1651,6 +1651,7 @@ def main():
 
                 # Count construct matches by name
                 from collections import Counter
+
                 construct_match_counts = Counter(m["name"] for m in construct_matches)
 
                 for pattern in all_patterns:
@@ -1669,21 +1670,24 @@ def main():
                 output_lines.append("PATTERNS")
                 output_lines.append("=" * 60)
                 output_lines.append("\n=== Pattern Detection ===")
-                
+
                 # Separate common and dialect-specific constructs
                 common_constructs = [p for p in all_patterns if p.dialect == "all"]
                 dialect_constructs = [p for p in all_patterns if p.dialect != "all"]
-                
+
                 # Count construct matches by name
                 from collections import Counter
+
                 construct_match_counts = Counter(m["name"] for m in construct_matches)
-                
+
                 for pattern in all_patterns:
                     if pattern.is_applicable(dialect_obj):
                         scope = "Common" if pattern.dialect == "all" else args.dialect
                         # Get count from regex matches
                         count = construct_match_counts.get(pattern.name, 0)
-                        output_lines.append(f"  ✓ {pattern.name} ({scope}) - Matched: {count}")
+                        output_lines.append(
+                            f"  ✓ {pattern.name} ({scope}) - Matched: {count}"
+                        )
                 output_lines.append(
                     f"\n{len(applicable_patterns)} patterns active ({len(common_constructs)} common + {len(dialect_constructs)} {args.dialect}-specific)"
                 )
