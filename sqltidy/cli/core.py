@@ -757,10 +757,7 @@ def handle_rewrite_command(args):
 
 def handle_pattern_command(args):
     """Handle the pattern command to show information about SQL patterns."""
-    from ..constructs import get_all_constructs
     from ..dialects import get_dialect
-
-    # Import pattern_tokenizer to ensure patterns are registered
 
     # List subcommand
     if args.patterns_command == "list":
@@ -773,17 +770,13 @@ def handle_pattern_command(args):
                 print(f"Error: {e}", file=sys.stderr)
                 sys.exit(1)
 
-        # Get all patterns
-        global_patterns = get_all_constructs()
-
-        # Get dialect-specific patterns
-        dialect_patterns = []
+        # Get constructs from dialects
+        all_patterns = []
         dialect_patterns_by_dialect = {}
 
         if dialect_obj:
             # Get constructs for specific dialect
-            dialect_patterns = dialect_obj.get_constructs()
-            all_patterns = global_patterns + dialect_patterns
+            all_patterns = dialect_obj.get_constructs()
             title = f"Constructs for {dialect_obj.name.upper()}"
         else:
             # Get constructs for ALL dialects
@@ -795,12 +788,11 @@ def handle_pattern_command(args):
                     d_patterns = d.get_constructs()
                     if d_patterns:
                         dialect_patterns_by_dialect[dialect_name] = d_patterns
-                        dialect_patterns.extend(d_patterns)
+                        all_patterns.extend(d_patterns)
                 except Exception as e:
                     import logging
 
                     logging.debug(f"Failed to load dialect constructs: {e}")
-            all_patterns = global_patterns + dialect_patterns
             title = "All SQL Constructs"
 
         if args.format == "json":
@@ -808,20 +800,14 @@ def handle_pattern_command(args):
 
             pattern_info = []
             for pattern in all_patterns:
-                # Determine if pattern is global or dialect-specific
-                is_global = pattern in global_patterns
+                # Determine if pattern is common or dialect-specific
+                is_common = pattern.dialect == "all"
 
-                if is_global:
-                    scope = "Global"
-                elif dialect_obj:
-                    scope = dialect_obj.name
+                if dialect_obj:
+                    scope = "Common" if is_common else dialect_obj.name
                 else:
                     # Find which dialect this pattern belongs to
-                    scope = "Unknown"
-                    for dname, dpatterns in dialect_patterns_by_dialect.items():
-                        if pattern in dpatterns:
-                            scope = dname
-                            break
+                    scope = pattern.dialect if pattern.dialect != "all" else "Common"
 
                 pattern_info.append(
                     {
@@ -838,16 +824,13 @@ def handle_pattern_command(args):
             table.add_column("Type", style="green")
 
             for pattern in all_patterns:
-                # Determine if pattern is global or dialect-specific
-                is_global = pattern in global_patterns
+                # Determine if pattern is common or dialect-specific
+                is_common = pattern.dialect == "all"
 
-                if is_global:
-                    scope = "Global"
-                elif dialect_obj:
-                    scope = dialect_obj.name
+                if dialect_obj:
+                    scope = "Common" if is_common else dialect_obj.name
                 else:
-                    # Find which dialect this pattern belongs to
-                    scope = "Unknown"
+                    scope = pattern.dialect if pattern.dialect != "all" else "Common"
                     for dname, dpatterns in dialect_patterns_by_dialect.items():
                         if pattern in dpatterns:
                             scope = dname
@@ -1599,12 +1582,28 @@ def main():
 
         # Import semantic tokenizer components
         from sqltidy.tokenizer import SemanticLevel, TokenGroup, GroupType, Token
+        from sqltidy.tokenizer.base import group_tokens
+        from sqltidy.constructs.base import match_constructs as match_sql_constructs
 
         # Always use semantic level unless tokens-only flag is set
         level = SemanticLevel.BASIC if args.tokens_only else SemanticLevel.SEMANTIC
 
         with console.status("[cyan]Analyzing SQL...", spinner="dots"):
+            # Tokenize the SQL
             tokens = tokenize_with_types(sql, dialect=args.dialect, level=level)
+            
+            # Apply semantic grouping if not in tokens-only mode
+            if level == SemanticLevel.SEMANTIC:
+                tokens = group_tokens(
+                    tokens,
+                    group_parentheses_flag=True,
+                    group_statements_flag=False,
+                    group_clauses_flag=True,
+                    dialect=args.dialect
+                )
+                
+                # Also match constructs in the raw SQL for counting
+                construct_matches = match_sql_constructs(sql, dialect=args.dialect)
 
         # Generate output
         output_lines = []
@@ -1613,14 +1612,22 @@ def main():
         # SECTION 1: PATTERNS
         # ============================================================
         if not args.tokens_only and level == SemanticLevel.SEMANTIC:
+            # Helper function to find all groups recursively (needed for construct counting)
+            def find_all_groups(items, target_type):
+                results = []
+                for item in items:
+                    if isinstance(item, TokenGroup):
+                        if item.group_type == target_type:
+                            results.append(item)
+                        results.extend(find_all_groups(item.tokens, target_type))
+                return results
+
             # Show constructs detected
-            from sqltidy.constructs import get_all_constructs
             from sqltidy.dialects import get_dialect as get_dialect_obj
 
             dialect_obj = get_dialect_obj(args.dialect)
-            global_patterns = get_all_constructs()
-            dialect_patterns = dialect_obj.get_constructs()
-            all_patterns = global_patterns + dialect_patterns
+            # All constructs (common + dialect-specific) are now in the dialect
+            all_patterns = dialect_obj.get_constructs()
             applicable_patterns = [
                 p for p in all_patterns if p.is_applicable(dialect_obj)
             ]
@@ -1636,40 +1643,52 @@ def main():
                 pattern_table.add_column("Pattern", style="cyan")
                 pattern_table.add_column("Dialect", style="yellow")
                 pattern_table.add_column("Status", justify="center", style="green")
+                pattern_table.add_column("Matched", justify="right", style="blue")
+
+                # Separate common and dialect-specific constructs
+                common_constructs = [p for p in all_patterns if p.dialect == "all"]
+                dialect_constructs = [p for p in all_patterns if p.dialect != "all"]
+
+                # Count construct matches by name
+                from collections import Counter
+                construct_match_counts = Counter(m["name"] for m in construct_matches)
 
                 for pattern in all_patterns:
                     if pattern.is_applicable(dialect_obj):
-                        scope = "Global" if pattern in global_patterns else args.dialect
-                        pattern_table.add_row(pattern.name, scope, "✓")
+                        scope = "Common" if pattern.dialect == "all" else args.dialect
+                        # Get count from regex matches
+                        count = construct_match_counts.get(pattern.name, 0)
+                        pattern_table.add_row(pattern.name, scope, "✓", str(count))
 
                 console.print(pattern_table)
                 console.print(
-                    f"\n[dim]{len(applicable_patterns)} patterns active ({len(global_patterns)} global + {len(dialect_patterns)} {args.dialect})[/dim]"
+                    f"\n[dim]{len(applicable_patterns)} patterns active ({len(common_constructs)} common + {len(dialect_constructs)} {args.dialect}-specific)[/dim]"
                 )
             else:
                 output_lines.append("\n" + "=" * 60)
                 output_lines.append("PATTERNS")
                 output_lines.append("=" * 60)
                 output_lines.append("\n=== Pattern Detection ===")
+                
+                # Separate common and dialect-specific constructs
+                common_constructs = [p for p in all_patterns if p.dialect == "all"]
+                dialect_constructs = [p for p in all_patterns if p.dialect != "all"]
+                
+                # Count construct matches by name
+                from collections import Counter
+                construct_match_counts = Counter(m["name"] for m in construct_matches)
+                
                 for pattern in all_patterns:
                     if pattern.is_applicable(dialect_obj):
-                        scope = "Global" if pattern in global_patterns else args.dialect
-                        output_lines.append(f"  ✓ {pattern.name} ({scope})")
+                        scope = "Common" if pattern.dialect == "all" else args.dialect
+                        # Get count from regex matches
+                        count = construct_match_counts.get(pattern.name, 0)
+                        output_lines.append(f"  ✓ {pattern.name} ({scope}) - Matched: {count}")
                 output_lines.append(
-                    f"\n{len(applicable_patterns)} patterns active ({len(global_patterns)} global + {len(dialect_patterns)} {args.dialect})"
+                    f"\n{len(applicable_patterns)} patterns active ({len(common_constructs)} common + {len(dialect_constructs)} {args.dialect}-specific)"
                 )
 
         if not args.tokens_only and level != SemanticLevel.BASIC:
-            # Helper function to find all groups recursively
-            def find_all_groups(items, target_type):
-                results = []
-                for item in items:
-                    if isinstance(item, TokenGroup):
-                        if item.group_type == target_type:
-                            results.append(item)
-                        results.extend(find_all_groups(item.tokens, target_type))
-                return results
-
             # Use Rich only if not outputting to file
             use_rich = not args.output
 
