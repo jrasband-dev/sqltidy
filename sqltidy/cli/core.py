@@ -844,14 +844,15 @@ def handle_pattern_command(args):
 
             # Show summary
             if dialect_obj:
-                global_count = len([p for p in all_patterns if p in global_patterns])
-                dialect_count = len(dialect_patterns)
+                # Count patterns by scope
+                global_count = len([p for p in all_patterns if p.dialect == "all"])
+                dialect_count = len([p for p in all_patterns if p.dialect != "all"])
                 console.print(
                     f"\n[cyan]Total:[/cyan] {len(all_patterns)} patterns ({global_count} global + {dialect_count} {dialect_obj.name})\n"
                 )
             else:
                 # Count patterns by dialect
-                global_count = len(global_patterns)
+                global_count = len([p for p in all_patterns if p.dialect == "all"])
                 dialect_counts = {
                     dname: len(dpatterns)
                     for dname, dpatterns in dialect_patterns_by_dialect.items()
