@@ -8,12 +8,81 @@ This module provides SQLite-specific SQL dialect support including:
 - SQLite-specific features (PRAGMA, AUTOINCREMENT, etc.)
 """
 
-from typing import Dict, List, Set
+import re
+from typing import Dict, List, Set, TYPE_CHECKING
 from .base import SQLDialect
+
+if TYPE_CHECKING:
+    from ..tokenizer.base import TokenPattern
 
 
 class SQLiteDialect(SQLDialect):
     """SQLite database dialect."""
+
+    def _register_token_patterns(self):
+        """Register SQLite specific token patterns."""
+        # Import at runtime to avoid circular import
+        from ..tokenizer.base import TokenPattern
+        
+        # Comments
+        self.register_token_pattern(TokenPattern(
+            name="Single Line Comment",
+            pattern=re.compile(r"--[^\n]*")
+        ))
+        self.register_token_pattern(TokenPattern(
+            name="Multi Line Comment",
+            pattern=re.compile(r"/\*[\s\S]*?\*/")
+        ))
+        
+        # Whitespace
+        self.register_token_pattern(TokenPattern(
+            name="Newline",
+            pattern=re.compile(r"\n")
+        ))
+        self.register_token_pattern(TokenPattern(
+            name="Whitespace",
+            pattern=re.compile(r"\s+")
+        ))
+        
+        # Operators
+        self.register_token_pattern(TokenPattern(
+            name="Multi-char Operator",
+            pattern=re.compile(r"<=|>=|<>|!=")
+        ))
+        self.register_token_pattern(TokenPattern(
+            name="Single-char Punctuation",
+            pattern=re.compile(r"[(),.;\[\]*=<>+-/]")
+        ))
+        
+        # Strings
+        self.register_token_pattern(TokenPattern(
+            name="Single-quoted String",
+            pattern=re.compile(r"'[^']*'")
+        ))
+        self.register_token_pattern(TokenPattern(
+            name="Double-quoted String",
+            pattern=re.compile(r'"[^"]*"')
+        ))
+        
+        # Identifiers and numbers
+        self.register_token_pattern(TokenPattern(
+            name="Identifier",
+            pattern=re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+        ))
+        self.register_token_pattern(TokenPattern(
+            name="Number",
+            pattern=re.compile(r"[0-9]+(?:\.[0-9]+)?")
+        ))
+        self.register_token_pattern(TokenPattern(
+            name="Comma",
+            pattern=re.compile(r",")
+        ))
+        
+        # Fallback
+        self.register_token_pattern(TokenPattern(
+            name="Fallback",
+            pattern=re.compile(r"\S")
+        ))
 
     @property
     def name(self) -> str:

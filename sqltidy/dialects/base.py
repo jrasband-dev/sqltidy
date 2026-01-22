@@ -9,6 +9,7 @@ from typing import Set, Dict, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..constructs import Construct
+    from ..tokenizer.base import TokenPattern
 
 
 class SQLDialect(ABC):
@@ -27,42 +28,143 @@ class SQLDialect(ABC):
 
     def __init__(self):
         """Initialize the dialect."""
-        self._patterns: List["Construct"] = []
+        self._constructs: List["Construct"] = []
+        self._token_patterns: List["TokenPattern"] = []
+        self._token_patterns_initialized = False
         self._validate()
-        self._register_patterns()
+        self._register_constructs()
 
-    def _register_patterns(self):
+    def _register_constructs(self):
         """
-        Register dialect-specific patterns.
+        Register dialect-specific constructs.
 
-        Override this method to register patterns specific to this dialect.
-        Patterns are used during tokenization to identify dialect-specific constructs.
+        Override this method to register constructs specific to this dialect.
+        Constructs are used to identify dialect-specific SQL patterns.
+        
+        Base implementation registers common constructs (CTE, WINDOW_FUNCTION, SUBQUERY)
+        that are applicable to all dialects.
 
         Example:
-            def _register_patterns(self):
-                from ..patterns.tsql_patterns import TrycatchPattern, OutputClausePattern
-                self.register_pattern(TrycatchPattern())
-                self.register_pattern(OutputClausePattern())
+            def _register_constructs(self):
+                # First call parent to register common constructs
+                super()._register_constructs()
+                
+                # Then register dialect-specific constructs
+                from ..constructs.base import Construct
+                self.register_construct(TryCatchConstruct())
+                self.register_construct(OutputClauseConstruct())
+        """
+        import re
+        from ..constructs.base import Construct
+        
+        # Register common constructs applicable to all SQL dialects
+        
+        # CTE (Common Table Expression)
+        self.register_construct(Construct(
+            name="CTE",
+            type="clause",
+            dialect="all",
+            pattern=re.compile(
+                r"""
+            ^\s*WITH\s+                # WITH keyword at start
+            (?P<cte_name>\w+)          # CTE name (identifier)
+            (?:\s*\((?P<columns>[^)]*)\))?  # Optional column list
+            \s+AS\s*                   # AS keyword
+            \(\s*                      # Opening parenthesis for subquery
+            (?P<subquery>.*?)          # Subquery (non-greedy)
+            \)\s*                      # Closing parenthesis
+            """,
+                re.VERBOSE | re.IGNORECASE | re.DOTALL | re.MULTILINE,
+            ),
+        ))
+        
+        # Window Function
+        self.register_construct(Construct(
+            name="WindowFunction",
+            type="clause",
+            dialect="all",
+            pattern=re.compile(
+                r"""
+            ^(?P<function_name>\w+)\s*     # Function name
+            \(\s*(?P<arguments>.*?)\s*\)\s* # Function arguments
+            OVER\s*                        # OVER keyword
+            \(\s*(?P<over_clause>.*?)\s*\)  # OVER clause content
+            """,
+                re.VERBOSE | re.IGNORECASE | re.DOTALL | re.MULTILINE,
+            ),
+        ))
+        
+        # Subquery
+        self.register_construct(Construct(
+            name="Subquery",
+            type="clause",
+            dialect="all",
+            pattern=re.compile(
+                r"""
+            \(\s*                          # Opening parenthesis
+            (?P<select_statement>SELECT\s+.*?) # SELECT statement
+            \s*\)\s*                       # Closing parenthesis
+            (?:AS\s+(?P<alias>\w+))?       # Optional alias
+            """,
+                re.VERBOSE | re.IGNORECASE | re.DOTALL,
+            ),
+        ))
+
+    def _register_token_patterns(self):
+        """
+        Register dialect-specific token patterns.
+
+        Override this method to register token patterns specific to this dialect.
+        Token patterns define how SQL strings are tokenized.
+
+        Example:
+            def _register_token_patterns(self):
+                import re
+                from ..tokenizer.base import TokenPattern
+                self.register_token_pattern(TokenPattern('Comment', re.compile(r'--[^\n]*')))
         """
         pass
 
-    def register_pattern(self, pattern: "Construct"):
+    def register_construct(self, construct: "Construct"):
         """
-        Register a pattern for this dialect.
+        Register a construct for this dialect.
 
         Args:
-            pattern: The pattern to register
+            construct: The construct to register
         """
-        self._patterns.append(pattern)
+        self._constructs.append(construct)
 
-    def get_patterns(self) -> List["Construct"]:
+    def get_constructs(self) -> List["Construct"]:
         """
-        Get all patterns registered for this dialect.
+        Get all constructs registered for this dialect.
 
         Returns:
-            List of Pattern objects
+            List of Construct objects
         """
-        return self._patterns.copy()
+        return self._constructs.copy()
+
+    def register_token_pattern(self, pattern: "TokenPattern"):
+        """
+        Register a token pattern for this dialect.
+
+        Args:
+            pattern: The TokenPattern to register
+        """
+        self._token_patterns.append(pattern)
+
+    def get_token_patterns(self) -> List["TokenPattern"]:
+        """
+        Get all token patterns registered for this dialect.
+        
+        Lazy-loads patterns on first access to avoid circular import issues.
+
+        Returns:
+            List of TokenPattern objects
+        """
+        if not self._token_patterns_initialized:
+            self._register_token_patterns()
+            self._token_patterns_initialized = True
+        return self._token_patterns.copy()
 
     @property
     @abstractmethod

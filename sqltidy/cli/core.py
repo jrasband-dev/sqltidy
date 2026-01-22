@@ -781,27 +781,27 @@ def handle_pattern_command(args):
         dialect_patterns_by_dialect = {}
 
         if dialect_obj:
-            # Get patterns for specific dialect
-            dialect_patterns = dialect_obj.get_patterns()
+            # Get constructs for specific dialect
+            dialect_patterns = dialect_obj.get_constructs()
             all_patterns = global_patterns + dialect_patterns
-            title = f"Patterns for {dialect_obj.name.upper()}"
+            title = f"Constructs for {dialect_obj.name.upper()}"
         else:
-            # Get patterns for ALL dialects
+            # Get constructs for ALL dialects
             from ..dialects.registry import list_dialects
 
             for dialect_name in list_dialects():
                 try:
                     d = get_dialect(dialect_name)
-                    d_patterns = d.get_patterns()
+                    d_patterns = d.get_constructs()
                     if d_patterns:
                         dialect_patterns_by_dialect[dialect_name] = d_patterns
                         dialect_patterns.extend(d_patterns)
                 except Exception as e:
                     import logging
 
-                    logging.debug(f"Failed to load dialect patterns: {e}")
+                    logging.debug(f"Failed to load dialect constructs: {e}")
             all_patterns = global_patterns + dialect_patterns
-            title = "All SQL Patterns"
+            title = "All SQL Constructs"
 
         if args.format == "json":
             import json
@@ -1613,13 +1613,13 @@ def main():
         # SECTION 1: PATTERNS
         # ============================================================
         if not args.tokens_only and level == SemanticLevel.SEMANTIC:
-            # Show patterns detected
+            # Show constructs detected
             from sqltidy.constructs import get_all_constructs
             from sqltidy.dialects import get_dialect as get_dialect_obj
 
             dialect_obj = get_dialect_obj(args.dialect)
             global_patterns = get_all_constructs()
-            dialect_patterns = dialect_obj.get_patterns()
+            dialect_patterns = dialect_obj.get_constructs()
             all_patterns = global_patterns + dialect_patterns
             applicable_patterns = [
                 p for p in all_patterns if p.is_applicable(dialect_obj)
@@ -1628,10 +1628,10 @@ def main():
             use_rich = not args.output
 
             if use_rich:
-                console.print("\n[bold magenta]═══ PATTERNS ═══[/bold magenta]")
+                console.print("\n[bold magenta]═══ CONSTRUCTS ═══[/bold magenta]")
                 console.print()
                 pattern_table = Table(
-                    title="Pattern Detection", box=box.ROUNDED, border_style="magenta"
+                    title="Construct Detection", box=box.ROUNDED, border_style="magenta"
                 )
                 pattern_table.add_column("Pattern", style="cyan")
                 pattern_table.add_column("Dialect", style="yellow")

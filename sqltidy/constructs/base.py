@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class Construct:
     name: str
+    type: Literal['clause']
     pattern: Pattern
     dialect: Literal["all", "sqlserver", "postgres", "mysql", "sqlite", "oracle"] = (
         "all"
@@ -56,7 +57,8 @@ def match_constructs(
     Args:
         sql: SQL string to analyze
         dialect: SQL dialect to use (default: "sqlserver")
-        constructs: List of constructs to match. If None, uses all registered constructs.
+        constructs: List of constructs to match. If None, uses all registered constructs
+                   from both global registry and dialect-specific constructs.
 
     Returns:
         List of dictionaries containing match information:
@@ -75,9 +77,12 @@ def match_constructs(
 
     # Get constructs to match
     if constructs is None:
-        constructs = get_all_constructs(
-            dialect.name if hasattr(dialect, "name") else dialect
-        )
+        # Get global constructs (common patterns like CTE, WINDOW_FUNCTION, etc.)
+        global_constructs = get_all_constructs()
+        # Get dialect-specific constructs
+        dialect_constructs = dialect_obj.get_constructs()
+        # Combine both
+        constructs = global_constructs + dialect_constructs
 
     # Filter constructs by dialect
     dialect_name = dialect_obj.name if hasattr(dialect_obj, "name") else dialect

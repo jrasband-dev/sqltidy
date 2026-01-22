@@ -70,60 +70,10 @@ class TokenPattern:
     """Defines a pattern for matching tokens."""
     name: str
     pattern: Pattern
-    dialect: Literal["all", "sqlserver", "postgres", "mysql", "sqlite", "oracle"] = "all"
 
     @property
     def regex(self) -> Pattern:
         return self.pattern
-
-
-# Define token patterns
-SINGLE_LINE_COMMENT = TokenPattern(
-    name="Single Line Comment", pattern=re.compile(r"--[^\n]*"), dialect="all"
-)
-MULTI_LINE_COMMENT = TokenPattern(
-    name="Multi Line Comment", pattern=re.compile(r"/\*[\s\S]*?\*/"), dialect="all"
-)
-NEWLINE = TokenPattern(name="Newline", pattern=re.compile(r"\n"), dialect="all")
-WHITESPACE = TokenPattern(name="Whitespace", pattern=re.compile(r"\s+"), dialect="all")
-MULTI_CHAR_OPERATOR = TokenPattern(
-    name="Multi-char Operator", pattern=re.compile(r"<=|>=|<>|!="), dialect="all"
-)
-SINGLE_CHAR_PUNCTUATION = TokenPattern(
-    name="Single-char Punctuation",
-    pattern=re.compile(r"[(),.;\[\]*=<>+-/]"),
-    dialect="all",
-)
-SINGLE_QUOTE = TokenPattern(
-    name="Single-quoted String", pattern=re.compile(r"'[^']*'"), dialect="all"
-)
-DOUBLE_QUOTE = TokenPattern(
-    name="Double-quoted String", pattern=re.compile(r'"[^"]*"'), dialect="all"
-)
-IDENTIFIER = TokenPattern(
-    name="Identifier", pattern=re.compile(r"[A-Za-z_@#][A-Za-z0-9_@#$]*"), dialect="all"
-)
-NUMBER = TokenPattern(
-    name="Number", pattern=re.compile(r"[0-9]+(?:\.[0-9]+)?"), dialect="all"
-)
-COMMA = TokenPattern(name="Comma", pattern=re.compile(r","), dialect="all")
-FALLBACK = TokenPattern(name="Fallback", pattern=re.compile(r"\S"), dialect="all")
-
-
-# Registry of token patterns in order
-TOKEN_PATTERNS: List[TokenPattern] = [
-    SINGLE_LINE_COMMENT,
-    MULTI_LINE_COMMENT,
-    NEWLINE,
-    WHITESPACE,
-    MULTI_CHAR_OPERATOR,
-    SINGLE_CHAR_PUNCTUATION,
-    SINGLE_QUOTE,
-    DOUBLE_QUOTE,
-    IDENTIFIER,
-    NUMBER,
-    FALLBACK,
-]
 
 
 # ==============================================================================
@@ -177,7 +127,13 @@ def get_token_type(
     else:
         dialect_obj = dialect
     
+    # Check for comments
+    # Multi-line: /* ... */
+    # Single-line: -- ... or # ... (MySQL)
+    # For # comments, require more than just the # character to avoid false positives
     if token.startswith("--") or (token.startswith("/*") and token.endswith("*/")):
+        return TokenType.COMMENT
+    if token.startswith("#") and len(token) > 1:
         return TokenType.COMMENT
     
     if token.isspace():
@@ -216,14 +172,14 @@ def get_token_type(
 
 def tokenize(sql: str, dialect: str = "sqlserver") -> List[Token]:
     """
-    Tokenize SQL string using TokenPattern definitions.
+    Tokenize SQL string using TokenPattern definitions from dialect.
 
     Iterates through the input SQL and matches each position against
-    TOKEN_PATTERNS in order. The first matching pattern is used.
+    token patterns from the dialect in order. The first matching pattern is used.
 
     Args:
         sql: SQL string to tokenize
-        dialect: SQL dialect for keyword detection
+        dialect: SQL dialect for keyword detection and token patterns
 
     Returns:
         List of Token instances
@@ -235,12 +191,15 @@ def tokenize(sql: str, dialect: str = "sqlserver") -> List[Token]:
 
     tokens = []
     position = 0
+    
+    # Get token patterns from dialect
+    token_patterns = dialect_obj.get_token_patterns()
 
     while position < len(sql):
         matched = False
 
         # Try each pattern in order
-        for token_pattern in TOKEN_PATTERNS:
+        for token_pattern in token_patterns:
             match = token_pattern.pattern.match(sql, position)
             if match:
                 token_value = match.group(0)

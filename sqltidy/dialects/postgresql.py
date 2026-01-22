@@ -2,8 +2,13 @@
 PostgreSQL dialect implementation.
 """
 
-from typing import Set
+import re
+from typing import Set, TYPE_CHECKING
 from .base import SQLDialect
+from ..constructs.base import Construct
+
+if TYPE_CHECKING:
+    from ..tokenizer.base import TokenPattern
 
 
 class PostgreSQLDialect(SQLDialect):
@@ -17,6 +22,122 @@ class PostgreSQLDialect(SQLDialect):
     - Functions (string, date, aggregate, window, etc.)
     - PostgreSQL-specific features (RETURNING, LISTEN/NOTIFY, etc.)
     """
+
+    def _register_token_patterns(self):
+        """Register PostgreSQL specific token patterns."""
+        # Import at runtime to avoid circular import
+        from ..tokenizer.base import TokenPattern
+        
+        # Comments
+        self.register_token_pattern(TokenPattern(
+            name="Single Line Comment",
+            pattern=re.compile(r"--[^\n]*")
+        ))
+        self.register_token_pattern(TokenPattern(
+            name="Multi Line Comment",
+            pattern=re.compile(r"/\*[\s\S]*?\*/")
+        ))
+        
+        # Whitespace
+        self.register_token_pattern(TokenPattern(
+            name="Newline",
+            pattern=re.compile(r"\n")
+        ))
+        self.register_token_pattern(TokenPattern(
+            name="Whitespace",
+            pattern=re.compile(r"\s+")
+        ))
+        
+        # Operators
+        self.register_token_pattern(TokenPattern(
+            name="Multi-char Operator",
+            pattern=re.compile(r"<=|>=|<>|!=")
+        ))
+        self.register_token_pattern(TokenPattern(
+            name="Single-char Punctuation",
+            pattern=re.compile(r"[(),.;\[\]*=<>+-/]")
+        ))
+        
+        # Strings
+        self.register_token_pattern(TokenPattern(
+            name="Single-quoted String",
+            pattern=re.compile(r"'[^']*'")
+        ))
+        self.register_token_pattern(TokenPattern(
+            name="Double-quoted String",
+            pattern=re.compile(r'"[^"]*"')
+        ))
+        
+        # Identifiers and numbers
+        self.register_token_pattern(TokenPattern(
+            name="Identifier",
+            pattern=re.compile(r"[A-Za-z_$][A-Za-z0-9_$]*")  # PostgreSQL allows $
+        ))
+        self.register_token_pattern(TokenPattern(
+            name="Number",
+            pattern=re.compile(r"[0-9]+(?:\.[0-9]+)?")
+        ))
+        self.register_token_pattern(TokenPattern(
+            name="Comma",
+            pattern=re.compile(r",")
+        ))
+        
+        # Fallback
+        self.register_token_pattern(TokenPattern(
+            name="Fallback",
+            pattern=re.compile(r"\S")
+        ))
+
+    def _register_constructs(self):
+        """Register PostgreSQL specific constructs."""
+        # First register common constructs (CTE, WindowFunction, Subquery)
+        super()._register_constructs()
+        
+        # Then register PostgreSQL-specific constructs
+        # RETURNING clause
+        self.register_construct(Construct(
+            name="Returning Clause",
+            type="clause",
+            dialect="postgresql",
+            pattern=re.compile(
+                r"""
+            ^\s*RETURNING\s+                       # RETURNING keyword
+            (?P<returning_list>.*?)                 # List of returning columns
+            """,
+                re.VERBOSE | re.IGNORECASE | re.MULTILINE,
+            ),
+        ))
+
+        # JSON operators
+        self.register_construct(Construct(
+            name="Json Operator",
+            type="clause",
+            dialect="postgresql",
+            pattern=re.compile(
+                r"""
+            ^\s*(?P<left_operand>\w+)\s*           # Left operand (column name)
+            (?P<operator>->|->>|\#>|\#>>|@>|<@|\?|\?\||\?\&|\|\|)\s*  # JSON operators
+            (?P<right_operand>.+)                   # Right operand (key, path, etc.)
+            """,
+                re.VERBOSE | re.IGNORECASE | re.MULTILINE,
+            ),
+        ))
+
+        # ON CONFLICT clause
+        self.register_construct(Construct(
+            name="On Conflict Clause",
+            type="clause",
+            dialect="postgresql",
+            pattern=re.compile(
+                r"""
+            ^\s*ON\s+CONFLICT\s*                   # ON CONFLICT keywords
+            (\(.*?\))?                             # Optional conflict target
+            \s*DO\s+                               # DO keyword
+            (NOTHING|UPDATE\s+SET\s+.*?)           # Action: NOTHING or UPDATE SET ...
+            """,
+                re.VERBOSE | re.IGNORECASE | re.DOTALL | re.MULTILINE,
+            ),
+        ))
 
     @property
     def name(self) -> str:

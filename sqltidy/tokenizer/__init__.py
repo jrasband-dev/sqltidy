@@ -2,6 +2,9 @@
 """
 Tokenizer package: exposes main API for tokenization and grouping.
 All functionality is now consolidated in base.py.
+
+Note: Token patterns are now defined in dialect classes via dialect.get_token_patterns().
+The global TOKEN_PATTERNS list and individual pattern constants have been removed.
 """
 
 from .base import (
@@ -24,20 +27,6 @@ from .base import (
     # Utility functions
     print_token_tree,
     is_keyword,
-    # Token patterns
-    TOKEN_PATTERNS,
-    SINGLE_LINE_COMMENT,
-    MULTI_LINE_COMMENT,
-    NEWLINE,
-    WHITESPACE,
-    MULTI_CHAR_OPERATOR,
-    SINGLE_CHAR_PUNCTUATION,
-    SINGLE_QUOTE,
-    DOUBLE_QUOTE,
-    IDENTIFIER,
-    NUMBER,
-    COMMA,
-    FALLBACK,
 )
 
 __all__ = [
@@ -60,18 +49,4 @@ __all__ = [
     # Utility functions
     "print_token_tree",
     "is_keyword",
-    # Token patterns
-    "TOKEN_PATTERNS",
-    "SINGLE_LINE_COMMENT",
-    "MULTI_LINE_COMMENT",
-    "NEWLINE",
-    "WHITESPACE",
-    "MULTI_CHAR_OPERATOR",
-    "SINGLE_CHAR_PUNCTUATION",
-    "SINGLE_QUOTE",
-    "DOUBLE_QUOTE",
-    "IDENTIFIER",
-    "NUMBER",
-    "COMMA",
-    "FALLBACK",
 ]

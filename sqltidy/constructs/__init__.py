@@ -1,15 +1,15 @@
 """
-Declarative, reusable, dialect-aware pattern system for SQL parsing.
+SQL construct matching system.
 
-Patterns are tiny building blocks that can match and group SQL tokens.
-They are composed into larger patterns to recognize complex SQL constructs.
+Constructs are patterns that match specific SQL syntax elements.
+All constructs (both common and dialect-specific) are now registered in their respective dialect classes.
 
 Example:
-    from sqltidy.patterns import Pattern, MatchContext
-    from sqltidy.patterns.tsql import CaseExpressionPattern
+    from sqltidy.dialects import get_dialect
 
-    construct = CaseExpressionConstruct()
-    matches = construct.match(context)
+    # Get all constructs for a dialect (includes common + dialect-specific)
+    dialect = get_dialect('sqlserver')
+    all_constructs = dialect.get_constructs()
 """
 
 from .base import (
@@ -18,51 +18,21 @@ from .base import (
     get_pattern,
     get_all_constructs,
     clear_constructs,
+    match_constructs,
 )
 
-from .general import (
-    CTE,
-    WINDOW_FUNCTION,
-    SUBQUERY,
-)
-
-from .postgres import (
-    # ARRAY,
-    RETURNING,
-    JSON_OPERATOR,
-    ON_CONFLICT,
-)
-
-from .sqlserver import (
-    JOIN_CLAUSE,
-    CASE_EXPRESSION,
-    TRY_CATCH,
-    PIVOT,
-    UNPIVOT,
-    OUTPUT_CLAUSE,
-)
+# Note: All constructs (common and dialect-specific) are now registered
+# in their respective dialect classes via SQLDialect._register_constructs()
+# Common constructs (CTE, WindowFunction, Subquery) are in the base SQLDialect class
+# Dialect-specific constructs are in subclasses (e.g., SQLServerDialect, PostgreSQLDialect)
 
 __all__ = [
-    # Base
+    # Base infrastructure
     "Construct",
     "register_construct",
     "get_pattern",
     "get_all_constructs",
     "clear_constructs",
-    # General Constructs
-    "CTE",
-    "WINDOW_FUNCTION",
-    "SUBQUERY",
-    # PostgreSQL Constructs
-    "ARRAY",
-    "RETURNING",
-    "JSON_OPERATOR",
-    "ON_CONFLICT",
-    # SQL Server Constructs
-    "JOIN_CLAUSE",
-    "CASE_EXPRESSION",
-    "TRY_CATCH",
-    "PIVOT",
-    "UNPIVOT",
-    "OUTPUT_CLAUSE",
+    "match_constructs",
 ]
+
