@@ -952,7 +952,7 @@ def add_rule(rule_file: str) -> None:
 
     # Validate the rule file by attempting to load it
     try:
-        from .plugins import load_rule_file
+        from ..plugins import load_rule_file
 
         rules = load_rule_file(str(source_path))
         if not rules:
@@ -995,7 +995,7 @@ def add_rule(rule_file: str) -> None:
 
 def list_rules() -> None:
     """List all built-in and plugin rules."""
-    from .rules.loader import load_rules
+    from ..rules.loader import load_rules
 
     # Load all built-in rules
     built_in_rules = load_rules()
